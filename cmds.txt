@@ -26,6 +26,7 @@ qemu-system-x86_64 compiled/boot.bin
 
 nasm -f bin Sector1/bootloader.asm -o compiled/bootloader.bin&&
 nasm -f elf64 Sector2+/extended_program.asm -o compiled/extended_program.o&&
+nasm -f elf64 binaries.asm -o compiled/binaries.o&&
 x86_64-elf-gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -c "Kernel.cpp" -o "compiled/kernelC.o"&&
 x86_64-elf-ld -T"link.ld"&&
 cat compiled/bootloader.bin compiled/kernel.bin > compiled/boot.bin&&

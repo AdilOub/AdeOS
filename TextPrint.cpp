@@ -73,4 +73,7 @@ void ClearScreen(uint_8 ClearColor = BACKGROUND_BLACK | FOREGROUND_WHITE){
     value += ClearColor << 24;
     value += ClearColor << 48;
     value += ClearColor << 56;
+    for (uint_64* i = (uint_64*)VGA_MEMORY; i < (uint_64*)(VGA_MEMORY + 4000); i++){
+        *i = value;
+    }
 }

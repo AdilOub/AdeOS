@@ -6,6 +6,7 @@ INPUT
 (
     compiled/extended_program.o
     compiled/kernelC.o
+    compiled/binaries.o
 )
 
 OUTPUT

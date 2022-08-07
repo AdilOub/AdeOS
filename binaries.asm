@@ -3,8 +3,8 @@
     GLOBAL %1
 %1:
     incbin %2
-    db 
+    db 0
     %1_size: dq %1_size - %1
 %endmacro
 
-IncBin Test "test.txt"
+IncBin Test, "test.txt"
