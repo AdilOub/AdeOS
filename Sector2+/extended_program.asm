@@ -37,9 +37,9 @@ StartProtectedMode:
     mov fs, ax
     mov gs, ax
 
-    ;we can move our stack to smthg larger but no need
-    ;mov ebp, 0x90000
-    ;mov esp, ebp
+    ;we can move our stack to smthg larger
+    mov ebp, 0x90000
+    mov esp, ebp
 
     mov [0xb8000], byte '3'
     mov [0xb8002], byte '2'
@@ -60,6 +60,7 @@ StartProtectedMode:
 
 [bits 64]
 [extern _start]
+%include "Sector2+/IDT.asm"
 Start64Bit:
     mov edi, 0xb8000
     mov rax, 0x1f201f201f201f20
@@ -69,4 +70,4 @@ Start64Bit:
     call _start
     jmp $
 
-times 4096-($-$$) db 0 ;512*8 sectors
+times 2048-($-$$) db 0 ;512*8 sectors
