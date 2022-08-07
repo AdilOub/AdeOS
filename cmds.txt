@@ -1,0 +1,32 @@
+nasm -f bin boot.asm -o boot.bin
+qemu-system-x86_64 compiled/boot.bin
+
+nasm -f bin boot.asm -o compiled/boot.bin&&qemu-system-x86_64 compiled/boot.bin
+
+
+make&&qemu-system-x86_64 compiled/boot.bin
+
+
+
+nasm -f bin Sector1/bootloader.asm -o compiled/bootloader.bin&&
+nasm -f bin Sector2+/extended_program.asm -o compiled/extended_program.bin&&
+cat compiled/bootloader.bin compiled/extended_program.bin > compiled/boot.bin&&
+qemu-system-x86_64 compiled/boot.bin
+
+
+nasm -f bin Sector1/bootloader.asm -o compiled/bootloader.bin&&
+nasm -f elf64 Sector2+/extended_program.asm -o compiled/extended_program.o&&
+x86_64-elf-gcc -ffreestanding -mno-red-zone -m64 -c "Kernel.cpp" -o "compiled/kernelC.o"&&
+x86_64-elf-ld -o compiled/kernelAsm.tmp -Ttext 0x7e00 compiled/extended_program.o compiled/kernelC.o&&
+objcopy -O binary compiled/kernelAsm.tmp compiled/kernel.bin&&
+cat compiled/bootloader.bin compiled/kernel.bin > compiled/boot.bin&&
+qemu-system-x86_64 compiled/boot.bin
+
+
+
+nasm -f bin Sector1/bootloader.asm -o compiled/bootloader.bin&&
+nasm -f elf64 Sector2+/extended_program.asm -o compiled/extended_program.o&&
+x86_64-elf-gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -c "Kernel.cpp" -o "compiled/kernelC.o"&&
+x86_64-elf-ld -T"link.ld"&&
+cat compiled/bootloader.bin compiled/kernel.bin > compiled/boot.bin&&
+qemu-system-x86_64 compiled/boot.bin
