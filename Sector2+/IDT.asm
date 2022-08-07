@@ -1,5 +1,5 @@
 [extern _idt]
-idtDesc:
+idtDescriptor:
     dw 4095
     dq _idt
 
@@ -29,10 +29,10 @@ isr1:
     call isr1Handler
     POPALL
     iretq
-GLOBAL isr1
+    GLOBAL isr1
 
 LoadIDT:
-    lidt[idtDesc]
+    lidt[idtDescriptor]
     sti
     ret
-GLOBAL LoadIDT
+    GLOBAL LoadIDT

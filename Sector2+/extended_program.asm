@@ -38,8 +38,8 @@ StartProtectedMode:
     mov gs, ax
 
     ;we can move our stack to smthg larger
-    mov ebp, 0x90000
-    mov esp, ebp
+    ;mov ebp, 0x9000
+    ;mov esp, ebp
 
     mov [0xb8000], byte '3'
     mov [0xb8002], byte '2'
@@ -66,6 +66,10 @@ Start64Bit:
     mov rax, 0x1f201f201f201f20
     mov ecx, 500
     rep stosq
+
+    mov rbp, 0x90000
+    mov rsp, rbp
+
     
     call _start
     jmp $
