@@ -4,6 +4,7 @@ jmp EnterProtectedMode
 
 %include "Sector2+/gdt.asm"
 %include "Sector1/print.asm"
+%include "Sector2+/DetectMemory.asm"
 
 ;TODO:
 ;disable int
@@ -11,6 +12,7 @@ jmp EnterProtectedMode
 ;load GDT
 ;set GDT in register
 EnterProtectedMode:
+    call DetectMemeory
     call EnableA20
     cli 
     lgdt [GDT_desc]
@@ -67,11 +69,22 @@ Start64Bit:
     mov ecx, 500
     rep stosq
 
-    mov rbp, 0x90000
-    mov rsp, rbp
+    ;mov rbp, 0x90000
+    ;mov rsp, rbp
 
-    
+    call ActivateSSE
     call _start
+
     jmp $
 
-times 2048-($-$$) db 0 ;512*8 sectors
+ActivateSSE:
+    mov rax, cr0
+    and ax, 0b11111101
+    or ax, 0b00000001
+    mov cr0, rax
+    mov rax, cr4
+    or ax, 0b1100000000
+    mov cr4, rax
+    ret
+
+times 4096-($-$$) db 0 ;512*8 sectors

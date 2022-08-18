@@ -1,11 +1,6 @@
-#pragma once
-#include "IO.cpp"
-#include "TextModeColorCodes.cpp"
-
-#define VGA_MEMORY (uint_8*)0xb8000
-#define VGA_WIDTH 80
-
+#include "Header Files/TextPrint.h"
 uint_16 CursorPosition;
+
 void SetCursorPosition(uint_16 position){
 
     if(position > 2000){
@@ -26,9 +21,10 @@ uint_16 PosFromCoord(uint_8 x, uint_8 y){
     return y * VGA_WIDTH + x;
 }
 
-void PrintString(const char* str, uint_8 color = BACKGROUND_BLACK | FOREGROUND_WHITE){
-    uint_8* charPtr = (uint_8*)str;
+void PrintString(const char* str, uint_8 color){
+    char* charPtr = (char*)str;
     uint_16 index = CursorPosition;
+    
     while(*charPtr !=0){
         switch (*charPtr)
         {
@@ -46,6 +42,13 @@ void PrintString(const char* str, uint_8 color = BACKGROUND_BLACK | FOREGROUND_W
         charPtr++;
     }
     SetCursorPosition(index);
+}
+
+
+void PrintChar(char chr, uint_8 color ){
+    *(VGA_MEMORY + CursorPosition * 2) = chr;
+    *(VGA_MEMORY + CursorPosition * 2 +1) = color;
+    SetCursorPosition(CursorPosition + 1);
 }
 
 char hexToStringOutput[128];
@@ -67,7 +70,90 @@ const char* HexToString(T value){
     return hexToStringOutput;
 }
 
-void ClearScreen(uint_8 ClearColor = BACKGROUND_BLACK | FOREGROUND_WHITE){
+const char* HexToString(uint_8 value) { return HexToString<uint_8>(value); }
+const char* HexToString(uint_16 value) { return HexToString<uint_16>(value); }
+const char* HexToString(uint_32 value) { return HexToString<uint_32>(value); }
+const char* HexToString(uint_64 value) { return HexToString<uint_64>(value); }
+const char* HexToString(char value) { return HexToString<char>(value); }
+const char* HexToString(short value) { return HexToString<short>(value); }
+const char* HexToString(int value) { return HexToString<int>(value); }
+const char* HexToString(long long value) { return HexToString<long long>(value); }
+
+
+char intToStringOutput[128];
+template<typename T>
+const char* IntToString(T value){
+    uint_8 isNegative = 0;
+    if(value < 0){
+        isNegative = 1;
+        value = -value;
+        intToStringOutput[0] = '-';
+    }
+
+    uint_8 size = 0;
+    uint_64 sizeTester = (uint_64)value;
+    while(sizeTester / 10 > 0){
+        sizeTester /= 10;
+        size++;
+    }
+
+    uint_8 index = 0;
+    uint_64 newValue = (uint_64)value;
+    while(newValue / 10 > 0){
+        uint_8 reminder = newValue % 10;
+        newValue /= 10;
+        intToStringOutput[size + isNegative - index] = reminder + 48;
+        index++;
+    }
+    uint_8 reminder = newValue % 10;
+    intToStringOutput[size + isNegative- index] = reminder + 48;
+
+    intToStringOutput[size + isNegative+ 1] = 0;
+    return intToStringOutput;
+}
+
+const char* IntToString(uint_8 value) { return IntToString<uint_8>(value); }
+const char* IntToString(uint_16 value) { return IntToString<uint_16>(value); }
+const char* IntToString(uint_32 value) { return IntToString<uint_32>(value); }
+const char* IntToString(uint_64 value) { return IntToString<uint_64>(value); }
+const char* IntToString(char value) { return IntToString<char>(value); }
+const char* IntToString(short value) { return IntToString<short>(value); }
+const char* IntToString(int value) { return IntToString<int>(value); }
+const char* IntToString(long long value) { return IntToString<long long>(value); }
+
+char floatToStringOutput[128];
+const char* FloatToString(float value, uint_8 decimalPlaces){
+
+    char* intPtr = (char*)IntToString((int)value);
+    char* floatPtr = floatToStringOutput;
+
+    if(value < 0){
+        value *= -1;  
+    }
+
+    while (*intPtr != 0){
+        *floatPtr = *intPtr;
+        intPtr++;
+        floatPtr++;
+    }
+    *floatPtr = '.';
+    floatPtr++;
+
+    float newValue = value - (int)value;
+
+    for(int i = 0; i < decimalPlaces; i++){
+        newValue *= 10;
+        *floatPtr = (int)newValue + 48;
+        newValue -= (int)newValue;
+        floatPtr++;
+    }
+
+    *floatPtr = 0;
+    return floatToStringOutput;
+}
+
+
+void ClearScreen(uint_8 ClearColor){
     uint_8 value = 0;
     value += ClearColor << 8;
     value += ClearColor << 24;

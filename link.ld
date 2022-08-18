@@ -7,6 +7,13 @@ INPUT
     compiled/extended_program.o
     compiled/kernelC.o
     compiled/binaries.o
+    compiled/IDT.o
+    compiled/IO.o
+    compiled/Keyboard.o
+    compiled/Memory.o
+    compiled/TextPrint.o
+    compiled/Commands.o
+    compiled/Heap.o
 )
 
 OUTPUT
@@ -22,6 +29,7 @@ SECTIONS
     {
         *(.text)
     }
+    
     .idt BLOCK(0x1000) : ALIGN(0x1000)
     {
         _idt = .;

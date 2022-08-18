@@ -1,4 +1,4 @@
-NB_OF_SECTOR equ 32 ;nb of sector in extended_program (8) plus some to avoid flashy screen
+NB_OF_SECTOR equ 128 ;nb of sector in extended_program (8) plus some to avoid flashy screen
 PROGRAM_SPACE equ 0x8000
 
 ReadDisk:
