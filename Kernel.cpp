@@ -1,3 +1,5 @@
+#include "Header Files/Kernel.h"
+
 #include "Header Files/TextPrint.h"
 #include "Header Files/IDT.h"
 #include "Header Files/Keyboard.h"
@@ -8,7 +10,6 @@
 
 //#include "HeaderFiles/Commands.h"
 
-extern const char Test[];
 
 void PrintAllMemoryMap(MemoryMapEntry** UsableMemeoryMap){
     for(uint_8 i = 0; i < UsableMemeoryRegionCount; i++){
@@ -25,23 +26,18 @@ extern "C" void _start(){
     ClearScreen(BACKGROUND_BLACK);
 
     PrintString(Test);
-    PrintString("\n\r\n\r");
+    PrintString("\n\r");
 
 
     MemoryMapEntry** UsableMemeoryMap = getUsableMemoryRegions();
     PrintAllMemoryMap(UsableMemeoryMap);
 
     InitializeHeap(0x100000, 0x100000);
-    void* Test = malloc(0x10);
-    void* Test2 = malloc(0x10);
-    void* Test3 = malloc(0x10);
 
-    PrintString(HexToString((uint_64)Test));    PrintString("\n\r");
-
-    PrintString(HexToString((uint_64)Test2));    PrintString("\n\r");
-
-    PrintString(HexToString((uint_64)Test3));    PrintString("\n\r");
-
+    uint_64* TAest = (uint_64*)aligned_alloc(0x4000, 0x08);
+    free(TAest);
+    uint_64* Test = (uint_64*)malloc(0x08);
+    PrintString(HexToString((uint_64)Test));
 
     return;
 }

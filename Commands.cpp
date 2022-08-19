@@ -65,6 +65,11 @@ void handleCmds(char* cmd){
         setLanguage(KBSet1::ScanCodeLookupTableQWERTY);
         PrintString(" Keyboard set to qwerty");
         endCmd();
+    }else if(strcmp(cmd, "slt")){
+        ClearScreen(BACKGROUND_BLACK);
+        SetCursorPosition(0);
+        PrintString(Test);
+        endCmd();
     }
     else{
         errorCmd(cmd);

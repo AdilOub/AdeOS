@@ -4,7 +4,9 @@
 
 extern uint_8 MemoryRegionCount;
 
-void* memset(void* dest, unsigned char val, int count);
+void* memset(void* start, uint_64 value, uint_64 num);
+void memcopy(void* destination, void* source, uint_64 num);
+
 
 struct  MemoryMapEntry
 {
@@ -20,3 +22,4 @@ extern MemoryMapEntry* UsableMemoryRegion[10];
 extern uint_8 UsableMemeoryRegionCount;
 
 MemoryMapEntry** getUsableMemoryRegions();
+
