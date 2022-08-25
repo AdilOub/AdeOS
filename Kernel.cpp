@@ -8,6 +8,9 @@
 #include "Header Files/Heap.h"
 #include "Header Files/Typedefs.h"
 
+//to use drawingggg
+#include "Header Files/Render.h"
+
 //#include "HeaderFiles/Commands.h"
 
 
@@ -19,6 +22,10 @@ void PrintAllMemoryMap(MemoryMapEntry** UsableMemeoryMap){
 
 
 extern "C" void _start(){
+    PrintCharRender(0, 0);
+    PrintCharRender(1, 0);
+    PrintCharRender(cursorPositionFromCoo(0,1), 0);
+    Print("ABBA");
     InitIDT();
     setLanguage(KBSet1::ScanCodeLookupTableAZERTY);
     SetCursorPosition(PosFromCoord(0, 0));

@@ -48,6 +48,7 @@ void StandarKeyBoardHandler(uint_8 scanCode, uint_8 chr){
         {
         case 0x8E: //backspace
             cmdsBuffer[bufferIndex] = '\0';
+            cmdsBuffer[bufferIndex-1] = '\0';
             bufferIndex -= 1;
 
             SetCursorPosition(CursorPosition-1);

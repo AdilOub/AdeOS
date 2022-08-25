@@ -14,6 +14,8 @@ INPUT
     compiled/TextPrint.o
     compiled/Commands.o
     compiled/Heap.o
+    compiled/ASCITable.o
+    compiled/Render.o
 )
 
 OUTPUT

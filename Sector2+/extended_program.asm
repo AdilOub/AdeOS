@@ -6,12 +6,13 @@ jmp EnterProtectedMode
 %include "Sector1/print.asm"
 %include "Sector2+/DetectMemory.asm"
 
-;TODO:
+;it:
 ;disable int
 ;enable A20 Line
 ;load GDT
 ;set GDT in register
 EnterProtectedMode:
+
     call DetectMemeory
     call EnableA20
     cli 
@@ -43,13 +44,17 @@ StartProtectedMode:
     ;mov ebp, 0x9000
     ;mov esp, ebp
 
-    mov [0xb8000], byte '3'
-    mov [0xb8002], byte '2'
-    mov [0xb8004], byte ' '
-    mov [0xb8006], byte 'b'
-    mov [0xb8008], byte 'i'
-    mov [0xb800A], byte 't'
-    mov [0xb800C], byte 's'
+    
+    mov [0xa0C8a], byte 0x27
+
+
+    ;mov [0xb8000], byte '3'
+    ;mov [0xb8002], byte '2'
+    ;mov [0xb8004], byte ' '
+    ;mov [0xb8006], byte 'b'
+    ;mov [0xb8008], byte 'i'
+    ;mov [0xb800A], byte 't'
+    ;mov [0xb800C], byte 's'
 
     ;TODO break memory print
     call DetectCPUID
@@ -64,15 +69,17 @@ StartProtectedMode:
 [extern _start]
 %include "Sector2+/IDT.asm"
 Start64Bit:
-    mov edi, 0xb8000
-    mov rax, 0x1f201f201f201f20
-    mov ecx, 500
-    rep stosq
+    ;mov edi, 0xb8000
+    ;mov rax, 0x1f201f201f201f20
+    ;mov ecx, 500
+    ;rep stosq
 
     ;mov rbp, 0x90000
     ;mov rsp, rbp
 
     call ActivateSSE
+
+    mov [0xa0C8a], byte 0x2F
     call _start
 
     jmp $

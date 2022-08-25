@@ -14,7 +14,10 @@ call PrintString
 call JmpLine
 
 call ReadDisk
+
+call SetVGAMod
 jmp PROGRAM_SPACE
+
 jmp $
 
 
@@ -23,7 +26,13 @@ jmp $
 
 
 HelloString:
-    db "Bienvenue sur Emi OS!", 0
+    db "Bienvenue sur le bootloader d'EmiOS!", 0
+
+SetVGAMod:
+    mov ah, 0x00
+    mov al, 0x13
+    int 0x10
+    ret
 
 times 510-($-$$) db 0
 db 0x55, 0xaa
