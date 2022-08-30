@@ -20,31 +20,49 @@ void PrintAllMemoryMap(MemoryMapEntry** UsableMemeoryMap){
     }
 }
 
-
 extern "C" void _start(){
-    PrintCharRender(0, 0);
-    PrintCharRender(1, 0);
-    PrintCharRender(cursorPositionFromCoo(0,1), 0);
-    Print("ABBA");
     InitIDT();
     setLanguage(KBSet1::ScanCodeLookupTableAZERTY);
-    SetCursorPosition(PosFromCoord(0, 0));
     MainKeyBoardHandler = KeyBoardHandler;
     ClearScreen(BACKGROUND_BLACK);
 
-    PrintString(Test);
-    PrintString("\n\r");
-
-
     MemoryMapEntry** UsableMemeoryMap = getUsableMemoryRegions();
-    PrintAllMemoryMap(UsableMemeoryMap);
 
     InitializeHeap(0x100000, 0x100000);
 
-    uint_64* TAest = (uint_64*)aligned_alloc(0x4000, 0x08);
-    free(TAest);
-    uint_64* Test = (uint_64*)malloc(0x08);
-    PrintString(HexToString((uint_64)Test));
+    
+    #ifndef VGA13
+    SetCursorPosition(PosFromCoord(0, 0));
+    PrintString(Test);
+    PrintString("\n\r");
+    PrintString("Memory:\n\r");
+    PrintAllMemoryMap(UsableMemeoryMap);
+    endCmd();
+    #endif
+
+    //Print("ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    #ifdef VGA13
+    Print("!\"#$%&\'()*+,-./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    //PlotImg((char *)relou, 262, 200);
+    #endif
+
+    ClearScreen();
+    SetCursorPosition(0);
+    uint_8* img = 0;
+    img = (uint_8*)malloc(262*200*sizeof(uint_8));
+
+    uint_8* Emi1Pointer = (uint_8*)Emi1;
+
+    for(int i = 0; i<5; i++){
+        while (*Emi1Pointer != ',')
+        {
+            PrintChar(*Emi1Pointer);
+            Emi1Pointer++;
+        }
+        PrintString("\n\r");
+        Emi1Pointer++;
+    }
+
 
     return;
 }

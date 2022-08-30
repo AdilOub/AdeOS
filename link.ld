@@ -16,6 +16,7 @@ INPUT
     compiled/Heap.o
     compiled/ASCITable.o
     compiled/Render.o
+    compiled/Math.o
 )
 
 OUTPUT

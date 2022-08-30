@@ -44,9 +44,6 @@ StartProtectedMode:
     ;mov ebp, 0x9000
     ;mov esp, ebp
 
-    
-    mov [0xa0C8a], byte 0x27
-
 
     ;mov [0xb8000], byte '3'
     ;mov [0xb8002], byte '2'
@@ -79,7 +76,7 @@ Start64Bit:
 
     call ActivateSSE
 
-    mov [0xa0C8a], byte 0x2F
+    ;mov [0xa0C8a], byte 0x2F
     call _start
 
     jmp $

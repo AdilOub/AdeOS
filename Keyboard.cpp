@@ -1,4 +1,5 @@
 #include "Header Files/Keyboard.h"
+#include "Header Files/Render.h"
 
 bool leftShiftPressed = false;
 bool rightShiftPressed = false;
@@ -34,13 +35,25 @@ void StandarKeyBoardHandler(uint_8 scanCode, uint_8 chr){
         {
         case true:
             PrintChar(chr - 32);
-            cmdsBuffer[bufferIndex] = chr - 32;
-            bufferIndex++;
+            if(bufferIndex<256){
+                cmdsBuffer[bufferIndex] = chr - 32;
+                bufferIndex++;
+            }
+
             break;
         case false:
+
+            #ifdef VGA13
+            PrintCharRender(getCursorPosRenderer(), chr-32);
+            setCursorPosRenderer(getCursorPosRenderer() + 1);
+            #else
             PrintChar(chr);
-            cmdsBuffer[bufferIndex] = chr;
-            bufferIndex++;
+            #endif
+            
+            if(bufferIndex<256){
+                cmdsBuffer[bufferIndex] = chr;
+                bufferIndex++;
+            }
             break;
         }
     }else{

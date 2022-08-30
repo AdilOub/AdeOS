@@ -1,4 +1,6 @@
 #include "Header Files/TextPrint.h"
+
+#ifndef VGA13
 uint_16 CursorPosition;
 
 void SetCursorPosition(uint_16 position){
@@ -163,3 +165,5 @@ void ClearScreen(uint_8 ClearColor){
         *i = value;
     }
 }
+
+#endif
