@@ -26,11 +26,11 @@ jmp $
 
 
 HelloString:
-    db "Bienvenue sur le bootloader d'EmiOS!", 0
+    db "Bienvenue sur le bootloader d'AdeOS!", 0
 
 SetVGAMod:
     mov ah, 0x00
-    mov al, 0x13
+    mov al, 0x03 ;VGA 0x03 pour  du text et 0x13 pour afficher des pixels
     int 0x10
     ret
 

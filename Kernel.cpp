@@ -46,13 +46,14 @@ extern "C" void _start(){
     //PlotImg((char *)relou, 262, 200);
     #endif
 
-    ClearScreen();
-    SetCursorPosition(0);
-    uint_8* img = 0;
-    img = (uint_8*)malloc(262*200*sizeof(uint_8));
+    //ClearScreen();
+    //SetCursorPosition(0);
+    //uint_8* img = 0;
+    //img = (uint_8*)malloc(262*200*sizeof(uint_8));
 
-    uint_8* Emi1Pointer = (uint_8*)Emi1;
+    //uint_8* Emi1Pointer = (uint_8*)Emi1;
 
+    /*
     for(int i = 0; i<5; i++){
         while (*Emi1Pointer != ',')
         {
@@ -62,7 +63,7 @@ extern "C" void _start(){
         PrintString("\n\r");
         Emi1Pointer++;
     }
-
+    */
 
     return;
 }

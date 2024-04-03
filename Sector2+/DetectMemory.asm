@@ -19,5 +19,5 @@ DetectMemeory:
         inc byte [MemoryRegionCount]
         jmp .repeat
 
-    .finished
-    ret
+    .finished:
+        ret

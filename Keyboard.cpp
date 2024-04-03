@@ -29,11 +29,14 @@ bool getArrowState(){
 
 
 
-void StandarKeyBoardHandler(uint_8 scanCode, uint_8 chr){
+void StandarKeyBoardHandler(uint_8 scanCode, uint_8 chr){ //pk printstring ne marche pas ici ?
+    //PrintChar('s'); //std keyboard handler loaded
+
     if(chr != 0){
+        //PrintString("char non nul\n\r");
         switch (leftShiftPressed | rightShiftPressed)
         {
-        case true:
+        case true: //shift pressed
             PrintChar(chr - 32);
             if(bufferIndex<256){
                 cmdsBuffer[bufferIndex] = chr - 32;
@@ -41,7 +44,7 @@ void StandarKeyBoardHandler(uint_8 scanCode, uint_8 chr){
             }
 
             break;
-        case false:
+        case false: //no uppercase
 
             #ifdef VGA13
             PrintCharRender(getCursorPosRenderer(), chr-32);
@@ -57,6 +60,7 @@ void StandarKeyBoardHandler(uint_8 scanCode, uint_8 chr){
             break;
         }
     }else{
+
         switch (scanCode)
         {
         case 0x8E: //backspace
@@ -80,12 +84,13 @@ void StandarKeyBoardHandler(uint_8 scanCode, uint_8 chr){
         case 0xB6: //rightshiftRealsed
             rightShiftPressed = false;
             break;
-        case 0x9C: //enter
+        case 0x9C: //enter released
             bufferIndex = 0;
             handleCmds(cmdsBuffer);
             clearCmdBuffer(cmdsBuffer, 256);
             break;
         default:
+                //PrintChar('?');
             break;
         }
     }
@@ -93,18 +98,21 @@ void StandarKeyBoardHandler(uint_8 scanCode, uint_8 chr){
 
 void KeyBoardHandler(uint_8 scanCode){
     //PrintString(IntToString(scanCode));
+    //PrintString("\n\r");
     uint_8 chr = 0;
-    if(scanCode < 0x3A)
+    if(scanCode < 0x3A){
         chr = LookupTable[scanCode];
+    }
 
+    //erk pourquoi j'ai fait ça ?
     switch (LastScanCode)
     {
-    case 0x50:
+    case 0x50: //down key
         if(arrowEnabled){
             SetCursorPosition(CursorPosition + VGA_WIDTH);
         }
         break;
-    case 0x48:
+    case 0x48: //up key
         if(arrowEnabled){
             SetCursorPosition(CursorPosition - VGA_WIDTH);
         }

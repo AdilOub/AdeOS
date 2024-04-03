@@ -32,9 +32,14 @@ extern "C" void isr1_handler(){
     //if(scanCode < 0x3A){
     //    chr = KBSet1::ScanCodeLookupTableQWERTY[scanCode];
     //}
+    
     if(MainKeyBoardHandler != 0){
         MainKeyBoardHandler(scanCode);
+    }else{
+        PrintString("No Keyboard Handler\n\r");
     }
     outb(0x20, 0x20);
     outb(0xa0, 0x20);
+    PrintString("isr1 called\n\r");
+
 }

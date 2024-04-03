@@ -40,12 +40,16 @@ void PrintString(const char* str, uint_8 color){
             *(VGA_MEMORY + index * 2) = *charPtr;
             *(VGA_MEMORY + index *2 + 1) = color;
             index++;
+            break;
         }
         charPtr++;
     }
     SetCursorPosition(index);
 }
 
+void jmpLine(){
+    SetCursorPosition(CursorPosition + VGA_WIDTH - CursorPosition % VGA_WIDTH);
+}
 
 void PrintChar(char chr, uint_8 color ){
     *(VGA_MEMORY + CursorPosition * 2) = chr;

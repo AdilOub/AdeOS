@@ -15,7 +15,7 @@ uint_16 PosFromCoord(uint_8 x, uint_8 y);
 void PrintChar(char chr, uint_8 color = BACKGROUND_BLACK | FOREGROUND_WHITE);
 void PrintString(const char* str, uint_8 color = BACKGROUND_BLACK | FOREGROUND_WHITE);
 
-
+void jmpLine();
 void ClearScreen(uint_8 ClearColor = BACKGROUND_BLACK | FOREGROUND_WHITE);
 
 

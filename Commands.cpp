@@ -21,7 +21,8 @@ void endCmd(){
 }
 
 void errorCmd(char* cmd){
-    PrintString("  --Unknown cmd: ");
+    PrintChar('e');
+    PrintString((char*)"  --Unknown cmd: ");
     PrintString(cmd);
     endCmd();
 }
@@ -38,9 +39,12 @@ bool strcmp(char* a, const char* b){
     return a[n] == b[n];
 }
 
-
+//j'avais pas encore connaisance des strucures de donnée
+//todo 1: utiliser une hashmap
+//todo 2: utiliser un systeme de fichier ou les commandes sont des exectuables dans un dossier (comme pour lionux)
 void handleCmds(char* cmd){
     if(strcmp(cmd, "help")){
+        PrintChar('n');
         PrintString(" Cmds: help; clear; arrow; lang-fr; lang-en");
         endCmd();
     }
