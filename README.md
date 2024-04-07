@@ -10,4 +10,5 @@ Avancée du projet:
 -Base du kernel ✅: Création d'un malloc et d'un free basique 
 -Gestion des IDT 🚧: Work in progress
 
+(le lolcode viens de l'ancien format d'image qui était en .lol)
 ![image](https://github.com/AdilOub/AdeOS/assets/57142734/9724936b-6f71-4132-8c31-5e9623104f65)
