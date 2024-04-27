@@ -3,6 +3,7 @@
 
 
 extern IDT64 _idt[256];
+extern uint_64 isr0;
 extern uint_64 isr1;
 
 extern "C" void LoadIDT();
@@ -10,6 +11,7 @@ extern "C" void LoadIDT();
 void(*MainKeyBoardHandler)(uint_8 scanCode);
 
 void InitIDT(){
+    //keyboard
 	_idt[1].zero = 0;
 	_idt[1].offset_low = (uint_16)(((uint_64)&isr1 & 0x000000000000ffff));
 	_idt[1].offset_mid = (uint_16)(((uint_64)&isr1 & 0x00000000ffff0000) >> 16);
@@ -18,6 +20,16 @@ void InitIDT(){
 	_idt[1].selector = 0x08;
 	_idt[1].types_attr = 0x8e;
     
+    //error handling
+    _idt[0].zero = 0;
+	_idt[0].offset_low = (uint_16)(((uint_64)&isr0 & 0x000000000000ffff));
+	_idt[0].offset_mid = (uint_16)(((uint_64)&isr0 & 0x00000000ffff0000) >> 16);
+	_idt[0].offset_high = (uint_32)(((uint_64)&isr0 & 0xffffffff00000000) >> 32);
+	_idt[0].ist = 0;
+	_idt[0].selector = 0x08;
+	_idt[0].types_attr = 0x8e;
+
+
     RemapPic();
 
     outb(0x21, 0xfd);
@@ -25,6 +37,11 @@ void InitIDT(){
     LoadIDT();
 }
 
+
+extern "C" void isr0_handler(){
+    PrintString("FATAL ERROR\n\r", BACKGROUND_RED);
+    asm("hlt");
+}
 
 extern "C" void isr1_handler(){
     uint_8 scanCode = inb(0x60);

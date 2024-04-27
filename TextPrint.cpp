@@ -158,7 +158,7 @@ const char* FloatToString(float value, uint_8 decimalPlaces){
     return floatToStringOutput;
 }
 
-
+#ifdef VGA13
 void ClearScreen(uint_8 ClearColor){
     uint_8 value = 0;
     value += ClearColor << 8;
@@ -168,6 +168,17 @@ void ClearScreen(uint_8 ClearColor){
     for (uint_64* i = (uint_64*)VGA_MEMORY; i < (uint_64*)(VGA_MEMORY + 4000); i++){
         *i = value;
     }
+
 }
+#else
+void ClearScreen(uint_8 ClearColor){
+    for(uint_32 i = 0; i < 80*25; i++){
+        *(VGA_MEMORY + i * 2) = 0;
+        *(VGA_MEMORY + i *2 + 1) = ClearColor;
+    }
+
+}
+#endif
+
 
 #endif

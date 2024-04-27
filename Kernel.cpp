@@ -34,15 +34,15 @@ extern "C" void _start(){
     
     #ifndef VGA13
     SetCursorPosition(PosFromCoord(0, 0));
-    PrintString(Test);
-    PrintString("\n\r>");
-    //errorCmd(0);
+    //PrintString(Test);
+    //PrintString("\n\r>");
+    /*
     PrintString("Salut\n\r");
     PrintString("Memory>\n\r");
     PrintAllMemoryMap(UsableMemeoryMap);
     PrintString("Fin memory<");
+    */
     endCmd();
-
     #endif
 
     //Print("ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ");

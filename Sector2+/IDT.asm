@@ -26,7 +26,16 @@ idtDescriptor:
 
   %endmacro
 
+[extern isr0_handler]
+[extern div_by_zero_handler]
 [extern isr1_handler]
+
+isr0:
+  PUSHALL
+  call isr0_handler
+  POPALL
+  iretq
+  GLOBAL isr0
 
 isr1:
   PUSHALL

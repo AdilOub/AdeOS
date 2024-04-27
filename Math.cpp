@@ -7,3 +7,16 @@ long pow(int x, int n){
     }
     return x2;
 }
+
+long rapidpow(int x, int n){
+    if(n == 0){
+        return 1;
+    }
+    if(n == 1){
+        return x;
+    }
+    if(n%2 == 0){
+        return rapidpow(x*x, n/2);
+    }
+    return x*rapidpow(x*x, (n-1)/2);
+}

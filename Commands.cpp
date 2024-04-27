@@ -73,8 +73,17 @@ void handleCmds(char* cmd){
         SetCursorPosition(0);
         PrintString(Test);
         endCmd();
+    }else if(strcmp(cmd, "fatal")){
+        PrintString("Fatal error: ", FOREGROUND_RED);
+        endCmd();
+        int a = 1/0;
+    }else if(strcmp(cmd, "reboot")){
+        asm("jmp 0xFFFF");
     }
     else{
         errorCmd(cmd);
     }
 }
+
+
+//pour les commandes on va utiliser un dictionaire 
