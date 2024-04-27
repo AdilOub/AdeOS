@@ -12,3 +12,5 @@ Avancée du projet:
 
 (le lolcode viens de l'ancien format d'image qui était en .lol)
 ![image](https://github.com/AdilOub/AdeOS/assets/57142734/9724936b-6f71-4132-8c31-5e9623104f65)
+
+![image](https://github.com/AdilOub/AdeOS/assets/57142734/bc728ada-5d29-45f8-b41d-cb11deae2a6e)
