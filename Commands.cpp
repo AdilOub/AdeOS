@@ -21,9 +21,8 @@ void endCmd(){
 }
 
 void errorCmd(char* cmd){
-    PrintChar('e');
-    PrintString((char*)"  --Unknown cmd: ");
-    PrintString(cmd);
+    PrintString("--Unknown cmd: ", FOREGROUND_RED);
+    PrintString(cmd, FOREGROUND_RED);
     endCmd();
 }
 
@@ -44,7 +43,7 @@ bool strcmp(char* a, const char* b){
 //todo 2: utiliser un systeme de fichier ou les commandes sont des exectuables dans un dossier (comme pour lionux)
 void handleCmds(char* cmd){
     if(strcmp(cmd, "help")){
-        PrintChar('n');
+        //PrintChar('n');
         PrintString(" Cmds: help; clear; arrow; lang-fr; lang-en");
         endCmd();
     }

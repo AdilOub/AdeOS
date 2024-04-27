@@ -30,10 +30,10 @@ void PrintString(const char* str, uint_8 color){
     while(*charPtr !=0){
         switch (*charPtr)
         {
-        case 10:
+        case 10: //new line
             index += VGA_WIDTH;
             break;
-        case 13:
+        case 13: //carriage return
             index -= index%VGA_WIDTH;
             break;
         default:

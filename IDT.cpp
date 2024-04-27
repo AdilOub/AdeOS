@@ -36,10 +36,10 @@ extern "C" void isr1_handler(){
     if(MainKeyBoardHandler != 0){
         MainKeyBoardHandler(scanCode);
     }else{
-        PrintString("No Keyboard Handler\n\r");
+        PrintString("No Keyboard Handler\n\r", BACKGROUND_RED);
     }
     outb(0x20, 0x20);
     outb(0xa0, 0x20);
-    PrintString("isr1 called\n\r");
+    //PrintString("isr1 called\n\r");
 
 }

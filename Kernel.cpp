@@ -13,6 +13,7 @@
 
 //#include "HeaderFiles/Commands.h"
 
+#define NULL 0
 
 void PrintAllMemoryMap(MemoryMapEntry** UsableMemeoryMap){
     for(uint_8 i = 0; i < UsableMemeoryRegionCount; i++){
@@ -34,10 +35,14 @@ extern "C" void _start(){
     #ifndef VGA13
     SetCursorPosition(PosFromCoord(0, 0));
     PrintString(Test);
-    PrintString("\n\r");
-    PrintString("Memory:\n\r");
+    PrintString("\n\r>");
+    //errorCmd(0);
+    PrintString("Salut\n\r");
+    PrintString("Memory>\n\r");
     PrintAllMemoryMap(UsableMemeoryMap);
+    PrintString("Fin memory<");
     endCmd();
+
     #endif
 
     //Print("ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ");
@@ -51,17 +56,17 @@ extern "C" void _start(){
     //uint_8* img = 0;
     //img = (uint_8*)malloc(262*200*sizeof(uint_8));
 
-    //uint_8* Emi1Pointer = (uint_8*)Emi1;
+    //uint_8* img_ptre = (uint_8*)Emi1;
 
     /*
     for(int i = 0; i<5; i++){
-        while (*Emi1Pointer != ',')
+        while (*img_ptre != ',')
         {
-            PrintChar(*Emi1Pointer);
-            Emi1Pointer++;
+            PrintChar(*img_ptre);
+            img_ptre++;
         }
         PrintString("\n\r");
-        Emi1Pointer++;
+        img_ptre++;
     }
     */
 

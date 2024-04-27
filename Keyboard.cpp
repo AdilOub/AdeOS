@@ -104,7 +104,7 @@ void KeyBoardHandler(uint_8 scanCode){
         chr = LookupTable[scanCode];
     }
 
-    //erk pourquoi j'ai fait ça ?
+    //erk pourquoi j'ai fait ça ? enft si c'est logique
     switch (LastScanCode)
     {
     case 0x50: //down key
