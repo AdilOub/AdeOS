@@ -8,7 +8,9 @@ Disclaimer: lors du début de ce projet je n'avais pas encore beaucoup de notion
 Avancée du projet:
 -Bootloader ✅: permet de passer du 16bit real mode au 32 bit protected mode puis au 64 bit (en activant l'A20 et en chargeant la GDT) <br>
 -Base du kernel ✅: Création d'un malloc et d'un free basique <br>
--Gestion des IDT 🚧: Work in progress <br>
+-Système de commandes (utilisant une hashtable) ✅ <br>
+-Gestion des IDT 🚧: Gestion des interupts du clavier (isr 1) et gestion basique des erreurs (isr 0) <br>
+-Lecture/ecritude disque: 🚧 <br>
 
 ![image](https://github.com/AdilOub/AdeOS/assets/57142734/9724936b-6f71-4132-8c31-5e9623104f65)
 
