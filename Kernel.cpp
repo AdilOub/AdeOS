@@ -30,12 +30,13 @@ extern "C" void _start(){
     MemoryMapEntry** UsableMemeoryMap = getUsableMemoryRegions();
 
     InitializeHeap(0x100000, 0x100000);
+    SetCursorPosition(PosFromCoord(0, 0));
 
+    initCmds();
     
     #ifndef VGA13
-    SetCursorPosition(PosFromCoord(0, 0));
-    //PrintString(Test);
-    //PrintString("\n\r>");
+    //SetCursorPosition(PosFromCoord(0, 0));
+    PrintString(Test);
     /*
     PrintString("Salut\n\r");
     PrintString("Memory>\n\r");

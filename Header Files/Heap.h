@@ -4,6 +4,8 @@
 #include "TextPrint.h"
 #include "Memory.h"
 
+#define NULL 0 
+
 struct MemorySegmentHeader{
     uint_64 MemoryLength;
     MemorySegmentHeader* nextSegment;
