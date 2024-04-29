@@ -92,3 +92,6 @@ ActivateSSE:
     ret
 
 times 4096-($-$$) db 0 ;512*8 sectors
+
+;on ecrit du chariabia pour des tests de disk read
+times 512 db 0x42

@@ -65,6 +65,44 @@ void fatalCmd(char* args){
     int a = 1/0;
 }
 
+void readDiskCmd(char *args){
+    uint_8 floppy_info = inb(FLPYDSK_MSR);
+    PrintString("Floppy disk status: ");
+    PrintString(IntToString(floppy_info));
+    PrintString("\n\r");
+
+    uint_8 *ptr = (uint_8*)0x1000; 
+    PrintString("Preread:");
+    PrintString("\n\r");
+
+    int i = 0;
+    for(int c = 0; c<4; c++){
+        for(int j=0; j<8; j++){
+            PrintString("0x");
+            PrintString(HexToString(ptr[i+j]));
+        }
+        i+=128;
+    }
+
+    flpydsk_read_sector(0);
+    PrintString("Postread:");
+    PrintString("\n\r");
+
+    i = 0;
+    for(int c = 0; c<4; c++){
+        for(int j=0; j<8; j++){
+            PrintString("0x");
+            PrintString(HexToString(ptr[i+j]));
+        }
+        i+=128;
+    }
+    floppy_info = inb(FLPYDSK_MSR);
+    PrintString("Floppy disk status: ");
+    PrintString(IntToString(floppy_info));
+    PrintString("\n\r");
+
+}
+
 //geré
 void raise_interupt32(char* args){
     asm("int $32");
@@ -165,7 +203,7 @@ unsigned int pearson_table[SIZE] = {131,73,96,115,237,223,74,236,41,166,186,192,
 cmd_table* cmdTable;
 
 //collision entre int49 et timer
-const char* cmds[] = {"help", "clear", "arrow", "langfr", "langen", "slt", "fatal", "reboot", "int32", "int49", "ttimer", "cube"};
+const char* cmds[] = {"help", "clear", "arrow", "langfr", "langen", "slt", "fatal", "reboot", "int32", "int49", "ttimer", "cube", "read"};
 //const void cmdFuncs[]  = {&helpCmd, &clearCmd, &arrowCmd, &langFrCmd, &langEnCmd, &sltCmd, &fatalCmd, &rebootCmd, &interupt49};
 
 unsigned int pearson(const char* str){
@@ -279,6 +317,7 @@ void initCmds(){
     set(cmdTable, cmds[9], &raise_interupt49);
     set(cmdTable, cmds[10], &timer);
     set(cmdTable, cmds[11], &cube);
+    set(cmdTable, cmds[12], &readDiskCmd);
     PrintString("Cmds loaded!\n\r", FOREGROUND_GREEN);
 }
 

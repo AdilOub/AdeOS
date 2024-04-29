@@ -8,6 +8,7 @@
 #include "Header Files/Heap.h"
 #include "Header Files/Typedefs.h"
 #include "Header Files/Timer.h"
+#include "Header Files/FloppyDisk.h"
 
 //to use drawingggg
 #include "Header Files/Render.h"
@@ -38,6 +39,7 @@ extern "C" void _start(){
 
     //initTimer();
     initCmds();
+    initFloppy();
 
 
 

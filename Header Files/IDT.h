@@ -4,6 +4,7 @@
 #include "IO.h"
 #include "TextPrint.h"
 #include "KBScanCodeSet1.h"
+#include "FloppyDisk.h"
 
 struct IDT64{
     uint_16 offset_low;
@@ -18,3 +19,6 @@ struct IDT64{
 
 extern void(*MainKeyBoardHandler)(uint_8 scanCode);
 void InitIDT();
+
+uint_8 get_flpydisk_int();
+void set_flpydisk_int(uint_8 val);

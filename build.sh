@@ -13,6 +13,7 @@ x86_64-elf-gcc -Ttext 0x8000 -ffreestanding  -mno-red-zone -m64 -c "ASCITable.cp
 x86_64-elf-gcc -Ttext 0x8000 -ffreestanding  -mno-red-zone -m64 -c "Render.cpp" -o "compiled/Render.o"&&
 x86_64-elf-gcc -Ttext 0x8000 -ffreestanding  -mno-red-zone -m64 -c "Math.cpp" -o "compiled/Math.o"&&
 x86_64-elf-gcc -Ttext 0x8000 -ffreestanding  -mno-red-zone -m64 -c "Timer.cpp" -o "compiled/Timer.o"&&
+x86_64-elf-gcc -Ttext 0x8000 -ffreestanding  -mno-red-zone -m64 -c "FloppyDisk.cpp" -o "compiled/FloppyDisk.o"&&
 x86_64-elf-ld -T"link.ld"&&
 cat compiled/bootloader.bin compiled/kernel.bin > compiled/boot.bin&&
 qemu-system-x86_64 compiled/boot.bin -m 1G

@@ -18,6 +18,7 @@ INPUT
     compiled/Render.o
     compiled/Math.o
     compiled/Timer.o
+    compiled/FloppyDisk.o
 )
 
 OUTPUT
