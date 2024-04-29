@@ -41,7 +41,7 @@ void PrintString(const char* str, uint_8 color){
             *(VGA_MEMORY + index *2 + 1) = color;
             index++;
             break;
-        }
+        } 
         charPtr++;
     }
     SetCursorPosition(index);

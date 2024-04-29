@@ -27,4 +27,8 @@ uint_16 getCursorPosRenderer();
 void setCursorPosRenderer(uint_16 newPos);
 
 void PlotImg(char* ptr, uint_16 sizeX, uint_16 sizeY);
+
+#else
+void drawline(int p[2], int p2[2]);
+
 #endif

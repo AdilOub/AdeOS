@@ -20,3 +20,5 @@ long rapidpow(int x, int n){
     }
     return x*rapidpow(x*x, (n-1)/2);
 }
+
+//pour faire tourner le cube, on doit calculer des sinus et cosinus

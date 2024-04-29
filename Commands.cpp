@@ -1,6 +1,7 @@
 #include "Header Files/Commands.h"
 #include "Header Files/Heap.h"
 #include "Header Files/Timer.h"
+#include "Header Files/Render.h"
 /*
 const char* colorString[] = {"blue", "green", "red", "purple", "white", "black"};
 const int colorForeground[] = {};
@@ -18,7 +19,7 @@ Creation de la hashtable des commandes
 
 #pragma region cmds
 void helpCmd(char* args){
-    PrintString(" Cmds: help; clear; arrow; lang-fr; lang-en; slt; fatal; reboot");
+    PrintString(" Cmds: help; clear; arrow; lang-fr; lang-en; slt; fatal; reboot; cube");
     endCmd();
 }
 
@@ -80,6 +81,78 @@ void rebootCmd(char* args){
     asm("jmp 0xFFFF");
 }
 
+void cube(char* args){
+    //pour render un cube on doit garder en mémoire les sommets et les arrêtes, et projeté 
+    //les sommets sur l'écran en fonction de la position de la caméra
+    //on utilisera ensuite une matrice de rotation et le timer (qu'on vient d'imlementer) pour faire tourner le cube
+
+    //sommets et arretes
+    //coordonnées des sommets
+    //on est en 80*25, on va prendre un cube de 20*20*20 centré en 40, 12, tourné de 45°
+    
+    int edges[8][3] = {
+        {35, 7, 7},
+        {35, 17, 7},
+        {45, 7, 7},
+        {45, 17, 7},
+        {35, 7, 17},
+        {35, 17, 17},
+        {45, 7, 17},
+        {45, 17, 17}
+    };
+    
+
+
+    //pas la manière la plus effiace, mais c'est un exemple;
+    //ce code sera amélioré quand on changera de mode VGA (si on le fait)
+    //bool si x et y sont reliés
+    bool vertices[8][8] = {
+        {0, 1, 1, 0, 1, 0, 0, 0},
+        {1, 0, 0, 1, 0, 1, 0, 0},
+        {1, 0, 0, 1, 0, 0, 1, 0},
+        {0, 1, 1, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 1, 1, 0},
+        {0, 1, 0, 0, 1, 0, 0, 1},
+        {0, 0, 1, 0, 1, 0, 0, 1},
+        {0, 0, 0, 1, 0, 1, 1, 0}
+    };
+
+    //on projete les sommets sur l'écran
+    //on prendra un point de vue de 0, 0, 0
+    //un ecran de 80x25
+    //on prendra un angle de pi/4 et une distance de 1
+    
+    //quel est la distance optimal pour que le cube soit bien visible?
+    float dist = 40;
+    int screen[8][2];
+
+    //on calcul les coordonnées projetées (donc en 2d)
+    for(int i = 0; i < 8; i++){
+        screen[i][0] = (int)(edges[i][0] * dist) / (edges[i][2] + dist);
+        screen[i][1] = (int)(edges[i][1] * dist) / (edges[i][2] + dist);
+    }
+
+    //on dessine les arrêtes
+    for(int i = 0; i<8; i++){
+        for(int j=0; j<8; j++){
+            if(vertices[i][j]){
+                //on dessine l'arrête directement dans la mémoire VGA, l'écran fait 80x25
+                drawline(screen[i], screen[j]);
+            }
+        }
+    }
+
+    //on dessine un point rouge au projeté de chaque sommet
+    for(int i = 0; i<8; i++){
+        int x = (int)(edges[i][0] * dist) / (edges[i][2] + dist);
+        int y = (int)(edges[i][1] * dist) / (edges[i][2] + dist);
+        int index = x + y*80;
+        *(VGA_MEMORY + index*2) = 0x0F; //'*'
+        *(VGA_MEMORY + index*2 +1) = FOREGROUND_RED;
+    }
+    
+
+}
 #pragma endregion cmds
 
 
@@ -92,7 +165,7 @@ unsigned int pearson_table[SIZE] = {131,73,96,115,237,223,74,236,41,166,186,192,
 cmd_table* cmdTable;
 
 //collision entre int49 et timer
-const char* cmds[] = {"help", "clear", "arrow", "langfr", "langen", "slt", "fatal", "reboot", "int32", "int49", "ttimer"};
+const char* cmds[] = {"help", "clear", "arrow", "langfr", "langen", "slt", "fatal", "reboot", "int32", "int49", "ttimer", "cube"};
 //const void cmdFuncs[]  = {&helpCmd, &clearCmd, &arrowCmd, &langFrCmd, &langEnCmd, &sltCmd, &fatalCmd, &rebootCmd, &interupt49};
 
 unsigned int pearson(const char* str){
@@ -205,6 +278,7 @@ void initCmds(){
     set(cmdTable, cmds[8], &raise_interupt32);
     set(cmdTable, cmds[9], &raise_interupt49);
     set(cmdTable, cmds[10], &timer);
+    set(cmdTable, cmds[11], &cube);
     PrintString("Cmds loaded!\n\r", FOREGROUND_GREEN);
 }
 

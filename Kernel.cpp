@@ -22,6 +22,9 @@ void PrintAllMemoryMap(MemoryMapEntry** UsableMemeoryMap){
     }
 }
 
+
+
+//kernel entry, called by extended_program.asm
 extern "C" void _start(){
     InitIDT();
     setLanguage(KBSet1::ScanCodeLookupTableAZERTY);
@@ -35,17 +38,19 @@ extern "C" void _start(){
 
     //initTimer();
     initCmds();
-    
+
+
+
     #ifndef VGA13
     //SetCursorPosition(PosFromCoord(0, 0));
-    PrintString(Test);
+    //PrintString(Test);
     /*
     PrintString("Salut\n\r");
     PrintString("Memory>\n\r");
     PrintAllMemoryMap(UsableMemeoryMap);
     PrintString("Fin memory<");
     */
-    endCmd();
+    //endCmd();
     #endif
 
     //Print("ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ");
