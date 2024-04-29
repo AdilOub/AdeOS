@@ -7,6 +7,7 @@
 #include "Header Files/IO.h"
 #include "Header Files/Heap.h"
 #include "Header Files/Typedefs.h"
+#include "Header Files/Timer.h"
 
 //to use drawingggg
 #include "Header Files/Render.h"
@@ -32,6 +33,7 @@ extern "C" void _start(){
     InitializeHeap(0x100000, 0x100000);
     SetCursorPosition(PosFromCoord(0, 0));
 
+    //initTimer();
     initCmds();
     
     #ifndef VGA13

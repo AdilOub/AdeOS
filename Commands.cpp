@@ -1,5 +1,6 @@
 #include "Header Files/Commands.h"
 #include "Header Files/Heap.h"
+#include "Header Files/Timer.h"
 /*
 const char* colorString[] = {"blue", "green", "red", "purple", "white", "black"};
 const int colorForeground[] = {};
@@ -58,11 +59,23 @@ void sltCmd(char* args){
 }
 
 void fatalCmd(char* args){
-    PrintString("Fatal error: ", FOREGROUND_RED);
+    PrintString(" Generating fatal error...", FOREGROUND_RED);
     endCmd();
     int a = 1/0;
 }
 
+//geré
+void raise_interupt32(char* args){
+    asm("int $32");
+}
+
+//pas geré, va faire planter le systeme
+void raise_interupt49(char* args){
+    asm("int $49");
+}
+void timer(char* args){
+    initTimer();
+}
 void rebootCmd(char* args){
     asm("jmp 0xFFFF");
 }
@@ -70,12 +83,17 @@ void rebootCmd(char* args){
 #pragma endregion cmds
 
 
+
+//TODO: trouver une permutation pour avoir une fonction de hachage plus efficace voir changer de fonction de hachage
+
 //une permutation de [0;255]
 #define SIZE 256
 unsigned int pearson_table[SIZE] = {131,73,96,115,237,223,74,236,41,166,186,192,242,34,56,122,173,164,84,138,152,167,231,43,8,184,63,136,195,159,146,144,102,226,10,52,38,40,163,25,88,199,83,36,37,233,94,212,11,178,64,85,215,180,240,194,210,130,134,82,109,214,72,135,112,68,220,20,45,225,252,181,53,104,126,157,234,213,98,200,127,227,92,255,91,78,65,13,9,175,31,7,238,118,156,217,105,3,254,29,162,250,170,116,100,93,209,230,222,39,16,185,132,216,190,125,137,249,95,26,168,169,70,123,177,114,241,196,108,239,15,103,59,67,193,229,202,171,203,208,66,0,87,189,154,183,201,120,6,149,142,197,139,46,50,80,219,151,57,161,86,117,22,49,30,153,205,77,32,5,228,12,211,124,89,243,1,33,14,48,140,76,232,24,119,148,188,90,113,75,207,245,58,69,97,111,179,145,19,2,28,55,110,221,23,147,107,21,27,44,4,129,158,62,61,155,251,54,206,187,101,248,42,128,99,71,244,141,246,17,176,79,235,133,204,121,174,81,35,224,191,51,143,160,60,18,172,165,150,106,182,198,253,247,218,47};
 cmd_table* cmdTable;
 
-const char* cmds[] = {"help", "clear", "arrow", "lang-fr", "lang-en", "slt", "fatal", "reboot"};
+//collision entre int49 et timer
+const char* cmds[] = {"help", "clear", "arrow", "langfr", "langen", "slt", "fatal", "reboot", "int32", "int49", "ttimer"};
+//const void cmdFuncs[]  = {&helpCmd, &clearCmd, &arrowCmd, &langFrCmd, &langEnCmd, &sltCmd, &fatalCmd, &rebootCmd, &interupt49};
 
 unsigned int pearson(const char* str){
     unsigned int hash = 0;
@@ -184,6 +202,9 @@ void initCmds(){
     set(cmdTable, cmds[5], &sltCmd);
     set(cmdTable, cmds[6], &fatalCmd);
     set(cmdTable, cmds[7], &rebootCmd);
+    set(cmdTable, cmds[8], &raise_interupt32);
+    set(cmdTable, cmds[9], &raise_interupt49);
+    set(cmdTable, cmds[10], &timer);
     PrintString("Cmds loaded!\n\r", FOREGROUND_GREEN);
 }
 
