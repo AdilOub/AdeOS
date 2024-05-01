@@ -1,7 +1,7 @@
 # AdeOS (anciennement EmiOS)
 Un OS 64bits codé en C et en Assembleur x86 (en utilisant un compilateur cpp, d'où les fichiers c++)
 Le but est d'avoir un kernel et un système basique de commande et de création de fichier léger.
-Le projet est actuellement en pause
+~~Le projet est actuellement en pause~~
 
 Disclaimer: lors du début de ce projet je n'avais pas encore beaucoup de notion en informatique théorique (graphe, arbre, gestion de la mémoire). Ainsi certaine peuvent (et serons) grandement amélioré.
 
@@ -15,3 +15,9 @@ Avancée du projet:
 ![image](https://github.com/AdilOub/AdeOS/assets/57142734/9724936b-6f71-4132-8c31-5e9623104f65)
 
 ![image](https://github.com/AdilOub/AdeOS/assets/57142734/bc728ada-5d29-45f8-b41d-cb11deae2a6e)
+
+
+
+WARNING: Il y a actuellement un problème lors du chargement de l'OS, le noyau a atteint une taille >512*64 (donnée chargée par le bootloader, dans readDisk.asm)
+Cette version est instable (le bootloader charge plus de donnée qu'il est censé pouvoir le faire, la version fonctionne en ignorant l'erreur lors de l'appel à l'interupt 13h et en démarrant quemu avec l'option -hda)
+Le noyau est en cours de ré-écriture pour charger les 512\*64bytes important, puis charger le reste en utilisant le floppydisk controller (pour l'instant sur une autre branche)
