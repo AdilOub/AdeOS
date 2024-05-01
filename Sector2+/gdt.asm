@@ -5,7 +5,7 @@ GDT_codedesc:
     dw 0xFFFF ;limit
     dw 0x0000 ;base low
     db 0x00 ;base medium
-    db 10011010b ;flag
+    db 10011010b ;flag (present, privilege ring 0, code, read, accessed)
     db 11001111b ;flag upper
     db 0x00 ;base hight
 GDT_datadesc:

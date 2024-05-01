@@ -3,8 +3,8 @@
 #ifndef VGA13
 
 
-const char line_char = '$';
-
+//const char line_char = '$';
+/*
 //on utilise l'algo de Bresenham pour dessiner une ligne
 void drawline(int p[2], int p2[2]){
     char line = line_char;
@@ -73,7 +73,7 @@ void drawline(int p[2], int p2[2]){
         }
     }
 }
-
+*/
 
 #endif
 

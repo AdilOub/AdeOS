@@ -89,7 +89,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>
 ************************************************************************/
-
+#ifdef VGA13
 /* the values in this array are a 8x8 bitmap font for ascii characters */
   uint_64 font[128] = {
 	0x7E7E7E7E7E7E0000,	/* NUL */
@@ -223,3 +223,4 @@
 };
 
 
+#endif

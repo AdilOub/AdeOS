@@ -1,5 +1,6 @@
 #pragma once 
 
+/*
 namespace KBSet1
 {
  const char ScanCodeLookupTableQWERTY[] = {
@@ -38,4 +39,4 @@ namespace KBSet1
          0 , ' '
     };   
 }
-
+*/

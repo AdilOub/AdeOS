@@ -96,12 +96,40 @@ void StandarKeyBoardHandler(uint_8 scanCode, uint_8 chr){ //pk printstring ne ma
     }
 }
 
+
+
+int i = 0;
+
+void memDmp2(uint_8* ptr, uint_64 size){
+    for(uint_64 i = 0; i < size; i++){
+        PrintString(HexToString(ptr[i]));
+        PrintChar(' ');
+    }
+}
+
 void KeyBoardHandler(uint_8 scanCode){
     //PrintString(IntToString(scanCode));
     //PrintString("\n\r");
     uint_8 chr = 0;
     if(scanCode < 0x3A){
         chr = LookupTable[scanCode];
+        /*ClearScreen();
+        SetCursorPosition(0);
+        memDmp2((uint_8*)0x8000+0x7000 + 512*i, 512);
+
+        //on ecrit i en bas à gauche directement dans la mémoire VGA
+        SetCursorPosition(PosFromCoord(0, 24));
+        const char* iStr = IntToString(i);
+        *(VGA_MEMORY + CursorPosition * 2) = iStr[0];
+        *(VGA_MEMORY + CursorPosition * 2 + 1) = BACKGROUND_RED | FOREGROUND_WHITE;
+        *(VGA_MEMORY + CursorPosition * 2 + 2) = iStr[1];
+        *(VGA_MEMORY + CursorPosition * 2 + 3) = BACKGROUND_RED | FOREGROUND_WHITE;
+        *(VGA_MEMORY + CursorPosition * 2 + 4) = iStr[2];
+        *(VGA_MEMORY + CursorPosition * 2 + 5) = BACKGROUND_RED | FOREGROUND_WHITE;
+        *(VGA_MEMORY + CursorPosition * 2 + 6) = iStr[3];
+        *(VGA_MEMORY + CursorPosition * 2 + 7) = BACKGROUND_RED | FOREGROUND_WHITE;
+
+        i++;*/
     }
 
     //erk pourquoi j'ai fait ça ? enft si c'est logique

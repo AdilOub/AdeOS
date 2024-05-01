@@ -1,5 +1,5 @@
 #include "Header Files/FloppyDisk.h"
-#define WAIT_DURATION 5000
+#define WAIT_DURATION 200
 
 
 //source:
@@ -49,21 +49,22 @@ uint_8 flpydsk_read_status(){
 
 void flpydsk_wait_irq(){
 	
+	//set_flpydisk_int(0);
 	//TODO FIX LA RACE CONDITION
-	PrintString("flpydsk_wait_irq: waiting for irq ", FOREGROUND_RED);
+	//PrintString("flpydsk_wait_irq: waiting for irq ", FOREGROUND_RED);
 	
 	/*while (get_flpydisk_int() == 0)
 	{
 	}
 	set_flpydisk_int(0);
 	*/
-	for(int i = 0; i < 100000; i++ ){ //on attend 100000 cycles sinon on risque de bloquer si l'interupt se déclare avant
+	for(uint_64 i = 0; i < 5000; i++ ){ //on attend 100000 cycles sinon on risque de bloquer si l'interupt se déclare avant
 		if(get_flpydisk_int() == 1){
 			set_flpydisk_int(0);
 			return;
 		}
 	}
-	PrintString("flpydsk_wait_irq: timeout ", FOREGROUND_RED);
+	//PrintString("flpydsk_wait_irq: timeout ", FOREGROUND_RED);
 }
 
 
@@ -71,7 +72,7 @@ void flpydsk_wait_irq(){
 void flpydsk_send_command (uint_8 cmd) {
 	//on attend que ça soit pret
 	for(int i = 0; i < WAIT_DURATION; i++ ){
-		if(flpydsk_read_status() & FLPYDSK_MSR_MASK_DATAREG){
+		if(!flpydsk_read_status() & FLPYDSK_MSR_MASK_DATAREG){
 			return outb(FLPYDSK_FIFO, cmd);
 		}
 	}
@@ -81,7 +82,7 @@ uint_8 flpydsk_read_data () {
  
 	//! same as above function but returns data register for reading
 	for (int i = 0; i < WAIT_DURATION; i++ )
-		if ( flpydsk_read_status () & FLPYDSK_MSR_MASK_DATAREG )
+		if ( !flpydsk_read_status () & FLPYDSK_MSR_MASK_DATAREG )
 			return inb(FLPYDSK_FIFO);
 	
 	PrintString("flpydsk_read_data: timeout\n", FOREGROUND_RED);
@@ -290,33 +291,22 @@ int flpydsk_seek(uint_32 cyl, uint_32 head ) {
  
 	return -1;
 }
-
-//desactive le controller
-void flpydsk_disable_controller () {
-	outb(FLPYDSK_DOR, 0);
-}
-
-//active le controller
-void flpydsk_enable_controller () {
-	outb(FLPYDSK_DOR, FLPYDSK_DOR_MASK_RESET | FLPYDSK_DOR_MASK_DMA);
-}
-
 //initialise le controller
 void flpydsk_reset () {
  
 	uint_32 st0, cyl;
  
 	//! reset the controller
-	flpydsk_disable_controller ();
-	flpydsk_enable_controller ();
+	outb(FLPYDSK_DOR, 0); //desactive controller
+	outb(FLPYDSK_DOR, FLPYDSK_DOR_MASK_RESET | FLPYDSK_DOR_MASK_DMA);; //active controller
 	flpydsk_wait_irq ();
  
 	//! send CHECK_INT/SENSE INTERRUPT command to all drives
 	for (int i=0; i<4; i++)
 		flpydsk_check_int (&st0,&cyl);
  
-	//! transfer speed 500kb/s
-	flpydsk_write_ccr (0);
+	//vitesse a 1mb/s car on a un floppy 2.88MB
+	flpydsk_write_ccr (3);
  
 	//! pass mechanical drive info. steprate=3ms, unload time=240ms, load time=16ms
 	flpydsk_drive_data (3,16,240,true);
@@ -357,7 +347,14 @@ uint_8* flpydsk_read_sector (int sectorLBA) {
 	return (uint_8*) DMA_BUFFER;
 }
 
+
+//Il semble qu'on ait un floppy de 2.88MB
+//c'est peut etre pourquoi ça marche pas
+
+
 void initFloppy(){
 	flpydsk_initialize_dma() ;
 	flpydsk_reset();
+
+	flpydsk_drive_data(13, 1, 0xF, true);
 }

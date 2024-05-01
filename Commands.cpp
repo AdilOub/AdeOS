@@ -16,7 +16,7 @@ Creation de la hashtable des commandes
 */
 
 
-
+/*
 #pragma region cmds
 void helpCmd(char* args){
     PrintString(" Cmds: help; clear; arrow; lang-fr; lang-en; slt; fatal; reboot; cube");
@@ -64,44 +64,61 @@ void fatalCmd(char* args){
     endCmd();
     int a = 1/0;
 }
+*/
+
+/*
+static const char * drive_types[8] = {
+    "none",
+    "360kB 5.25\"",
+    "1.2MB 5.25\"",
+    "720kB 3.5\"",
+
+    "1.44MB 3.5\"",
+    "2.88MB 3.5\"",
+    "unknown type",
+    "unknown type"
+};
 
 void readDiskCmd(char *args){
+
+    outb(0x70, 0x10);
+    unsigned drives = inb(0x71);
+    PrintString("Floppy drives 0: "); PrintString(drive_types[drives >> 4]); PrintString("\n\r");
+    PrintString("Floppy drives 1: "); PrintString(drive_types[drives & 0x0F]); PrintString("\n\r");
+    
+    PrintString("\n\r");
+
     uint_8 floppy_info = inb(FLPYDSK_MSR);
     PrintString("Floppy disk status: ");
     PrintString(IntToString(floppy_info));
     PrintString("\n\r");
 
-    uint_8 *ptr = (uint_8*)0x1000; 
+    uint_8 *ptr = (uint_8*)(0x1000 + 0x8000); 
     PrintString("Preread:");
     PrintString("\n\r");
-
-    int i = 0;
-    for(int c = 0; c<4; c++){
-        for(int j=0; j<8; j++){
-            PrintString("0x");
-            PrintString(HexToString(ptr[i+j]));
-        }
-        i+=128;
-    }
+    PrintString("0x");
+    PrintString(HexToString(*ptr));
+    PrintString(" 0x");
+    PrintString(HexToString(*(ptr+1)));
 
     flpydsk_read_sector(0);
     PrintString("Postread:");
     PrintString("\n\r");
+    PrintString("0x");
+    PrintString(HexToString(*ptr));
+    PrintString(" 0x");
+    PrintString(HexToString(*(ptr+1)));
 
-    i = 0;
-    for(int c = 0; c<4; c++){
-        for(int j=0; j<8; j++){
-            PrintString("0x");
-            PrintString(HexToString(ptr[i+j]));
-        }
-        i+=128;
-    }
+
     floppy_info = inb(FLPYDSK_MSR);
     PrintString("Floppy disk status: ");
     PrintString(IntToString(floppy_info));
     PrintString("\n\r");
 
-}
+    *ptr = 0x41;
+    *(ptr+1) = 0x42;
+
+}*/
 
 //geré
 void raise_interupt32(char* args){
@@ -119,6 +136,7 @@ void rebootCmd(char* args){
     asm("jmp 0xFFFF");
 }
 
+/*
 void cube(char* args){
     //pour render un cube on doit garder en mémoire les sommets et les arrêtes, et projeté 
     //les sommets sur l'écran en fonction de la position de la caméra
@@ -190,7 +208,7 @@ void cube(char* args){
     }
     
 
-}
+}*/
 #pragma endregion cmds
 
 
@@ -198,15 +216,20 @@ void cube(char* args){
 //TODO: trouver une permutation pour avoir une fonction de hachage plus efficace voir changer de fonction de hachage
 
 //une permutation de [0;255]
-#define SIZE 256
-unsigned int pearson_table[SIZE] = {131,73,96,115,237,223,74,236,41,166,186,192,242,34,56,122,173,164,84,138,152,167,231,43,8,184,63,136,195,159,146,144,102,226,10,52,38,40,163,25,88,199,83,36,37,233,94,212,11,178,64,85,215,180,240,194,210,130,134,82,109,214,72,135,112,68,220,20,45,225,252,181,53,104,126,157,234,213,98,200,127,227,92,255,91,78,65,13,9,175,31,7,238,118,156,217,105,3,254,29,162,250,170,116,100,93,209,230,222,39,16,185,132,216,190,125,137,249,95,26,168,169,70,123,177,114,241,196,108,239,15,103,59,67,193,229,202,171,203,208,66,0,87,189,154,183,201,120,6,149,142,197,139,46,50,80,219,151,57,161,86,117,22,49,30,153,205,77,32,5,228,12,211,124,89,243,1,33,14,48,140,76,232,24,119,148,188,90,113,75,207,245,58,69,97,111,179,145,19,2,28,55,110,221,23,147,107,21,27,44,4,129,158,62,61,155,251,54,206,187,101,248,42,128,99,71,244,141,246,17,176,79,235,133,204,121,174,81,35,224,191,51,143,160,60,18,172,165,150,106,182,198,253,247,218,47};
+#define CMDS_TABLE_SIZE 256
+unsigned int pearson_table[CMDS_TABLE_SIZE] = {131,73,96,115,237,223,74,236,41,166,186,192,242,34,56,122,173,164,84,138,152,167,231,43,8,184,63,136,195,159,146,144,102,226,10,52,38,40,163,25,88,199,83,36,37,233,94,212,11,178,64,85,215,180,240,194,210,130,134,82,109,214,72,135,112,68,220,20,45,225,252,181,53,104,126,157,234,213,98,200,127,227,92,255,91,78,65,13,9,175,31,7,238,118,156,217,105,3,254,29,162,250,170,116,100,93,209,230,222,39,16,185,132,216,190,125,137,249,95,26,168,169,70,123,177,114,241,196,108,239,15,103,59,67,193,229,202,171,203,208,66,0,87,189,154,183,201,120,6,149,142,197,139,46,50,80,219,151,57,161,86,117,22,49,30,153,205,77,32,5,228,12,211,124,89,243,1,33,14,48,140,76,232,24,119,148,188,90,113,75,207,245,58,69,97,111,179,145,19,2,28,55,110,221,23,147,107,21,27,44,4,129,158,62,61,155,251,54,206,187,101,248,42,128,99,71,244,141,246,17,176,79,235,133,204,121,174,81,35,224,191,51,143,160,60,18,172,165,150,106,182,198,253,247,218,47};
 cmd_table* cmdTable;
 
 //collision entre int49 et timer
-const char* cmds[] = {"help", "clear", "arrow", "langfr", "langen", "slt", "fatal", "reboot", "int32", "int49", "ttimer", "cube", "read"};
+
+
 //const void cmdFuncs[]  = {&helpCmd, &clearCmd, &arrowCmd, &langFrCmd, &langEnCmd, &sltCmd, &fatalCmd, &rebootCmd, &interupt49};
 
+/*
 unsigned int pearson(const char* str){
+    PrintString("Hashing: ", FOREGROUND_LIGHTGRAY);
+    PrintString(str, FOREGROUND_LIGHTGRAY);
+    PrintString("\n\r", FOREGROUND_LIGHTGRAY);
     unsigned int hash = 0;
     for (int i = 0; str[i] != '\0'; i++)
     {
@@ -222,7 +245,7 @@ unsigned int hashfunction(char *key){
     {
         hash += key[i];
     }
-    return hash % SIZE; //le modulo est inutile
+    return hash % CMDS_TABLE_SIZE; //le modulo est inutile
 }
 
 
@@ -238,12 +261,12 @@ unsigned int djb2(char* str){
 
 cmd_table* create_table(){
     cmd_table* t = (cmd_table*)malloc(sizeof(cmd_table));
-    t->items = (cmd_item*)malloc(sizeof(cmd_item) * SIZE);
-    for(int i = 0; i<SIZE; i++){
+    t->items = (cmd_item*)malloc(sizeof(cmd_item) * CMDS_TABLE_SIZE);
+    for(int i = 0; i<CMDS_TABLE_SIZE; i++){
         t->items[i].key = NULL;
         t->items[i].value = NULL;
     }
-    t->size = SIZE;
+    t->size = CMDS_TABLE_SIZE;
     t->count = 0;
     return t;
 }
@@ -270,11 +293,6 @@ void (*get(cmd_table* t, const char* key))(char*){
     }
 }
 
-void clearCmdBuffer(char* buffer, int bufferSize){
-    for(int i = 0; i<bufferSize; i++){
-        buffer[i] = '\0';
-    }
-}
 
 
 void endCmd(){
@@ -286,6 +304,14 @@ void errorCmd(char* cmd){
     PrintString(cmd, FOREGROUND_RED);
     endCmd();
 }
+*/
+
+void clearCmdBuffer(char* buffer, int bufferSize){
+    for(int i = 0; i<bufferSize; i++){
+        buffer[i] = '\0';
+    }
+}
+
 
 bool strcmp(char* a, const char* b){
     int n = 0;
@@ -300,41 +326,67 @@ bool strcmp(char* a, const char* b){
 }
 
 
-
+//const char* cmds[] = {"help", "clear", "arrow", "langfr", "langen", "slt", "fatal", "reboot", "int32", "int49", "ttimer", "cube", "read"};
+/*
 void initCmds(){
     PrintString("Loading cmds...\n\r", FOREGROUND_GREEN);
+    PrintString(IntToString(pearson_table[0]));
+
+    const char* cmds[] = {"help", "clear", "arrow", "langfr", "langen", "slt", "fatal", "reboot", "int32", "int49", "ttimer", "cube", "read"};
+
     cmdTable = create_table();
     //peut etre utiliser un fichier texte pour faire ça automatiquement
     set(cmdTable, cmds[0], &helpCmd);
     set(cmdTable, cmds[1], &clearCmd);
-    set(cmdTable, cmds[2], &arrowCmd);
-    set(cmdTable, cmds[3], &langFrCmd);
-    set(cmdTable, cmds[4], &langEnCmd);
-    set(cmdTable, cmds[5], &sltCmd);
-    set(cmdTable, cmds[6], &fatalCmd);
-    set(cmdTable, cmds[7], &rebootCmd);
-    set(cmdTable, cmds[8], &raise_interupt32);
-    set(cmdTable, cmds[9], &raise_interupt49);
-    set(cmdTable, cmds[10], &timer);
-    set(cmdTable, cmds[11], &cube);
-    set(cmdTable, cmds[12], &readDiskCmd);
+
+    //on va afficher les addresses des char* 
+    PrintString("Address of help: ");
+    PrintString(HexToString((uint_64)cmds[0]));
+    PrintString("\n\r");
+
+    PrintString("Address of clear: ");
+    PrintString(HexToString((uint_64)cmds[1]));
+    PrintString("\n\r");
+
+    int index = pearson(cmds[0]);
+    PrintString("Index of help: ");
+    PrintString(HexToString(index));
+    PrintString("\n\r");
+
+    index = pearson(cmds[1]);
+    PrintString("Index of clear: ");
+    PrintString(HexToString(index));
+    PrintString("\n\r");
+
+    set(cmdTable, "clear", &clearCmd);
+    set(cmdTable, "arrow", &arrowCmd);
+    set(cmdTable, "langfr", &langFrCmd);
+    set(cmdTable, "langen", &langEnCmd);
+    set(cmdTable, "slt", &sltCmd);
+    set(cmdTable, "fatal", &fatalCmd);
+    set(cmdTable, "reboot", &rebootCmd);
+    set(cmdTable, "int32", &raise_interupt32);
+    set(cmdTable, "int49", &raise_interupt49);
+    set(cmdTable, "ttimer", &timer);
+    set(cmdTable, "cube", &cube);
+    set(cmdTable, "read", &readDiskCmd);
     PrintString("Cmds loaded!\n\r", FOREGROUND_GREEN);
 }
 
-
+*/
 
 
 void handleCmds(char* cmd){
     //todo separer la cmd et les arguments
     //PrintString("getting cmd...\n\r", FOREGROUND_GREEN);
-    void (*cmdFunc)(char*) = get(cmdTable, cmd);
+    //void (*cmdFunc)(char*) = get(cmdTable, cmd);
     //PrintString("ok!\n\r", FOREGROUND_GREEN);
-    if(cmdFunc == NULL){
+    /*if(cmdFunc == NULL){
         errorCmd(cmd);
         return;
     }
     (*cmdFunc)(NULL);
-    endCmd();
+    endCmd();*/
     return;
 }
 
