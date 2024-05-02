@@ -54,15 +54,13 @@ SECTIONS
 
 
     .rodata : ALIGN(0x1000){
-        _rodata = .;
-        *(.rodata) *(.rodata*)
+        *(.rodata) /**(.rodata*)*/
         
     }
 
     
     .data : ALIGN(0x1000){
-        _data = .;
-       *(.data) *(.data*)
+       *(.data) /**(.data*)*/
     }
 
 

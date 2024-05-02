@@ -19,7 +19,7 @@ cat compiled/bootloader.bin compiled/kernel.bin > compiled/boot.bin&&
 cp compiled/boot.bin ./floppyimg/boot.bin&&
 cd floppyimg&&
 dd if=boot.bin of=floppy.flp bs=512 count=2880&&
-qemu-system-x86_64 -fda floppy.flp -m 64M 
+qemu-system-x86_64 -fda floppy.flp -m 128M 
 
 
 #-boot a -d cpu_reset  

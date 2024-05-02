@@ -1,8 +1,9 @@
 #pragma once 
 
-/*
+
 namespace KBSet1
 {
+    /*
  const char ScanCodeLookupTableQWERTY[] = {
         0 ,  0 , '1', '2',
         '3', '4', '5', '6',
@@ -19,7 +20,7 @@ namespace KBSet1
         'b', 'n', 'm', ',',
         '.', '/',  0 , '*',
          0 , ' '
-    };   
+    };   */
 
     const char ScanCodeLookupTableAZERTY[] = {
         0 ,  0 , '1', '2',
@@ -39,4 +40,4 @@ namespace KBSet1
          0 , ' '
     };   
 }
-*/
+

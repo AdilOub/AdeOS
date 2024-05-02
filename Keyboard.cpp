@@ -113,23 +113,18 @@ void KeyBoardHandler(uint_8 scanCode){
     uint_8 chr = 0;
     if(scanCode < 0x3A){
         chr = LookupTable[scanCode];
-        /*ClearScreen();
+        ClearScreen();
         SetCursorPosition(0);
-        memDmp2((uint_8*)0x8000+0x7000 + 512*i, 512);
-
-        //on ecrit i en bas à gauche directement dans la mémoire VGA
+        memDmp2((uint_8*)0x8000 +0x7000 + 512*i, 512);
+        //memDmp2((uint_8*)0xFFFF, 512);
+        //on affiche l'adresse de la page
         SetCursorPosition(PosFromCoord(0, 24));
-        const char* iStr = IntToString(i);
-        *(VGA_MEMORY + CursorPosition * 2) = iStr[0];
-        *(VGA_MEMORY + CursorPosition * 2 + 1) = BACKGROUND_RED | FOREGROUND_WHITE;
-        *(VGA_MEMORY + CursorPosition * 2 + 2) = iStr[1];
-        *(VGA_MEMORY + CursorPosition * 2 + 3) = BACKGROUND_RED | FOREGROUND_WHITE;
-        *(VGA_MEMORY + CursorPosition * 2 + 4) = iStr[2];
-        *(VGA_MEMORY + CursorPosition * 2 + 5) = BACKGROUND_RED | FOREGROUND_WHITE;
-        *(VGA_MEMORY + CursorPosition * 2 + 6) = iStr[3];
-        *(VGA_MEMORY + CursorPosition * 2 + 7) = BACKGROUND_RED | FOREGROUND_WHITE;
-
-        i++;*/
+        PrintString(HexToString(0x8000 + 0x7000 + 512*i), BACKGROUND_RED | FOREGROUND_WHITE);
+        if(chr == 'b'){
+            i--;
+        }else{
+            i++;
+        }
     }
 
     //erk pourquoi j'ai fait ça ? enft si c'est logique

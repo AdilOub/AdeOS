@@ -52,8 +52,8 @@ StartProtectedMode:
     mov gs, ax
 
     ;we can move our stack to smthg larger
-    mov ebp, 0x9000
-    mov esp, ebp
+    ;mov ebp, 0x9000
+    ;mov esp, ebp
 
 
     ;mov [0xb8000], byte '3'
