@@ -1,20 +1,27 @@
 [org 0x7c00]
 
-mov [BOOT_DISK], dl
+mov [BOOT_DISK], dl ;normalement 0x80 pour C
 cmp dl, 1
 je DiskErrorOnBoot
 
+;on met le stack au bon endroit
+cli
+xor ax, ax
+mov ds, ax
+mov es, ax
+mov ss, ax
+mov sp, 0x7c00
+sti 
 
-mov bp, 0x7c00 ;on met le stack directement avant le bootloader (il "grow downward" donc ok)
-mov sp, bp
 
 
-mov bx, HelloString
-call PrintString
-call JmpLine
 
 
+
+
+; ;call oldReadDisk
 call ReadDisk
+
 
 
 mov bx, DiskOk
@@ -32,26 +39,35 @@ mov bx, TryToJmp
 call PrintString
 call JmpLine
 
+mov bx, PROGRAM_SPACE
+call PrintHex
+call JmpLine
+
 jmp PROGRAM_SPACE
 
+mov bx, FailedToJmp
+call PrintString
+call JmpLine
+
 jmp $
+
 
 
 %include "Sector1/print.asm"
 %include "Sector1/disk_read.asm"
 
 
-HelloString:
-    db "Bienvenue sur le bootloader d'AdeOS!", 0
-
 DiskOk:
-    db "Disque dur OK...", 0
+    db "DD OK...", 0
 
 VGAOk:
-    db "Mode VGA OK...", 0
+    db "VGA OK...", 0
 
 TryToJmp:
-    db "Jmp program space...", 0
+    db "jmping extended prog at:", 0
+
+FailedToJmp:
+    db "jmp failed :c", 0
 
 SetVGAMod:
     mov ah, 0x00

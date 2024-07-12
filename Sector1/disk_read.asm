@@ -1,85 +1,58 @@
-NB_OF_SECTOR equ 64 ;nb of sector in extended_program (8) plus some to avoid flashy screen
 PROGRAM_SPACE equ 0x8000 ;program space dans le linker
-;on va essayer de le load dans 0x10000
-;adresse = segment*16 + offset
-;0x8000 = 0x1000*16 + 0x0000
-;segment register: cs, ds, es, fs, gs et ss
+SECTEUR_COUNT equ 61 ;nombre de secteur à lire, taille de boot.bin/512 - 1
 
 
-;si on est en -hda on peut lire 128 secteurs directement 
-;mais dans ce cas il ne faut pas jne DiskReadFailed
-ReadDisk_old:
-    mov ax, 0x800 ;adresse de destination 0x800*16=0x8000
-    mov es, ax
-    mov ah, 0x02 ;mode lecture floppy
-    mov bx, 0x000;destination
-    mov al, 64 ;nb of sector to read
-    mov dl, [BOOT_DISK] ;disk number
-    mov ch, 0 ;cylinder 0
-    xor dh, dh ;head 0
-    mov cl, 2 ;on lit à partir du secteur 2, le secteur 1 est le bootloader
-
-    int 0x13
-    ;cmp ah, 0
-    ;jne DiskReadFailed ;jmp if err
-
-    ;ret
-
-    ;on reset
-
-    ;on lit le reste à la suite, doonc à l'adresse PROGRAM_SPACE + 512*NB_OF_SECTOR=0x10000
-    mov ax, 0x1000 ;adresse de destination 0x1000*16=0x10000
-    mov es, ax
-    mov ah, 0x02 ;mode lecture floppy
-    mov bx, 0x200;destination offset
-    mov al, 1 ;nb of sector to read
-    mov dl, [BOOT_DISK] ;disk number
-    mov ch, 1 ;cylinder 1 car on a deja lu les 64 secteurs du cylinder 0
-    xor dh, dh ;head 0
-    mov cl, 1 ;secteur 1
-    int 0x13
-    cmp ah, 0
-    jne DiskReadFailed2 ;jmp if err
-
-    ;on affiche le 1er hexa à l'adresse 0x10000
-    ; mov ax, 0xFFF
-    ; mov es, ax
-    ; mov bx, [es:0x00F]
-    ; call PrintHex
-    ; call JmpLine
-    ; jmp $
-
-    ret
+;WARNING!
+;on n'est pas censé pouvoir lire plus de 64 secteurs à la fois
+;mais avec un disque dur ça marche (pas avec un floppy) et on n'a pas d'erreur
+;à l'inverse, essayer de lire les secteurs de manière séparée ne marche pas :/
+;on va donc tout lire d'un coup... (j'ai passé trop de temps à essayer de résoudre ce problème)
+;pour l'instant on est en dessous de 64 ça va.
+;peut être qu'un hdd à plus que 64 secteurs par cylindre et que c'est pour ça que ça marche?
 
 
-;y'a un probleme avec l'alignement dans le linker
 ReadDisk:
-    ;on lit les 32k premiers octets à l'adresse es:bx (0x8000)
-    mov ax, 0x800;
+    xor ah, ah
+    int 0x13 ;reset disk
+
+    ;; ON COMMENCE PAR LIRE LE EXTENDED BOOTLOADER
+    ;; un secteur fait 512 bytes. On doit lire 8 secteurs pour lire le bootloader extendu
+    mov ax, 0x800 ;adresse de destination
     mov es, ax
     mov ch, 0 ;on commence par le cylinder 0
-    mov cl, 2 ;on veut pas lire le bootloader
-    call ReadDiskInterupt
+    mov cl, 2 ;on veut pas lire le bootloader, on commence par le secteur 2
+    mov ah, 0x02 ;mode lecture floppy
+    mov bx, 0 ;offset de destination
+    mov al, SECTEUR_COUNT ;nb de secteurs à lire
+    mov dl, [BOOT_DISK] ;on lit les 8 secteurs du bootloader extended
+    xor dh, dh ;tête de disque
+    int 0x13
+    ;cmp ah, 0
+    jc DiskReadFailed ;jmp if err
+
 
     ;on log disk 1 ok
     mov bx, Disk1Ok
     call PrintString
     call JmpLine
 
+    ;on lit ensuite le reste
 
-    ;on lit le reste à l'adresse PROGRAM_SPACE + 512*NB_OF_SECTOR=0x10000
-    mov ax, 0x1000
-    mov es, ax
-    mov ch, 1 ;on passe au cylinder 1
-    mov cl, 1 ;on commence par le secteur 1
-    call ReadDiskInterupt
+
+    ; mov ax, 0x8E0;
+    ; mov es, ax
+    ; mov ch, 0 ;on commence par le cylinder 0
+    ; mov cl, 9 ;on veut pas lire le bootloader, on commence par le secteur 2
+    ; mov bl, 57 ;le nombre de secteur j'aurai dit 55 mais c'est 57
+    ; call ReadDiskInterupt ;on a décalé de 1 donc on peut pas lire 64 secteurs
 
     ret
 
+;argument: bl: nombre de secteur à lire
 ReadDiskInterupt: ;on s'attend à ce que le cylindre soit set
     mov ah, 0x02        ; Mode lecture floppy
-    mov bx, 0x000       ; Offset de destination
-    mov al, 64          ; Nombre de secteurs à lire (64 secteurs)
+    mov al, bl          ; Nombre de secteurs à lire (64 secteurs)
+    xor bx, bx       ; Offset de destination
     mov dl, [BOOT_DISK] ; Numéro du disque
     ;mov ch, 0           ; Numéro du cylindre
     xor dh, dh          ; Tête de disque
@@ -88,23 +61,23 @@ ReadDiskInterupt: ;on s'attend à ce que le cylindre soit set
     int 0x13 
     cmp ah, 0
     jne DiskReadFailed ;jmp if err
-
     ret
 
 
 BOOT_DISK: 
-    db 0
+    db 0b ;0x80 pour le disque C, 0 pour le floppy
 
 
 Disk1Ok:
-    db "Disk 1 OK", 0
+    db "boot ext OK", 0
+
+Disk2Ok:
+    db "Other Disks OK", 0
 
 DiskErrorOnBootMsg:
     db "Disk Error On Boot", 0
 DiskReadErrorMsg:
     db "Disk Read Failed", 0
-DiskReadErrorMsg2:
-    db "Disk Read Failed 2", 0
 
 ;differente message d'erreur possible lors de la lecture du disque
 ; InvalidCommandMsg: ;0x01
@@ -162,13 +135,6 @@ DiskErrorOnBoot:
 ;     jmp $
 
 
-
-DiskReadFailed2:
-    mov bx, DiskReadErrorMsg2
-    call PrintString
-    call JmpLine
-    call DiskReadFailed
-
 DiskReadFailed:
     push ax
     mov bx, DiskReadErrorMsg
@@ -181,6 +147,7 @@ DiskReadFailed:
     call PrintHex
     call JmpLine
     jmp $
+    ;ret
     ;pop ax
     ;on determine quelle est l'erreur
     ; cmp ah, 0x01

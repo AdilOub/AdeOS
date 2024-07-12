@@ -57,15 +57,13 @@ void(*MainKeyBoardHandler)(uint_8 scanCode);
 
 //uint_64 external_error_handler[32] = {isr0, 0, isr2, 0, isr4, isr5, isr6, isr7, isr8, isr9, isr10, isr11, isr12, isr13, isr14, isr15, isr16, isr17, isr18, isr19, isr20, isr21, isr22, isr23, isr24, isr25, isr26, isr27, isr28, isr29, isr30, isr31};
 
-uint_64 external_error_handler[32];
+//uint_64 external_error_handler[32];
 
 //array de fonction pour les erreurs
 
 void InitIDT(){
-    external_error_handler[0]= (uint_64)isr0;
-    external_error_handler[8]= (uint_64)isr8;
 
-    /*
+    
     //div error 
     _idt[0].zero = 0;
 	_idt[0].offset_low = (uint_16)(((uint_64)&isr0 & 0x000000000000ffff));
@@ -83,21 +81,21 @@ void InitIDT(){
     _idt[8].ist = 0;
     _idt[8].selector = 0x08;
     _idt[8].types_attr = 0x8f;
-    */
+    
 
 
-   for(uint_8 i = 0; i < 32; i++){
-        if(i != 0 || i!= 8){
-            continue;
-        }
-       _idt[i].zero = 0;
-       _idt[i].offset_low = (uint_16)(((uint_64)external_error_handler[i] & 0x000000000000ffff));
-       _idt[i].offset_mid = (uint_16)(((uint_64)external_error_handler[i] & 0x00000000ffff0000) >> 16);
-       _idt[i].offset_high = (uint_32)(((uint_64)external_error_handler[i] & 0xffffffff00000000) >> 32);
-       _idt[i].ist = 0;
-       _idt[i].selector = 0x08;
-       _idt[i].types_attr = 0x8f;
-   }       
+//    for(uint_8 i = 0; i < 32; i++){
+//         if(i != 0 || i!= 8){
+//             continue;
+//         }
+//        _idt[i].zero = 0;
+//        _idt[i].offset_low = (uint_16)(((uint_64)external_error_handler[i] & 0x000000000000ffff));
+//        _idt[i].offset_mid = (uint_16)(((uint_64)external_error_handler[i] & 0x00000000ffff0000) >> 16);
+//        _idt[i].offset_high = (uint_32)(((uint_64)external_error_handler[i] & 0xffffffff00000000) >> 32);
+//        _idt[i].ist = 0;
+//        _idt[i].selector = 0x08;
+//        _idt[i].types_attr = 0x8f;
+//    }       
 
 
     //timer
@@ -138,7 +136,7 @@ void InitIDT(){
 
 
     //outb(0x21, 0xfd); //11111101 on n'autorise que l'irq1
-    outb(0x21, 0xfc); //11111100 on n'autorise que l'irq0 et l'irq1
+    outb(0x21, 0xfc); //11111100 on n'autorise que l'irq0 et l'irq1 (timer et clavier)
     //outb(0x21, 0xbc); //10111100 irq0, irq1 et irq6
     outb(0xa1, 0xff); //slave pic
 
@@ -229,7 +227,8 @@ void set_flpydisk_int(uint_8 val){
 
 //div error
 extern "C" void isr0_handler(){
-    SetCursorPosition(0);asm("cli");
+    asm("cli");
+    SetCursorPosition(0);
     PrintString("Kernel panic: div error\n\r", BACKGROUND_RED | FOREGROUND_WHITE);
     //c'est surement grave
     asm("hlt");

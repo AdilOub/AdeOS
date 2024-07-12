@@ -40,17 +40,14 @@ le rodata est load correctement dans la mémoire mais pas le data
 SECTIONS
 {
     . = 0x8000;
+    
     .text :ALIGN(0x1000)
     {
         *(.text)
         /**(.rodata*)*/
     }
     
-    .idt BLOCK(0x1000) : ALIGN(0x1000)
-    {
-        _idt = .;
-        . = . + 0x1000;
-    }
+
 
 
     .rodata : ALIGN(0x1000){
@@ -64,10 +61,14 @@ SECTIONS
     }
 
 
-
-
     .bss : ALIGN(0x1000){
         *(COMMON)
         *(.bss) 
+    }
+
+    .idt BLOCK(0x1000) : ALIGN(0x1000)
+    {
+        _idt = .;
+        . = . + 0x1000;
     }
 }

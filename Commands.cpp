@@ -16,7 +16,7 @@ Creation de la hashtable des commandes
 */
 
 
-/*
+
 #pragma region cmds
 void helpCmd(char* args){
     PrintString(" Cmds: help; clear; arrow; lang-fr; lang-en; slt; fatal; reboot; cube");
@@ -64,7 +64,7 @@ void fatalCmd(char* args){
     endCmd();
     int a = 1/0;
 }
-*/
+
 
 /*
 static const char * drive_types[8] = {
@@ -122,7 +122,7 @@ void readDiskCmd(char *args){
 
 //geré
 void raise_interupt32(char* args){
-    asm("int $32");
+    asm("int $32"); //normalement c'est un div0
 }
 
 //pas geré, va faire planter le systeme
@@ -136,7 +136,7 @@ void rebootCmd(char* args){
     asm("jmp 0xFFFF");
 }
 
-/*
+
 void cube(char* args){
     //pour render un cube on doit garder en mémoire les sommets et les arrêtes, et projeté 
     //les sommets sur l'écran en fonction de la position de la caméra
@@ -188,6 +188,10 @@ void cube(char* args){
         screen[i][1] = (int)(edges[i][1] * dist) / (edges[i][2] + dist);
     }
 
+    int offX = 0;
+    int offY = 0;
+    
+
     //on dessine les arrêtes
     for(int i = 0; i<8; i++){
         for(int j=0; j<8; j++){
@@ -198,6 +202,7 @@ void cube(char* args){
         }
     }
 
+/*
     //on dessine un point rouge au projeté de chaque sommet
     for(int i = 0; i<8; i++){
         int x = (int)(edges[i][0] * dist) / (edges[i][2] + dist);
@@ -205,10 +210,10 @@ void cube(char* args){
         int index = x + y*80;
         *(VGA_MEMORY + index*2) = 0x0F; //'*'
         *(VGA_MEMORY + index*2 +1) = FOREGROUND_RED;
-    }
+    }*/
     
 
-}*/
+}
 #pragma endregion cmds
 
 
@@ -225,11 +230,11 @@ cmd_table* cmdTable;
 
 //const void cmdFuncs[]  = {&helpCmd, &clearCmd, &arrowCmd, &langFrCmd, &langEnCmd, &sltCmd, &fatalCmd, &rebootCmd, &interupt49};
 
-/*
+
 unsigned int pearson(const char* str){
-    PrintString("Hashing: ", FOREGROUND_LIGHTGRAY);
-    PrintString(str, FOREGROUND_LIGHTGRAY);
-    PrintString("\n\r", FOREGROUND_LIGHTGRAY);
+    //PrintString("Hashing: ", FOREGROUND_LIGHTGRAY, BACKGROUND_BLACK);
+    //PrintString(str, FOREGROUND_LIGHTGRAY, BACKGROUND_BLACK);
+    //PrintString("\n\r", FOREGROUND_LIGHTGRAY, BACKGROUND_BLACK);
     unsigned int hash = 0;
     for (int i = 0; str[i] != '\0'; i++)
     {
@@ -304,7 +309,7 @@ void errorCmd(char* cmd){
     PrintString(cmd, FOREGROUND_RED);
     endCmd();
 }
-*/
+
 
 void clearCmdBuffer(char* buffer, int bufferSize){
     for(int i = 0; i<bufferSize; i++){
@@ -327,10 +332,10 @@ bool strcmp(char* a, const char* b){
 
 
 //const char* cmds[] = {"help", "clear", "arrow", "langfr", "langen", "slt", "fatal", "reboot", "int32", "int49", "ttimer", "cube", "read"};
-/*
+
 void initCmds(){
-    PrintString("Loading cmds...\n\r", FOREGROUND_GREEN);
-    PrintString(IntToString(pearson_table[0]));
+    //PrintString("Loading cmds...\n\r", FOREGROUND_GREEN);
+    //PrintString(IntToString(pearson_table[0]));
 
     const char* cmds[] = {"help", "clear", "arrow", "langfr", "langen", "slt", "fatal", "reboot", "int32", "int49", "ttimer", "cube", "read"};
 
@@ -340,7 +345,7 @@ void initCmds(){
     set(cmdTable, cmds[1], &clearCmd);
 
     //on va afficher les addresses des char* 
-    PrintString("Address of help: ");
+   /* PrintString("Address of help: ");
     PrintString(HexToString((uint_64)cmds[0]));
     PrintString("\n\r");
 
@@ -357,7 +362,7 @@ void initCmds(){
     PrintString("Index of clear: ");
     PrintString(HexToString(index));
     PrintString("\n\r");
-
+*/
     set(cmdTable, "clear", &clearCmd);
     set(cmdTable, "arrow", &arrowCmd);
     set(cmdTable, "langfr", &langFrCmd);
@@ -369,24 +374,23 @@ void initCmds(){
     set(cmdTable, "int49", &raise_interupt49);
     set(cmdTable, "ttimer", &timer);
     set(cmdTable, "cube", &cube);
-    set(cmdTable, "read", &readDiskCmd);
+    //set(cmdTable, "read", &readDiskCmd);
     PrintString("Cmds loaded!\n\r", FOREGROUND_GREEN);
 }
 
-*/
 
 
 void handleCmds(char* cmd){
     //todo separer la cmd et les arguments
-    //PrintString("getting cmd...\n\r", FOREGROUND_GREEN);
-    //void (*cmdFunc)(char*) = get(cmdTable, cmd);
-    //PrintString("ok!\n\r", FOREGROUND_GREEN);
-    /*if(cmdFunc == NULL){
+    PrintString("getting cmd...\n\r", FOREGROUND_GREEN);
+    void (*cmdFunc)(char*) = get(cmdTable, cmd);
+    PrintString("ok!\n\r", FOREGROUND_GREEN);
+    if(cmdFunc == NULL){
         errorCmd(cmd);
         return;
     }
     (*cmdFunc)(NULL);
-    endCmd();*/
+    endCmd();
     return;
 }
 

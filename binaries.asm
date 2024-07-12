@@ -7,5 +7,5 @@
     %1_size: dq %1_size - %1
 %endmacro
 
-;IncBin Test, "test.txt"
+IncBin Test, "test.txt"
 ;IncBin Emi1, "emi1.img"

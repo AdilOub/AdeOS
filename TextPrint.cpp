@@ -1,61 +1,7 @@
 #include "Header Files/TextPrint.h"
+#include "Header Files/Kernel.h"
+#include "Header Files/Render.h"
 
-#ifndef VGA13
-uint_16 CursorPosition;
-
-void SetCursorPosition(uint_16 position){
-
-    if(position > 2000){
-        position = 2000;
-    }
-    if(position < 0){
-        position = 0;
-    }
-
-    outb(0x3D4, 0x0F);
-    outb(0x3D5, (uint_8)(position & 0xFF));
-    outb(0x3D4, 0x0E);
-    outb(0x3D5, (uint_8)((position >> 8) & 0xFF));
-    CursorPosition = position;
-}
-
-uint_16 PosFromCoord(uint_8 x, uint_8 y){
-    return y * VGA_WIDTH + x;
-}
-
-void PrintString(const char* str, uint_8 color){
-    char* charPtr = (char*)str;
-    uint_16 index = CursorPosition;
-    
-    while(*charPtr !=0){
-        switch (*charPtr)
-        {
-        case 10: //new line
-            index += VGA_WIDTH;
-            break;
-        case 13: //carriage return
-            index -= index%VGA_WIDTH;
-            break;
-        default:
-            *(VGA_MEMORY + index * 2) = *charPtr;
-            *(VGA_MEMORY + index *2 + 1) = color;
-            index++;
-            break;
-        } 
-        charPtr++;
-    }
-    SetCursorPosition(index);
-}
-
-void jmpLine(){
-    SetCursorPosition(CursorPosition + VGA_WIDTH - CursorPosition % VGA_WIDTH);
-}
-
-void PrintChar(char chr, uint_8 color ){
-    *(VGA_MEMORY + CursorPosition * 2) = chr;
-    *(VGA_MEMORY + CursorPosition * 2 +1) = color;
-    SetCursorPosition(CursorPosition + 1);
-}
 
 char hexToStringOutput[128];
 template<typename T>
@@ -158,19 +104,63 @@ const char* FloatToString(float value, uint_8 decimalPlaces){
     return floatToStringOutput;
 }
 
-#ifdef VGA13
-void ClearScreen(uint_8 ClearColor){
-    uint_8 value = 0;
-    value += ClearColor << 8;
-    value += ClearColor << 24;
-    value += ClearColor << 48;
-    value += ClearColor << 56;
-    for (uint_64* i = (uint_64*)VGA_MEMORY; i < (uint_64*)(VGA_MEMORY + 4000); i++){
-        *i = value;
+#ifndef VGA13
+uint_16 CursorPosition;
+
+void SetCursorPosition(uint_16 position){
+
+    if(position > 2000){
+        position = 2000;
+    }
+    if(position < 0){
+        position = 0;
     }
 
+    outb(0x3D4, 0x0F);
+    outb(0x3D5, (uint_8)(position & 0xFF));
+    outb(0x3D4, 0x0E);
+    outb(0x3D5, (uint_8)((position >> 8) & 0xFF));
+    CursorPosition = position;
 }
-#else
+
+uint_16 PosFromCoord(uint_8 x, uint_8 y){
+    return y * VGA_WIDTH + x;
+}
+
+void PrintString(const char* str, uint_8 color, uint_8 unused){
+    char* charPtr = (char*)str;
+    uint_16 index = CursorPosition;
+    
+    while(*charPtr !=0){
+        switch (*charPtr)
+        {
+        case 10: //new line
+            index += VGA_WIDTH;
+            break;
+        case 13: //carriage return
+            index -= index%VGA_WIDTH;
+            break;
+        default:
+            *(VGA_MEMORY + index * 2) = *charPtr;
+            *(VGA_MEMORY + index *2 + 1) = color;
+            index++;
+            break;
+        } 
+        charPtr++;
+    }
+    SetCursorPosition(index);
+}
+
+void jmpLine(){
+    SetCursorPosition(CursorPosition + VGA_WIDTH - CursorPosition % VGA_WIDTH);
+}
+
+void PrintChar(char chr, uint_8 color ){
+    *(VGA_MEMORY + CursorPosition * 2) = chr;
+    *(VGA_MEMORY + CursorPosition * 2 +1) = color;
+    SetCursorPosition(CursorPosition + 1);
+}
+
 void ClearScreen(uint_8 ClearColor){
     for(uint_32 i = 0; i < 80*25; i++){
         *(VGA_MEMORY + i * 2) = 0;
@@ -178,7 +168,41 @@ void ClearScreen(uint_8 ClearColor){
     }
 
 }
+
+
+#endif 
+
+#ifdef VGA13
+uint_16 CursorPosition;
+void SetCursorPosition(uint_16 position){
+    setCursorPosRenderer(position); //bad code mais c'est ma faute ça
+}
+
+uint_16 PosFromCoord(uint_8 x, uint_8 y){
+    return y * VGA_13_W + x;
+}
+
+void PrintString(const char *str, uint_8 foreground, uint_8 background){
+    Print(str, foreground, background);
+}
+
+void PrintChar(char chr, uint_8 color){
+
+}
+
+void ClearScreen(uint_8 ClearColor){
+    uint_8 value = 0;
+    //value += ClearColor << 8;
+    //value += ClearColor << 24;
+    //value += ClearColor << 48;
+    //value += ClearColor << 56;
+    for (uint_8* i = (uint_8*)VGA_OFFSET; i < (uint_8*)(VGA_OFFSET + 64000); i++){
+        *i = value;
+    }
+
+}
 #endif
 
 
-#endif
+
+

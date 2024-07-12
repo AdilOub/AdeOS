@@ -16,11 +16,20 @@ jmp EnterProtectedMode
 ;enable A20 Line
 ;load GDT
 ;set GDT in register
+
+setVGA_graphic:
+    mov ah, 0x00
+    mov al, 0x13
+    int 0x10
+    ret
+
 EnterProtectedMode:
     mov bx, ExtendedProgramStart
     call PrintString
     call JmpLine
 
+    ;call setVGA_graphic
+    
     call DetectMemeory
     call EnableA20
     cli ;jmp to 32 bits on desactive les interruptions
@@ -88,33 +97,49 @@ Start64Bit:
     mov rsp, rbp
     call ActivateSSE
 
-    ;mov [0xb8000], byte '6'
-    ;mov [0xb8002], byte '4'
-    ;mov [0xb8004], byte ' '
-    ;mov [0xb8006], byte 'b'
-    ;mov [0xb8008], byte 'i'
-    ;mov [0xb800A], byte 't'
-    ;mov [0xb800C], byte 's'
+    ; mov [0xb8000], byte '6'
+    ; mov [0xb8002], byte '4'
+    ; mov [0xb8004], byte ' '
+    ; mov [0xb8006], byte 'b'
+    ; mov [0xb8008], byte 'i'
+    ; mov [0xb800A], byte 't'
+    ; mov [0xb800C], byte 's'
+    
     ;jmp $
     ;mov [0xa0C8a], byte 0x2F
-    call _start
+
+    call _start ;on lance le kernel en C 
     
-    mov [0xb80F0], byte 'F'
-    mov [0xb80F2], byte 'i'
-    mov [0xb80F4], byte 'n'
+    ; mov [0xb80F0], byte 'F'
+    ; mov [0xb80F2], byte 'i'
+    ; mov [0xb80F4], byte 'n'
+    ; mov ax, [0x8000+4093]
+    ; mov [0xb80F6], ax
+
     jmp $
 
 ActivateSSE:
+    ;check if SSE is available
+    mov eax, 0x1
+    cpuid
+    test edx, 1 << 25
+    jz .no_sse
     mov rax, cr0
-    and ax, 0b11111101
-    or ax, 0b00000001
-    mov cr0, rax
+    and ax, 0xFFB ;0xFFFB clear EM bit
+    or ax, 0x2 ;on met le coprocessor en C0.MP 
+    mov cr0, rax 
     mov rax, cr4
-    or ax, 0b1100000000
+    or ax, 3<<9 ;on active les bits 9 et 10 pour CR4.OSFXSR et CR4.OSXMMEXCPT
     mov cr4, rax
     ret
+    .no_sse:
+    mov rdi, NoSSEMsg
+    call PrintString
+    jmp $
 
 
+NoSSEMsg:
+    db "SSE not available", 0
 ExtendedProgramStart:
     db "jmpOK, Debut du programme etendu...", 0
 
@@ -123,6 +148,7 @@ ProtectedModeOk:
 
 Debug:
     db "Fin extended program", 0
-;times 12 db 0x42
 
-times 4096-($-$$) db 0 ;512*8 sectors
+
+times 512 dw 0xcafe
+times 4096-($-$$) db 122 ;512*8 sectors
