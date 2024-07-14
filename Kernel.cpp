@@ -32,7 +32,53 @@ et donc les variables globales non constante ne sont pas initialisées
 //64
 int A = 0xcafe;
 
-void test();
+
+
+//eax: 32 bits
+//ax: 16 bits
+//ah/al: 8 bits
+
+//numsector: nombre de secteur de 256 octets à lire
+void readDataATA(uint_64 lba, uint_8 num_sectors, uint_8* buffer) {
+    
+    uint_32 masked_lba = lba & 0x0FFFFFFF;
+
+    uint_32 portDrive = 0x01f6;
+    uint_32 bit24_27 = (masked_lba >> 24) | 0b11100000;
+    uint_8 bit24_27_8 = bit24_27 & 0xFF;
+    outb(portDrive, bit24_27_8);
+
+    uint_32 portNbSector = 0x01f2;
+    outb(portNbSector, num_sectors);
+
+    uint_32 portBit0_7 = 0x01f3;
+    outb(portBit0_7, masked_lba & 0xFF);
+
+    uint_32 portBit8_15 = 0x01f4;
+    outb(portBit8_15, (masked_lba >> 8) & 0xFF);
+
+    uint_32 portBit16_23 = 0x01f5;
+    outb(portBit16_23, (masked_lba >> 16) & 0xFF);
+
+    uint_32 portCommand = 0x01f7;
+    outb(portCommand, 0x20);
+
+    while(!(inb(portCommand) & 0x08));
+    
+
+    uint_32 dataPort = 0x1F0;
+    uint_64 size = num_sectors * 256;
+    uint_16* data = (uint_16*)malloc(2);
+
+    for(uint_64 i = 0; i < size; i+=2){
+        insw(dataPort, data); //reversed
+        buffer[i+1] = ((*data&0xFF00)>>8);
+        buffer[i] = (*data&0x00FF);
+    }
+    free(data);
+    return;
+    
+}
 
 //kernel entry, called by extended_program.asm
 extern "C" void _start(){
@@ -69,10 +115,22 @@ extern "C" void _start(){
 
     Print("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
     Print("!\"#$%&\'()*+,-./0123456789\n\r");
+    Print("lecture: ");
+    uint_8* buffer = (uint_8*)calloc(512*sizeof(uint_8));
+    readDataATA(0, 2, buffer);
+    for(int i = 0; i<512; i++){
+        Print(HexToString(buffer[i]));
+        Print(" ");
+    }
+    free(buffer);
     
-    //PlotImg((char *)relou, 262, 200);
+    //on va essayer de lire le disque 
+    //on va lire le secteur 1 en utilisant le lecteur ATAPI
 
-        while (true)
+    
+    
+
+    while (true)
     {
         /* code */
     }
@@ -82,6 +140,7 @@ extern "C" void _start(){
     return;
     
 }
+
 
 
 

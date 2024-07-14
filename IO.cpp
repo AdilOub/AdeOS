@@ -10,6 +10,12 @@ uint_8 inb(uint_16 port){
     return returnVal;
 }
 
+void insw (unsigned short int __port, void *__addr)
+{
+  uint_16 resultVal = 0;
+  asm volatile ("insw":"=D" (__addr) :"d" (__port), "0" (__addr));
+}
+
 //unused
 void PIC_sendEOI(uint_8 irq)
 {

@@ -29,6 +29,7 @@ PrintHex: ;bx - number
     loop .loop
     ret
 
+
 JmpLine:
     mov ah, 0x0e
     mov al, 0x0d ;\r
