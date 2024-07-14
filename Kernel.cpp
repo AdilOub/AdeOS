@@ -8,6 +8,7 @@
  #include "Header Files/Heap.h"
  #include "Header Files/Typedefs.h"
 #include "Header Files/Timer.h"
+#include "Header Files/DiskRead.h"
 //#include "Header Files/FloppyDisk.h"
 
 
@@ -32,55 +33,8 @@ et donc les variables globales non constante ne sont pas initialisées
 //64
 int A = 0xcafe;
 
-
-
-//eax: 32 bits
-//ax: 16 bits
-//ah/al: 8 bits
-
-//numsector: nombre de secteur de 256 octets à lire
-void readDataATA(uint_64 lba, uint_8 num_sectors, uint_8* buffer) {
-    
-    uint_32 masked_lba = lba & 0x0FFFFFFF;
-
-    uint_32 portDrive = 0x01f6;
-    uint_32 bit24_27 = (masked_lba >> 24) | 0b11100000;
-    uint_8 bit24_27_8 = bit24_27 & 0xFF;
-    outb(portDrive, bit24_27_8);
-
-    uint_32 portNbSector = 0x01f2;
-    outb(portNbSector, num_sectors);
-
-    uint_32 portBit0_7 = 0x01f3;
-    outb(portBit0_7, masked_lba & 0xFF);
-
-    uint_32 portBit8_15 = 0x01f4;
-    outb(portBit8_15, (masked_lba >> 8) & 0xFF);
-
-    uint_32 portBit16_23 = 0x01f5;
-    outb(portBit16_23, (masked_lba >> 16) & 0xFF);
-
-    uint_32 portCommand = 0x01f7;
-    outb(portCommand, 0x20);
-
-    while(!(inb(portCommand) & 0x08));
-    
-
-    uint_32 dataPort = 0x1F0;
-    uint_64 size = num_sectors * 256;
-    uint_16* data = (uint_16*)malloc(2);
-
-    for(uint_64 i = 0; i < size; i+=2){
-        insw(dataPort, data); //reversed
-        buffer[i+1] = ((*data&0xFF00)>>8);
-        buffer[i] = (*data&0x00FF);
-    }
-    free(data);
-    return;
-    
-}
-
 //kernel entry, called by extended_program.asm
+
 extern "C" void _start(){
     
     InitIDT();
@@ -115,14 +69,67 @@ extern "C" void _start(){
 
     Print("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
     Print("!\"#$%&\'()*+,-./0123456789\n\r");
-    Print("lecture: ");
-    uint_8* buffer = (uint_8*)calloc(512*sizeof(uint_8));
-    readDataATA(0, 2, buffer);
-    for(int i = 0; i<512; i++){
-        Print(HexToString(buffer[i]));
-        Print(" ");
+    //Print("lecture1: ");
+
+    //software reset
+    outb(0x1f6, 0x04);
+    outb(0x1f6, 0x00);
+    uint_8 status = inb(0x1f6);
+    status = inb(0x1f6);
+    status = inb(0x1f6);
+    status = inb(0x1f6);
+    Print("\n\rInfo:");
+    Print(HexToString(status));
+
+
+    Print("\n\rlecture1...");
+    uint_8* buffer3 = (uint_8*)calloc(512*sizeof(uint_8));
+    readDataATA(0, 1, buffer3);
+    for(int i = 0; i<16; i++){
+         Print(HexToString(buffer3[i]));
+         Print(" ");
+     }
+
+    Print("\n\rlecture1 res: ");
+    Print(HexToString(get_status()));
+
+    Print("\n\rEcriture...");
+    uint_8* buffer_write = (uint_8*)calloc(sizeof(uint_8)*512);
+    for(int i = 0; i<256; i++){
+        buffer_write[i] = i;
     }
-    free(buffer);
+    for(int i = 255; i<512; i++){
+        buffer_write[i] = 0x69;
+    }
+    buffer_write[511]= 0x12;
+
+    writeDataATA(80, 1, buffer_write);
+    Print("\n\rEcriture resultat: ");
+    Print(HexToString(get_status()));
+
+
+    Print("\n\rlecture2...");
+    uint_8* buffer4 = (uint_8*)calloc(512*sizeof(uint_8));
+    readDataATA(80, 1, buffer4);
+    for(int i = 0; i<16; i++){
+         Print(HexToString(buffer4[i]));
+         Print(" ");
+     }
+        Print("\n\rlecture 2 res: ");
+    Print(HexToString(get_status()));
+
+
+    //ATTENTION: APPELER LA FONCTION ata_lba_read (asm) CORROMP LE HEAP (on peut plus malloc après)
+
+    // Print("encore: \n\r");
+
+    // ata_lba_read(0, 1, buffer);
+    // for(int i = 0; i<256; i++){
+    //      Print(HexToString(buffer[i]));
+    //      Print(" ");
+    //  }
+
+
     
     //on va essayer de lire le disque 
     //on va lire le secteur 1 en utilisant le lecteur ATAPI

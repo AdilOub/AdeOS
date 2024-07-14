@@ -4,7 +4,7 @@
 #include "IO.h"
 #include "TextPrint.h"
 #include "KBScanCodeSet1.h"
-#include "FloppyDisk.h"
+#include "DiskRead.h"
 
 struct IDT64{
     uint_16 offset_low;

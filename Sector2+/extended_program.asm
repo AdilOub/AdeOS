@@ -107,17 +107,16 @@ Start64Bit:
     ;jmp $
     ;mov [0xa0C8a], byte 0x2F
 
-    ;mov eax, 2
-    ;mov cl, 1
-    ;mov rdi, buffer
-    ;call ata_lba_read
+    ; mov rdi, 0
+    ; mov rsi, 1
+    ; mov rdx, buffer
+    ; call ata_lba_read
 
     ;afficher la valeur de buffer[0] dans l'écran
     
-    ;mov bx, [buffer]
-    ;mov rcx, 0xb80D0
-    ;call PrintHexInVGA
-
+    ; mov bx, [buffer]
+    ; mov rcx, 0xb80D0
+    ; call PrintHexInVGA
 
 
     call _start ;on lance le kernel en C 
@@ -201,8 +200,12 @@ PrintHexInVGA:
 ;
 ; @return None
 ;=============================================================================
+;argument rdi, rsi, rdx pour utiliser l'extern "C"
 ata_lba_read:
-               pushfq
+            mov rax, rdi
+            mov rcx, rsi
+            mov rdi, rdx
+             pushfq
                and rax, 0x0FFFFFFF
                push rax
                push rbx
@@ -258,9 +261,12 @@ ata_lba_read:
                pop rbx
                pop rax
                popfq
-               ret
+            ret
+GLOBAL ata_lba_read
 
 buffer:
+    times 256 db 0x12
+buffer2:
     times 256 db 0x12
 
 NoSSEMsg:
@@ -275,5 +281,5 @@ Debug:
     db "Fin extended program", 0
 
 
-times 512 dw 0xcafe
+;times 512 dw 0xcafe
 times 4096-($-$$) db 122 ;512*8 sectors

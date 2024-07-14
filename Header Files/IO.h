@@ -16,6 +16,9 @@
 void outb(uint_16 port, uint_8 val);
 uint_8 inb(uint_16 port);
 
-void insw (unsigned short int __port, void *__addr);
+void insw (uint_16 __port, void *__addr);
+void outsw(uint_16 __port, void* __addr);
+
+
 
 void RemapPic(uint_16 offset1, uint_16 offset2);

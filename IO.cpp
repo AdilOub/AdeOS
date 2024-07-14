@@ -10,10 +10,13 @@ uint_8 inb(uint_16 port){
     return returnVal;
 }
 
-void insw (unsigned short int __port, void *__addr)
+void insw (uint_16 __port, void *__addr)
 {
-  uint_16 resultVal = 0;
   asm volatile ("insw":"=D" (__addr) :"d" (__port), "0" (__addr));
+}
+
+void outsw(uint_16 __port, void* __addr){
+      asm volatile ("outsw":"=S" (__addr) :"d" (__port), "0" (__addr));
 }
 
 //unused

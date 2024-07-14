@@ -18,7 +18,7 @@ INPUT
     compiled/Render.o
     compiled/Math.o
     compiled/Timer.o
-    /*compiled/FloppyDisk.o*/
+    compiled/DiskRead.o
 )
 
 OUTPUT

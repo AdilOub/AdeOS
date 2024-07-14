@@ -13,11 +13,12 @@ x86_64-elf-gcc -Ttext 0x8000 -ffreestanding  -mcmodel=kernel -mno-red-zone -m64 
 x86_64-elf-gcc -Ttext 0x8000 -ffreestanding  -mcmodel=kernel -mno-red-zone -m64 -c "Render.cpp" -o "compiled/Render.o"&&
 x86_64-elf-gcc -Ttext 0x8000 -ffreestanding  -mcmodel=kernel -mno-red-zone -m64 -c "Math.cpp" -o "compiled/Math.o"&&
 x86_64-elf-gcc -Ttext 0x8000 -ffreestanding  -mcmodel=kernel -mno-red-zone -m64 -c "Timer.cpp" -o "compiled/Timer.o"&&
-#x86_64-elf-gcc -Ttext 0x8000 -ffreestanding  -mno-red-zone -m64 -c "FloppyDisk.cpp" -o "compiled/FloppyDisk.o"&&
+x86_64-elf-gcc -Ttext 0x8000 -ffreestanding  -mcmodel=kernel -mno-red-zone -m64 -c "DiskRead.cpp" -o "compiled/DiskRead.o"&&
 x86_64-elf-ld -T"link.ld"&&
 cat compiled/bootloader.bin compiled/kernel.bin > compiled/boot.bin&&
 cp compiled/boot.bin ./diskimg/boot.bin&&
 cd diskimg&&
 cp boot.bin boot2.bin&&
 #python3 merge.py&&
+truncate boot2.bin --size 128K&&
 qemu-system-x86_64 boot2.bin -m 32M -no-reboot -no-shutdown -d cpu_reset
