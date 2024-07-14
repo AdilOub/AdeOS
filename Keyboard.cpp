@@ -47,7 +47,7 @@ void StandarKeyBoardHandler(uint_8 scanCode, uint_8 chr){ //pk printstring ne ma
         case false: //no uppercase
 
             #ifdef VGA13
-            PrintCharRender(getCursorPosRenderer(), chr-32);
+            PrintCharRender(getCursorPosRenderer(), chr, 0x0F, 0x00);
             setCursorPosRenderer(getCursorPosRenderer() + 1);
             #else
             PrintChar(chr);
@@ -96,12 +96,44 @@ void StandarKeyBoardHandler(uint_8 scanCode, uint_8 chr){ //pk printstring ne ma
     }
 }
 
+
+
+int i = 0;
+
+void memDmp2(uint_8* ptr, uint_64 size){
+    for(uint_64 i = 0; i < size; i++){
+        PrintString(HexToString(ptr[i]));
+        PrintChar(' ');
+    }
+}
+
+#ifdef DEBUG_MEMORY_PRINT
 void KeyBoardHandler(uint_8 scanCode){
     //PrintString(IntToString(scanCode));
     //PrintString("\n\r");
     uint_8 chr = 0;
     if(scanCode < 0x3A){
         chr = LookupTable[scanCode];
+        ClearScreen();
+        SetCursorPosition(0);
+        memDmp2((uint_8*)0x8000 +0x7000 + 512*i, 512);
+        //memDmp2((uint_8*)0xFFFF, 512);
+        //on affiche l'adresse de la page
+        SetCursorPosition(PosFromCoord(0, 24));
+        PrintString(HexToString(0x8000 + 0x7000 + 512*i), BACKGROUND_RED | FOREGROUND_WHITE);
+        if(chr == 'b'){
+            i--;
+            ClearScreen();
+            SetCursorPosition(0);
+            memDmp2((uint_8*)0x8000 +0x7000 + 512*i, 512);
+            //memDmp2((uint_8*)0xFFFF, 512);
+            //on affiche l'adresse de la page
+            SetCursorPosition(PosFromCoord(0, 24));
+            PrintString(HexToString(0x8000 + 0x7000 + 512*i), BACKGROUND_RED | FOREGROUND_WHITE);
+        }else{
+            i++;
+            PrintChar(chr, BACKGROUND_RED | FOREGROUND_GREEN);
+        }
     }
 
     //erk pourquoi j'ai fait ça ? enft si c'est logique
@@ -125,3 +157,39 @@ void KeyBoardHandler(uint_8 scanCode){
 
     LastScanCode = scanCode;
 }
+
+#else
+
+void KeyBoardHandler(uint_8 scanCode){
+    //PrintString(IntToString(scanCode));
+    //PrintString("\n\r");
+    uint_8 chr = 0;
+    if(scanCode < 0x3A){
+        chr = LookupTable[scanCode];
+        StandarKeyBoardHandler(scanCode, chr);
+        return;
+    }
+
+    
+    switch (LastScanCode)
+    {
+    case 0x50: //down key
+        if(arrowEnabled){
+            SetCursorPosition(CursorPosition + VGA_WIDTH);
+        }
+        break;
+    case 0x48: //up key
+        if(arrowEnabled){
+            SetCursorPosition(CursorPosition - VGA_WIDTH);
+        }
+        break;
+
+    default:
+        StandarKeyBoardHandler(scanCode, chr);
+        break;
+    }
+
+    LastScanCode = scanCode;
+}
+
+#endif

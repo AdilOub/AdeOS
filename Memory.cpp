@@ -4,12 +4,13 @@ MemoryMapEntry* UsableMemoryRegion[10];
 uint_8 UsableMemeoryRegionCount = 0;
 
 
+//pourquoi :C
+/*
 void* memset(void* start, uint_64 value, uint_64 num){ 
 	if(num<=8){
 		uint_8* valPtr = (uint_8*)&value;
 		for(uint_8* ptr = (uint_8*)start; ptr < (uint_8*)((uint_64)start + num); ptr++){
 			*ptr= *valPtr;
-			valPtr++;
 		}
 		return start;
 
@@ -22,12 +23,23 @@ void* memset(void* start, uint_64 value, uint_64 num){
 	}
 
 	uint_8* valPtr = (uint_8*)&value;
-	for(uint_8* ptr = (uint_8*)start; ptr < (uint_8*)((uint_64)start + num); ptr++){
+	for(uint_8* ptr = (uint_8*)start + newnum; ptr < (uint_8*)((uint_64)start + num); ptr++){
 		*ptr= *valPtr;
-		valPtr++;
 	}
 	return start;
 }
+*/
+
+//moins rapide mais au moins c'est fiable...
+void* memset(void* start, uint_8 val, uint_64 size){
+	uint_8* ptr = (uint_8*)start;
+	for(uint_64 i = 0; i < size; i++){
+		*ptr = val;
+		ptr++;
+	}
+	return start;
+}
+
 
 void memcopy(void* destination, void* source, uint_64 num){
 	if(num<=8){

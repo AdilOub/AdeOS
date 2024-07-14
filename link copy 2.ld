@@ -18,7 +18,7 @@ INPUT
     compiled/Render.o
     compiled/Math.o
     compiled/Timer.o
-    compiled/DiskRead.o
+    compiled/FloppyDisk.o
 )
 
 OUTPUT
@@ -30,45 +30,38 @@ OUTPUT
 /*bon y'a un petit probleme avec les string ici 
 le rodata n'est pas load correctement dans la mémoire
 au lieu de ça text est load dans la mémoire
-
-EDIT: j'ai mis le rodata au dessus du data et c'est inversé:
-le rodata est load correctement dans la mémoire mais pas le data
 */
 
-/*KERNEL_VMA = 0x8000;*/
-/*KERNEL_VMA = 0xFFFFFFFF80000000;*/
+KERNEL_VMA = 0x8000;
 SECTIONS
 {
-    . = 0x8000;
-    
-    .text :ALIGN(0x1000)
+    . = KERNEL_VMA;
+
+
+    .text : AT(ADDR(.text) - KERNEL_VMA)
     {
+        _code = .;
         *(.text)
-        /**(.rodata*)*/
+        *(.rodata*)
+        . = ALIGN(0x1000);
     }
     
-
-
-
-    .rodata : ALIGN(0x1000){
-        *(.rodata) /**(.rodata*)*/
-        
-    }
-
-    
-    .data : ALIGN(0x1000){
-       *(.data) /**(.data*)*/
-    }
-
-
-    .bss : ALIGN(0x1000){
-        *(COMMON)
-        *(.bss) 
-    }
-
     .idt BLOCK(0x1000) : ALIGN(0x1000)
     {
         _idt = .;
         . = . + 0x1000;
+    }
+
+
+    .data : AT(ADDR(.data) - KERNEL_VMA)
+    {
+        _data = .;
+       *(.data) 
+       . = ALIGN(0x1000);
+    }
+
+    .bss : ALIGN(0x1000){
+        *(COMMON)
+        *(.bss) 
     }
 }
