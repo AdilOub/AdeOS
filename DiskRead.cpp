@@ -13,7 +13,7 @@
 //eax: 32 bits
 //ax: 16 bits
 //ah/al: 8 bits
-void readDataATA(uint_64 lba, uint_8 num_sectors, uint_8* buffer) {
+void readDataATASector(uint_64 lba, uint_8 num_sectors, uint_8* buffer) {
     
     uint_32 masked_lba = lba & 0x0FFFFFFF;
 
@@ -68,7 +68,7 @@ void resetDisk(){
 	return;
 }
 
-void writeDataATA(uint_64 lba, uint_8 num_sectors, uint_8* buffer){
+void writeDataATASector(uint_64 lba, uint_8 num_sectors, uint_8* buffer){
     uint_32 masked_lba = lba & 0x0FFFFFFF;
 
     outb(0x01F6, 0xE0 | ((masked_lba >> 24) & 0x0F)); // Bits 24-27 du LBA avec le mode LBA
@@ -98,7 +98,7 @@ void writeDataATA(uint_64 lba, uint_8 num_sectors, uint_8* buffer){
 	// *error = 0xca;
 	// *(error+1) = 0xfe;
 
-	while(get_status() & 0b01000000){
+	while(get_status() & 0b01000000){ //TODO Fix may cause infinite loop
 		//still busy
 		//outsw(dataPort, error);
 	}
@@ -108,4 +108,25 @@ void writeDataATA(uint_64 lba, uint_8 num_sectors, uint_8* buffer){
 	//free(error);
 
 	return;
+}
+
+void readDataATA(uint_64 lba, uint_64 size, uint_8* buffer){
+    uint_8 num_sector = (size / 512) + (size%512) ? 1 : 0;
+    PrintString("Num sector: ");
+    PrintString(IntToString(num_sector));
+    uint_8* buffer_aligned = (uint_8*)malloc(sizeof(uint_8)*num_sector*512);
+    PrintString("AA");
+    readDataATASector(lba, num_sector, buffer_aligned);
+    PrintString("BB");
+    memcopy(buffer, buffer_aligned, sizeof(uint_8)*size);
+    return;
+}
+
+void writeDataATA(uint_64 lba, uint_64 size, uint_8* buffer){
+    uint_8 num_sector = (size / 512) + (size%512) ? 1 : 0;
+    uint_8* buffer_aligned = (uint_8*)malloc(sizeof(uint_8)*num_sector*512);
+    readDataATASector(lba, num_sector, buffer_aligned);
+    memcopy(buffer_aligned, buffer, sizeof(uint_8)*size);
+    writeDataATASector(lba, num_sector, buffer_aligned);
+
 }

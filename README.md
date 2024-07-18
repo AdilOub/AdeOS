@@ -16,3 +16,13 @@ Les floppy étant mal gérer, j'ai décidé d'utiliser un disque dur à la place
 NOTE:
 Faire très attention aux options de compilation (-mcmodel) qui peuvent casser des trucs
 On utilisera peut être mcmodel=kernel (ou large) si on veut mettre le code dans la partie haute de la mémoire (ex: .=0x10000)
+
+
+NOTE 2:
+TODO réorganiser les fichires (car on commence a en avoir bcp)
+/: kernel.cpp drivers/ utils/ memory/ graphics/ core/
+driver: tout ce qui utilise les IO pour communiquer avec le hardware (IO.cpp, IDT.cpp, Timer.cpp, DiskRead.cpp Keyboard.cpp)
+memory: tout ce qui gère la mémoire (heap.cpp, memoru.cpp)
+graphics: tout ce qui permet d'afficher (Textprint, Render)
+utils: tout les fichiers qui sont pas directement lié à l'os (typedef, arbre, )
+core: Command & Compilateur & FileSystem

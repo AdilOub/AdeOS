@@ -9,14 +9,13 @@
  #include "Header Files/Typedefs.h"
 #include "Header Files/Timer.h"
 #include "Header Files/DiskRead.h"
-//#include "Header Files/FloppyDisk.h"
-
+#include "Header Files/FileSystem.h"
 
 //to use drawingggg
 #include "Header Files/Render.h"
 
 #include "Header Files/Commands.h"
-
+#include "Header Files/FileSystem.h"
 
 /*
 TODO Important!!!
@@ -34,6 +33,45 @@ et donc les variables globales non constante ne sont pas initialisées
 int A = 0xcafe;
 
 //kernel entry, called by extended_program.asm
+
+
+void test_disk(){
+    Print("\n\rlecture1...");
+    uint_8* buffer3 = (uint_8*)calloc(512*sizeof(uint_8));
+    readDataATA(0, 1, buffer3);
+    for(int i = 0; i<16; i++){
+         Print(HexToString(buffer3[i]));
+         Print(" ");
+     }
+
+    Print("\n\rlecture1 res: ");
+    Print(HexToString(get_status()));
+
+    Print("\n\rEcriture...");
+    uint_8* buffer_write = (uint_8*)calloc(sizeof(uint_8)*512);
+    for(int i = 0; i<256; i++){
+        buffer_write[i] = i;
+    }
+    for(int i = 255; i<512; i++){
+        buffer_write[i] = 0x69;
+    }
+    buffer_write[511]= 0x12;
+
+    writeDataATA(80, 1, buffer_write);
+    Print("\n\rEcriture resultat: ");
+    Print(HexToString(get_status()));
+
+
+    Print("\n\rlecture2...");
+    uint_8* buffer4 = (uint_8*)calloc(512*sizeof(uint_8));
+    readDataATA(80, 1, buffer4);
+    for(int i = 0; i<16; i++){
+         Print(HexToString(buffer4[i]));
+         Print(" ");
+     }
+        Print("\n\rlecture 2 res: ");
+    Print(HexToString(get_status()));
+}
 
 extern "C" void _start(){
     
@@ -71,52 +109,36 @@ extern "C" void _start(){
     Print("!\"#$%&\'()*+,-./0123456789\n\r");
     //Print("lecture1: ");
 
-    //software reset
-    outb(0x1f6, 0x04);
-    outb(0x1f6, 0x00);
-    uint_8 status = inb(0x1f6);
-    status = inb(0x1f6);
-    status = inb(0x1f6);
-    status = inb(0x1f6);
-    Print("\n\rInfo:");
-    Print(HexToString(status));
+    int test = 30;
+    Print("Addresse de test ");
+    Print(HexToString((uint_64)&test));
+
+    Print("\n\rValeur de test: ");
+    Print(IntToString(test));
+
+    uint_8 truc[] = { 0x8B, 0x04, 0x25, 0xEC, 0xFF,
+                    0x08, 0x00, 0x83, 0xC0, 0x0C,
+                     0x89, 0x04, 0x25, 0xEC,
+                      0xFF, 0x08, 0x00, 0xC3 } ;
+    //asm volatile ("call %0": : "r"(truc));
+
+    Print("\n\rValeur de test apres: ");
+    Print(IntToString(test)); 
+
+    Print("\n\rtaille strucure: ");
+    Print(IntToString((uint_32)sizeof(inode)));
 
 
-    Print("\n\rlecture1...");
-    uint_8* buffer3 = (uint_8*)calloc(512*sizeof(uint_8));
-    readDataATA(0, 1, buffer3);
-    for(int i = 0; i<16; i++){
-         Print(HexToString(buffer3[i]));
-         Print(" ");
-     }
-
-    Print("\n\rlecture1 res: ");
-    Print(HexToString(get_status()));
-
-    Print("\n\rEcriture...");
-    uint_8* buffer_write = (uint_8*)calloc(sizeof(uint_8)*512);
-    for(int i = 0; i<256; i++){
-        buffer_write[i] = i;
-    }
-    for(int i = 255; i<512; i++){
-        buffer_write[i] = 0x69;
-    }
-    buffer_write[511]= 0x12;
-
-    writeDataATA(80, 1, buffer_write);
-    Print("\n\rEcriture resultat: ");
-    Print(HexToString(get_status()));
+    Print("\n\r Writing single bit in 0x0: ");
+    uint_8* buffer = (uint_8*)malloc(sizeof(uint_8));
+    *buffer = 0xad;
+    //writeDataATA(0, 1, buffer);
 
 
-    Print("\n\rlecture2...");
-    uint_8* buffer4 = (uint_8*)calloc(512*sizeof(uint_8));
-    readDataATA(80, 1, buffer4);
-    for(int i = 0; i<16; i++){
-         Print(HexToString(buffer4[i]));
-         Print(" ");
-     }
-        Print("\n\rlecture 2 res: ");
-    Print(HexToString(get_status()));
+    int r = searchSuperBlock();
+    
+
+
 
 
     //ATTENTION: APPELER LA FONCTION ata_lba_read (asm) CORROMP LE HEAP (on peut plus malloc après)

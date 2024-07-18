@@ -1,6 +1,7 @@
 nasm -f bin Sector1/bootloader.asm -o compiled/bootloader.bin&&
 nasm -f elf64 Sector2+/extended_program.asm -o compiled/extended_program.o&&
 nasm -f elf64 binaries.asm -o compiled/binaries.o&&
+
 x86_64-elf-gcc -Ttext 0x8000 -ffreestanding  -mcmodel=kernel -mno-red-zone -m64 -c "Kernel.cpp" -o "compiled/kernelC.o"&&
 x86_64-elf-gcc -Ttext 0x8000 -ffreestanding  -mcmodel=kernel -mno-red-zone -m64 -c "IDT.cpp" -o "compiled/IDT.o"&&
 x86_64-elf-gcc -Ttext 0x8000 -ffreestanding  -mcmodel=kernel -mno-red-zone -m64 -c "IO.cpp" -o "compiled/IO.o"&&

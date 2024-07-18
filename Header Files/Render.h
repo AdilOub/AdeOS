@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Kernel.h"
 #include "Typedefs.h"
 #include "ASCITable.h"

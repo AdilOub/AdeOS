@@ -19,6 +19,7 @@ INPUT
     compiled/Math.o
     compiled/Timer.o
     compiled/DiskRead.o
+    compiled/FileSystem.o
 )
 
 OUTPUT
