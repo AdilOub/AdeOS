@@ -2,8 +2,10 @@
 #include "Header Files/IO.h"
 
 
-//ATTENTION RISQUE DE POSER DES PROBLEMES 
-//lire https://wiki.osdev.org/ATA_PIO_Mode#Device_Control_Register_(Control_base_+_0)
+//UTILISE LE MODE PIO
+//https://wiki.osdev.org/ATA_PIO_Mode (cf. //https://wiki.osdev.org/ATA_PIO_Mode#x86_Code_Examples)
+
+//ATTENTION RISQUE DE POSER DES PROBLEMES car pas de wait
 //surtout x86 Direction, 28bit PIO !!!
 
 
@@ -59,7 +61,7 @@ uint_8 get_status(){
     status = inb(0x1f6);
     status = inb(0x1f6);
     status = inb(0x1f6);
-	return status;
+	return status; //A0->ok, E0->erreur :(
 }
 
 void resetDisk(){
@@ -98,7 +100,7 @@ void writeDataATASector(uint_64 lba, uint_8 num_sectors, uint_8* buffer){
 	// *error = 0xca;
 	// *(error+1) = 0xfe;
 
-	while(get_status() & 0b01000000){ //TODO Fix may cause infinite loop
+	while(get_status() & 0b01000000){ //TODO Fix may cause infinite loop on error
 		//still busy
 		//outsw(dataPort, error);
 	}
@@ -115,9 +117,9 @@ void readDataATA(uint_64 lba, uint_64 size, uint_8* buffer){
     PrintString("Num sector: ");
     PrintString(IntToString(num_sector));
     uint_8* buffer_aligned = (uint_8*)malloc(sizeof(uint_8)*num_sector*512);
-    PrintString("AA");
+    PrintString("start read-");
     readDataATASector(lba, num_sector, buffer_aligned);
-    PrintString("BB");
+    PrintString("-end read:");
     memcopy(buffer, buffer_aligned, sizeof(uint_8)*size);
     return;
 }

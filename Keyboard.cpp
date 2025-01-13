@@ -60,7 +60,7 @@ void StandarKeyBoardHandler(uint_8 scanCode, uint_8 chr){ //pk printstring ne ma
             break;
         }
     }else{
-
+        int i = 0;
         switch (scanCode)
         {
         case 0x8E: //backspace
@@ -85,10 +85,25 @@ void StandarKeyBoardHandler(uint_8 scanCode, uint_8 chr){ //pk printstring ne ma
             rightShiftPressed = false;
             break;
         case 0x9C: //enter released
+
+            
+            asm("mov %%eax, %0" : "=b"(i));
+            PrintString("Buffer: ");
+            PrintString(IntToString(i));
+            PrintString("\n\r");
+
+            asm("mov $0x69, %eax");
+            asm("mov %%eax, %0" : "=b"(i));
+            PrintString("Buffer: ");
+            PrintString(IntToString(i));
+            PrintString("\n\r");
+
+            //asm("int $0x80");
             bufferIndex = 0;
             handleCmds(cmdsBuffer);
             clearCmdBuffer(cmdsBuffer, 256);
             break;
+
         default:
                 //PrintChar('?');
             break;
@@ -169,7 +184,6 @@ void KeyBoardHandler(uint_8 scanCode){
         StandarKeyBoardHandler(scanCode, chr);
         return;
     }
-
     
     switch (LastScanCode)
     {

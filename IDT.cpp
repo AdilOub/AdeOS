@@ -1,5 +1,9 @@
 #include "Header Files/IDT.h"
 
+/*du nettoyage à faire ici
+1- refaire la structure
+2- gerer différement les Interrupt, Trap et Task
+*/
 
 
 extern IDT64 _idt[256];
@@ -40,10 +44,14 @@ extern uint_64 isr8;
 
 
 
+
 extern uint_64 isr33;
 extern uint_64 isr32;
 
 extern uint_64 isr38;
+
+extern uint_64 isr128; //software interupt, 128=0x80 arbritraire 
+
 
 uint_8 tick = 0;
 
@@ -126,6 +134,15 @@ void InitIDT(){
     _idt[38].selector = 0x08;
     _idt[38].types_attr = 0x8e;
 
+
+    //software interupt
+    _idt[128].zero = 0;
+    _idt[128].offset_low = (uint_16)(((uint_64)&isr128 & 0x000000000000ffff));
+    _idt[128].offset_mid = (uint_16)(((uint_64)&isr128 & 0x00000000ffff0000) >> 16);
+    _idt[128].offset_high = (uint_32)(((uint_64)&isr128 & 0xffffffff00000000) >> 32);
+    _idt[128].ist = 0;
+    _idt[128].selector = 0x08;
+    _idt[128].types_attr = 0x8e;
     
 
 
@@ -147,10 +164,19 @@ void InitIDT(){
 }
 
 
+//software interupt
+extern "C" void isr128_handler(){
+    asm("cli");
+    PrintString("isr128 called\n\r", BACKGROUND_BLUE);
+    asm("sti");
+    outb(0x20, 0x20);
+    outb(0xa0, 0x20);
+}
 
 
 //timer
 extern "C" void isr32_handler(){
+
     //on va faire clignoter un point en haut à droite
     uint_16 pos = PosFromCoord(79, 0);
     if(tick%8 == 0){

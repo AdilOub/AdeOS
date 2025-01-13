@@ -55,16 +55,16 @@ void test_disk(){
     for(int i = 255; i<512; i++){
         buffer_write[i] = 0x69;
     }
-    buffer_write[511]= 0x12;
+    buffer_write[0]= 0x69;
 
-    writeDataATA(80, 1, buffer_write);
+    writeDataATA(0, 1, buffer_write);
     Print("\n\rEcriture resultat: ");
     Print(HexToString(get_status()));
 
 
     Print("\n\rlecture2...");
     uint_8* buffer4 = (uint_8*)calloc(512*sizeof(uint_8));
-    readDataATA(80, 1, buffer4);
+    readDataATA(0, 1, buffer4);
     for(int i = 0; i<16; i++){
          Print(HexToString(buffer4[i]));
          Print(" ");
@@ -103,60 +103,14 @@ extern "C" void _start(){
     */
     //endCmd();
     #endif
+
+    
     ClearScreen();
 
     Print("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
     Print("!\"#$%&\'()*+,-./0123456789\n\r");
     //Print("lecture1: ");
 
-    int test = 30;
-    Print("Addresse de test ");
-    Print(HexToString((uint_64)&test));
-
-    Print("\n\rValeur de test: ");
-    Print(IntToString(test));
-
-    uint_8 truc[] = { 0x8B, 0x04, 0x25, 0xEC, 0xFF,
-                    0x08, 0x00, 0x83, 0xC0, 0x0C,
-                     0x89, 0x04, 0x25, 0xEC,
-                      0xFF, 0x08, 0x00, 0xC3 } ;
-    //asm volatile ("call %0": : "r"(truc));
-
-    Print("\n\rValeur de test apres: ");
-    Print(IntToString(test)); 
-
-    Print("\n\rtaille strucure: ");
-    Print(IntToString((uint_32)sizeof(inode)));
-
-
-    Print("\n\r Writing single bit in 0x0: ");
-    uint_8* buffer = (uint_8*)malloc(sizeof(uint_8));
-    *buffer = 0xad;
-    //writeDataATA(0, 1, buffer);
-
-
-    int r = searchSuperBlock();
-    
-
-
-
-
-    //ATTENTION: APPELER LA FONCTION ata_lba_read (asm) CORROMP LE HEAP (on peut plus malloc après)
-
-    // Print("encore: \n\r");
-
-    // ata_lba_read(0, 1, buffer);
-    // for(int i = 0; i<256; i++){
-    //      Print(HexToString(buffer[i]));
-    //      Print(" ");
-    //  }
-
-
-    
-    //on va essayer de lire le disque 
-    //on va lire le secteur 1 en utilisant le lecteur ATAPI
-
-    
     
 
     while (true)
@@ -164,7 +118,6 @@ extern "C" void _start(){
         /* code */
     }
     
-
 
     return;
     

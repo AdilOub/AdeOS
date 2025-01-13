@@ -70,6 +70,8 @@ idtDescriptor:
 
 [extern isr38_handler] ;ata primary
 
+[extern isr128_handler] ;software interrupt
+
 ;interupt materiel
 isr0:
   PUSHALL
@@ -323,6 +325,14 @@ isr38:
   POPALL
   iretq
   GLOBAL isr38
+
+;software interrupt
+isr128: ;0x80 pour faire comme unix hihi
+  PUSHALL
+  call isr128_handler
+  POPALL
+  iretq
+  GLOBAL isr128
 
 
 LoadIDT:
