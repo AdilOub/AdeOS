@@ -28,7 +28,7 @@ et donc les variables globales non constante ne sont pas initialisées
 #define NULL 0
 
 void PrintAllMemoryMap(MemoryMapEntry** UsableMemeoryMap){
-    for(uint_8 i = 0; i < UsableMemeoryRegionCount; i++){
+    for(uint8_t i = 0; i < UsableMemeoryRegionCount; i++){
         PrintMemoryMap(UsableMemeoryMap[i], CursorPosition);
     }
 }
@@ -36,13 +36,13 @@ void PrintAllMemoryMap(MemoryMapEntry** UsableMemeoryMap){
 
 
 
-void PrintString2(const char str[], uint_8 color){
+void PrintString2(const char str[], uint8_t color){
     PrintChar(str[0], color);
 }
 
 //affiche la mémoire à partir de ptr jusqu'à size
-void memDmp(uint_8* ptr, uint_64 size){
-    for(uint_64 i = 0; i < size; i++){
+void memDmp(uint8_t* ptr, uint64_t size){
+    for(uint64_t i = 0; i < size; i++){
         PrintString(HexToString(ptr[i]));
         PrintChar(' ');
     }
@@ -139,7 +139,7 @@ extern "C" void _start(){
     PrintString(jmp);
     PrintString(c1); //Adresse
     PrintString(jmp);
-    PrintString(HexToString((uint_64)&A)); //0xf000
+    PrintString(HexToString((uint64_t)&A)); //0xf000
     PrintString(jmp);
     PrintString(c2); //valleur
     PrintString(IntToString(A)); //18
@@ -148,7 +148,7 @@ extern "C" void _start(){
     PrintString(c4); //RODATA
     PrintString(jmp);
     PrintString(c1); //Adresse
-    PrintString(HexToString((uint_64)(&RODATA[0]))); //0x10080
+    PrintString(HexToString((uint64_t)(&RODATA[0]))); //0x10080
     PrintString(jmp);
     PrintString(c2); //valleur
     PrintString(IntToString(RODATA[0])); //106
@@ -167,7 +167,7 @@ extern "C" void _start(){
     PrintString(c5); //RODATAINSIDE
     PrintString(jmp);
     PrintString(c1); //Adresse
-    PrintString(HexToString((uint_64)RODATAINSIDE)); //0x7ba2
+    PrintString(HexToString((uint64_t)RODATAINSIDE)); //0x7ba2
     PrintString(jmp);
     PrintString(c2); //valleur
     PrintString(IntToString(RODATAINSIDE[0])); //90
@@ -192,7 +192,7 @@ extern "C" void _start(){
     SetCursorPosition(PosFromCoord(0, 18));
     PrintString(c3);PrintString(c5);PrintString(jmp);
     const char* slt = "Salut";
-    PrintString(HexToString((uint_64)&slt[0])); //0x1065A
+    PrintString(HexToString((uint64_t)&slt[0])); //0x1065A
     PrintString(jmp);
     PrintChar('>');PrintChar((slt[0]));PrintChar('<');
     PrintString(jmp);
@@ -202,7 +202,7 @@ extern "C" void _start(){
     PrintString("Salut");
 
     SetCursorPosition(0);
-    //memDmp((uint_8*)0x10070, 0x200); //0x200=512
+    //memDmp((uint8_t*)0x10070, 0x200); //0x200=512
     /*
     char* aa = (char*)malloc(sizeof(char) * 10);
     aa[0] = 'H';
@@ -217,12 +217,12 @@ extern "C" void _start(){
     for(int i = 0; i < 256; i++){
         prout[i] = 0x42;
     }
-    PrintString(HexToString((uint_64)prout));
+    PrintString(HexToString((uint64_t)prout));
     CursorPosition += VGA_WIDTH;
     CursorPosition -= CursorPosition % VGA_WIDTH;
     
     PrintString2(aa, BACKGROUND_RED | FOREGROUND_WHITE);
-    PrintString(HexToString((uint_64)aa));
+    PrintString(HexToString((uint64_t)aa));
 
     //on saute une ligne
     CursorPosition += VGA_WIDTH;
@@ -230,13 +230,13 @@ extern "C" void _start(){
 
     const char* Test2 = "Neige";
     PrintString2(Test2, BACKGROUND_GREEN | FOREGROUND_WHITE);
-    PrintString(HexToString((uint_64)Test2));
+    PrintString(HexToString((uint64_t)Test2));
 
     free(aa);
 
     CursorPosition += VGA_WIDTH;
     CursorPosition -= CursorPosition % VGA_WIDTH;
-    memDmp((uint_8*)0x8000, 0x200); //0x200=512
+    memDmp((uint8_t*)0x8000, 0x200); //0x200=512
 
 
     */
@@ -274,10 +274,10 @@ extern "C" void _start(){
 
     //ClearScreen();
     //SetCursorPosition(0);
-    //uint_8* img = 0;
-    //img = (uint_8*)malloc(262*200*sizeof(uint_8));
+    //uint8_t* img = 0;
+    //img = (uint8_t*)malloc(262*200*sizeof(uint8_t));
 
-    //uint_8* img_ptre = (uint_8*)Emi1;
+    //uint8_t* img_ptre = (uint8_t*)Emi1;
 
     /*
     for(int i = 0; i<5; i++){

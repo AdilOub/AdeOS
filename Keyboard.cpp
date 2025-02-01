@@ -3,7 +3,7 @@
 
 bool leftShiftPressed = false;
 bool rightShiftPressed = false;
-uint_8 LastScanCode;
+uint8_t LastScanCode;
 
 
 bool arrowEnabled = false;
@@ -29,7 +29,7 @@ bool getArrowState(){
 
 
 
-void StandarKeyBoardHandler(uint_8 scanCode, uint_8 chr){ //pk printstring ne marche pas ici ?
+void StandarKeyBoardHandler(uint8_t scanCode, uint8_t chr){ //pk printstring ne marche pas ici ?
     //PrintChar('s'); //std keyboard handler loaded
 
     if(chr != 0){
@@ -61,6 +61,8 @@ void StandarKeyBoardHandler(uint_8 scanCode, uint_8 chr){ //pk printstring ne ma
         }
     }else{
         int i = 0;
+        int n = 0;
+        uint64_t current_add = 0;
         switch (scanCode)
         {
         case 0x8E: //backspace
@@ -86,22 +88,27 @@ void StandarKeyBoardHandler(uint_8 scanCode, uint_8 chr){ //pk printstring ne ma
             break;
         case 0x9C: //enter released
 
-            
-            asm("mov %%eax, %0" : "=b"(i));
-            PrintString("Buffer: ");
-            PrintString(IntToString(i));
-            PrintString("\n\r");
+            //PrintString("\n\n\n\rCommand add: ");
+            //current_add = (uint64_t)((void*)StandarKeyBoardHandler);
+            //PrintString(HexToString(current_add));
+            //PrintString("\n\r");
 
-            asm("mov $0x69, %eax");
-            asm("mov %%eax, %0" : "=b"(i));
-            PrintString("Buffer: ");
-            PrintString(IntToString(i));
-            PrintString("\n\r");
+            //asm("mov %%eax, %0" : "=b"(i));
+            //PrintString("Buffer: ");
+            //PrintString(IntToString(i));
+            //PrintString("\n\r");
+
+            //asm("mov $0x69, %eax");
+            //asm("mov %%eax, %0" : "=b"(i));
+            //PrintString("Buffer: ");
+            //PrintString(IntToString(i));
+            //PrintString("\n\r");
 
             //asm("int $0x80");
             bufferIndex = 0;
             handleCmds(cmdsBuffer);
             clearCmdBuffer(cmdsBuffer, 256);
+            //asm("int $0x2c");
             break;
 
         default:
@@ -115,24 +122,24 @@ void StandarKeyBoardHandler(uint_8 scanCode, uint_8 chr){ //pk printstring ne ma
 
 int i = 0;
 
-void memDmp2(uint_8* ptr, uint_64 size){
-    for(uint_64 i = 0; i < size; i++){
+void memDmp2(uint8_t* ptr, uint64_t size){
+    for(uint64_t i = 0; i < size; i++){
         PrintString(HexToString(ptr[i]));
         PrintChar(' ');
     }
 }
 
 #ifdef DEBUG_MEMORY_PRINT
-void KeyBoardHandler(uint_8 scanCode){
+void KeyBoardHandler(uint8_t scanCode){
     //PrintString(IntToString(scanCode));
     //PrintString("\n\r");
-    uint_8 chr = 0;
+    uint8_t chr = 0;
     if(scanCode < 0x3A){
         chr = LookupTable[scanCode];
         ClearScreen();
         SetCursorPosition(0);
-        memDmp2((uint_8*)0x8000 +0x7000 + 512*i, 512);
-        //memDmp2((uint_8*)0xFFFF, 512);
+        memDmp2((uint8_t*)0x8000 +0x7000 + 512*i, 512);
+        //memDmp2((uint8_t*)0xFFFF, 512);
         //on affiche l'adresse de la page
         SetCursorPosition(PosFromCoord(0, 24));
         PrintString(HexToString(0x8000 + 0x7000 + 512*i), BACKGROUND_RED | FOREGROUND_WHITE);
@@ -140,8 +147,8 @@ void KeyBoardHandler(uint_8 scanCode){
             i--;
             ClearScreen();
             SetCursorPosition(0);
-            memDmp2((uint_8*)0x8000 +0x7000 + 512*i, 512);
-            //memDmp2((uint_8*)0xFFFF, 512);
+            memDmp2((uint8_t*)0x8000 +0x7000 + 512*i, 512);
+            //memDmp2((uint8_t*)0xFFFF, 512);
             //on affiche l'adresse de la page
             SetCursorPosition(PosFromCoord(0, 24));
             PrintString(HexToString(0x8000 + 0x7000 + 512*i), BACKGROUND_RED | FOREGROUND_WHITE);
@@ -175,10 +182,10 @@ void KeyBoardHandler(uint_8 scanCode){
 
 #else
 
-void KeyBoardHandler(uint_8 scanCode){
+void KeyBoardHandler(uint8_t scanCode){
     //PrintString(IntToString(scanCode));
     //PrintString("\n\r");
-    uint_8 chr = 0;
+    uint8_t chr = 0;
     if(scanCode < 0x3A){
         chr = LookupTable[scanCode];
         StandarKeyBoardHandler(scanCode, chr);

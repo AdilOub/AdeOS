@@ -88,12 +88,12 @@ void readDiskCmd(char *args){
     
     PrintString("\n\r");
 
-    uint_8 floppy_info = inb(FLPYDSK_MSR);
+    uint8_t floppy_info = inb(FLPYDSK_MSR);
     PrintString("Floppy disk status: ");
     PrintString(IntToString(floppy_info));
     PrintString("\n\r");
 
-    uint_8 *ptr = (uint_8*)(0x1000 + 0x8000); 
+    uint8_t *ptr = (uint8_t*)(0x1000 + 0x8000); 
     PrintString("Preread:");
     PrintString("\n\r");
     PrintString("0x");
@@ -346,11 +346,11 @@ void initCmds(){
 
     //on va afficher les addresses des char* 
    /* PrintString("Address of help: ");
-    PrintString(HexToString((uint_64)cmds[0]));
+    PrintString(HexToString((uint64_t)cmds[0]));
     PrintString("\n\r");
 
     PrintString("Address of clear: ");
-    PrintString(HexToString((uint_64)cmds[1]));
+    PrintString(HexToString((uint64_t)cmds[1]));
     PrintString("\n\r");
 
     int index = pearson(cmds[0]);
@@ -382,7 +382,9 @@ void initCmds(){
 
 void handleCmds(char* cmd){
     //todo separer la cmd et les arguments
-    PrintString("getting cmd...\n\r", FOREGROUND_GREEN);
+    PrintString("getting cmd (actually no)...\n\r", FOREGROUND_GREEN);
+    endCmd();
+    return;
     void (*cmdFunc)(char*) = get(cmdTable, cmd);
     PrintString("ok!\n\r", FOREGROUND_GREEN);
     if(cmdFunc == NULL){

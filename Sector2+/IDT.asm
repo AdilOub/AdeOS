@@ -37,7 +37,7 @@ idtDescriptor:
 ; ;[extern isr3_handler] ;breakpoint
 ; [extern isr4_handler] ;overflow
 ; [extern isr5_handler] ;bound range
-; [extern isr6_handler] ;invalid opcode
+[extern isr6_handler] ;invalid opcode
 ; [extern isr7_handler] ;device not available
 [extern isr8_handler] ;double fault
 ; [extern isr9_handler] ;coprocessor segment overrun (outdated)
@@ -45,7 +45,7 @@ idtDescriptor:
 ; [extern isr11_handler] ;11
 ; [extern isr12_handler] ;12
 ; [extern isr13_handler] ; general protection fault
-; [extern isr14_handler] ; page fault
+[extern isr14_handler] ; page fault
 ; [extern isr15_handler] ;15
 ; [extern isr16_handler] ;16
 ; [extern isr17_handler] ;17
@@ -67,6 +67,8 @@ idtDescriptor:
 
 [extern isr32_handler] ;timer
 [extern isr33_handler] ;clavier
+
+[extern isr44_handler] ;ps2 (mouse)
 
 [extern isr38_handler] ;ata primary
 
@@ -116,12 +118,12 @@ isr0:
 ;   iretq
 ;   GLOBAL isr5
 
-; isr6:
-;   PUSHALL
-;   call isr6_handler
-;   POPALL
-;   iretq
-;   GLOBAL isr6
+isr6:
+  PUSHALL
+  call isr6_handler
+  POPALL
+  iretq
+  GLOBAL isr6
 
 ; isr7:
 ;   PUSHALL
@@ -172,12 +174,12 @@ isr8:
 ;   iretq
 ;   GLOBAL isr13
 
-; isr14:
-;   PUSHALL
-;   call isr14_handler
-;   POPALL
-;   iretq
-;   GLOBAL isr14
+isr14:
+  PUSHALL
+  call isr14_handler
+  POPALL
+  iretq
+  GLOBAL isr14
 
 ; isr15:
 ;   PUSHALL
@@ -325,6 +327,13 @@ isr38:
   POPALL
   iretq
   GLOBAL isr38
+
+isr44:
+  PUSHALL
+  call isr44_handler
+  POPALL
+  iretq
+  GLOBAL isr44
 
 ;software interrupt
 isr128: ;0x80 pour faire comme unix hihi

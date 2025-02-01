@@ -1,5 +1,5 @@
 PROGRAM_SPACE equ 0x8000 ;program space dans le linker
-SECTEUR_COUNT equ 61 ;nombre de secteur à lire, taille de boot.bin/512 - 1
+SECTEUR_COUNT equ 68 ;nombre de secteur à lire, taille de boot.bin/512 - 1
 
 
 ;WARNING!

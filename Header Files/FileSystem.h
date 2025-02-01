@@ -3,44 +3,52 @@
 #include "DiskRead.h"
 #include "Typedefs.h"
 #include "Render.h"
+#include "TextPrint.h"
+#include "Heap.h"
 
-//on doit définir une structure cohérente pour le filesystem.
-//actuellement l'idée c'est qu'il commence en 0xA000 dans le fichier 
-//ensuite on pourra chercher dans le fichier un block qui commence par le magic number
+#define FAT_TABLE_SIZE 65536 // nombre de bloc qu'on peut avoir
 
-//limiation: on peut lire & écrire des blocs de 512 bytes
 
-typedef struct SuperBlock SuperBlock;
-typedef struct inode inode;
+#define FREE_BLOCK 0
+#define END_OF_FILE 0xFFFF
+#define BAD_BLOCK 0xFFFE
+#define NOT_USED 0xFFFD
+#define FOLDER_SIGNATURE 0xFFFC
 
-struct SuperBlock
-{
-    uint_16 magic; //should be 0xade7
-    uint_64 blocks_count;
-    uint_32 inode_count;
-    inode* inodes; //inode du root  
+//#define BLOCK_SIZE 1024
+#define BLOCK_SIZE_POW2 6
+#define BLOCK_SIZE (2 << BLOCK_SIZE_POW2)
+
+#define LINK_SIZE 0x10
+#define MAX_INODE_PER_DIR (BLOCK_SIZE / LINK_SIZE)-1 
+
+#define DISK_OFFSET 0x10000
+
+#define OS_BLOC_SIZE 512
+
+
+struct file{
+    char name[16];
+    uint16_t inode;
 };
-
-//un fichier c'est quoi ?
-//c'est un inode + les donnée
-
-struct inode{
-    uint_64 size;
-    uint_64 location;
-    uint_16 creation_tmp;
-    uint_16 modification_tmp;
-    bool is_dir;
-    char name[64]; //askip c'est pas bien mébon...
-    inode* parent;
-    uint_32 children_count;
-    inode* children;
-}; //j'ai un peu pris les types au hasard pour que la structure fasse pile 64bytes
+typedef struct file file;
 
 
 
-//vu que les inodes doivent contenir une liste, on va faire en sorte qu'ils fassent tous 512bytes
+void setup_root();
+
+//creation
+uint16_t create_folder_in_parent(uint16_t parent, char* name);
+uint16_t create_file_in_parent(uint16_t parent, char* name, char* data);
+void write_in_data(char* data, const char* stuff);
+uint16_t read_begin_of_file(uint16_t inode, char* buffer, int size);
 
 
+//suppression
+uint8_t delete_inode(uint16_t parent, uint16_t inode);
 
+//lecture 
+uint16_t* read_folder(uint16_t parent);
 
-int searchSuperBlock();
+//description
+file* read_inode_info(uint16_t inode);

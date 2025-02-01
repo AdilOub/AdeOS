@@ -1,12 +1,12 @@
 #include "Header Files/Kernel.h"
 
- #include "Header Files/TextPrint.h"
- #include "Header Files/IDT.h"
- #include "Header Files/Keyboard.h"
- #include "Header Files/Memory.h"
- #include "Header Files/IO.h"
- #include "Header Files/Heap.h"
- #include "Header Files/Typedefs.h"
+#include "Header Files/TextPrint.h"
+#include "Header Files/IDT.h"
+#include "Header Files/Keyboard.h"
+#include "Header Files/Memory.h"
+#include "Header Files/IO.h"
+#include "Header Files/Heap.h"
+#include "Header Files/Typedefs.h"
 #include "Header Files/Timer.h"
 #include "Header Files/DiskRead.h"
 #include "Header Files/FileSystem.h"
@@ -17,27 +17,26 @@
 #include "Header Files/Commands.h"
 #include "Header Files/FileSystem.h"
 
-/*
-TODO Important!!!
-Il y a actuellement un problème avec le linker:
-la section data ne semble pas être chargée correctement
-et donc les variables globales non constante ne sont pas initialisées
-(ce n'est pas le cas pour les variables globales constante)
+//compiler
+#include "Header Files/Compiler.h"
 
-*/
-
+#define GET_RIP (uint32_t)({uint32_t rip; asm volatile ("lea (%%rip), %%eax\n\t" "mov %%eax, %0\n\t" : "=r"(rip)); rip;}) 
 
 #define NULL 0
 
-//64
-int A = 0xcafe;
+
 
 //kernel entry, called by extended_program.asm
-
+void afficher_rigolo(uint8_t a){
+    asm("nop");
+    uint64_t b = 0x69;
+    Print(IntToString(a), FOREGROUND_LIGHTRED);
+    return;
+}
 
 void test_disk(){
     Print("\n\rlecture1...");
-    uint_8* buffer3 = (uint_8*)calloc(512*sizeof(uint_8));
+    uint8_t* buffer3 = (uint8_t*)calloc(512*sizeof(uint8_t));
     readDataATA(0, 1, buffer3);
     for(int i = 0; i<16; i++){
          Print(HexToString(buffer3[i]));
@@ -48,7 +47,7 @@ void test_disk(){
     Print(HexToString(get_status()));
 
     Print("\n\rEcriture...");
-    uint_8* buffer_write = (uint_8*)calloc(sizeof(uint_8)*512);
+    uint8_t* buffer_write = (uint8_t*)calloc(sizeof(uint8_t)*512);
     for(int i = 0; i<256; i++){
         buffer_write[i] = i;
     }
@@ -63,7 +62,7 @@ void test_disk(){
 
 
     Print("\n\rlecture2...");
-    uint_8* buffer4 = (uint_8*)calloc(512*sizeof(uint_8));
+    uint8_t* buffer4 = (uint8_t*)calloc(512*sizeof(uint8_t));
     readDataATA(0, 1, buffer4);
     for(int i = 0; i<16; i++){
          Print(HexToString(buffer4[i]));
@@ -73,45 +72,178 @@ void test_disk(){
     Print(HexToString(get_status()));
 }
 
+void setup_disk_test(){
+    
+    setup_root(); //attention, doit être utiliser qu'une seule fois !!!
+
+
+    int t = create_folder_in_parent(0, "test");
+    create_folder_in_parent(0, "bin");
+    create_folder_in_parent(0, "usr");
+    create_folder_in_parent(t, "HIHI");
+
+
+    char* data = (char*) malloc(BLOCK_SIZE*2);
+    for(int i = 0; i<BLOCK_SIZE; i++){
+        data[i] = '-';
+    }
+    for(int i = BLOCK_SIZE; i<BLOCK_SIZE*2; i++){
+        data[i] = '+';
+    }
+    data[BLOCK_SIZE*2-1] = '*';
+    write_in_data(data, "Hello World");
+    int f = create_file_in_parent(0, "test.txt", data);
+
+
+
+    create_folder_in_parent(0, "test2");
+
+    char* s = (char*)malloc(BLOCK_SIZE*2);
+    *s = 'E';
+    
+    read_begin_of_file(f, s, BLOCK_SIZE*2);
+    Print("Read: ");
+    PrintString(s);
+    Print("\n\r");
+    Print("\n\r");
+    Print("Everything is fine\n\r");
+    free(s);
+    
+}
+
+void hellow(){
+    Print("Helloow ^_^\n\r", FOREGROUND_LIGHTMAGENTA);
+}
+
 extern "C" void _start(){
     
     InitIDT();
     setLanguage(KBSet1::ScanCodeLookupTableAZERTY);
     MainKeyBoardHandler = KeyBoardHandler;
     InitializeHeap(0x100000, 0x100000);
-    SetCursorPosition(PosFromCoord(0, 0));
-    initCmds();
+
     
-    
-    //on a tout check manuellement jusqu'a 0x2000
-
-
-
-
-    //initTimer();
-    //initFloppy();
-
-
-    #ifndef VGA13
-    //SetCursorPosition(PosFromCoord(0, 0));
-    //PrintString(Test);
-    /*
-    PrintString("Salut\n\r");
-    PrintString("Memory>\n\r");
-    PrintAllMemoryMap(UsableMemeoryMap);
-    PrintString("Fin memory<");
-    */
-    //endCmd();
-    #endif
-
     
     ClearScreen();
-
+    SetCursorPosition(PosFromCoord(0, 0));
+    //PrintString(Test);
+    PrintString("Bienvenue sur "); PrintString("AdeOs", FOREGROUND_LIGHTGREEN); PrintString(" !\n\r\n\r");
+    
+    Print("Test affichage:\n\r", FOREGROUND_LIGHTCYAN);
     Print("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
-    Print("!\"#$%&\'()*+,-./0123456789\n\r");
-    //Print("lecture1: ");
+    Print("!\"#$%&\'()*+,-./0123456789\n\r\n\r");
+
+
+    Print("Test filesystem:\n\r", FOREGROUND_LIGHTCYAN);
+    //setup_disk_test();
+    PrintString("Reading folder 0 (root dir)\n\r");
+    uint16_t* inodes = read_folder(0);
+    if(inodes == NULL){
+        Print("Error reading folder\n");
+        return;
+    }
+
+    for(int i = 0; false && i<MAX_INODE_PER_DIR; i++){
+        Print("Value of inode ");
+        Print(IntToString(i));
+        Print(": ");
+        Print(IntToString(i));
+        Print(" ");
+    }
+    Print("\n\r");
+    free(inodes);
+
+    Print("Test lecture information:\n\r", FOREGROUND_LIGHTCYAN);
+    file* f = read_inode_info(0);
+    Print("Name of inode 0: ");
+    Print(f->name);
+    Print("\n\r");
+    free(f);
+
+
+    Print("\n\r Everything is fine\n\r", FOREGROUND_GREEN);
+
+    //padding to see in hexfile, 64 'a'
+
+    //get address of the function hellow
+    uint64_t hellow_addr = (uint64_t)hellow;
+    Print("Address of hellow: ");
+    Print(HexToString(hellow_addr));
+    Print("\n\r");
+    hellow();
+    asm("nop");
+    asm("nop");
+    asm("nop");
+    asm("nop");
+    asm("nop");
+
+
+    //écrit une fonction en asm qui renvoie la valeur 0x69
+    uint8_t asm_code[] = {0xB8, 0x69, 0x00, 0x00, 0x00, 0xC3};
+    Print("Code de la fonction en asm: ");
+    for(int i = 0; i<6; i++){
+        Print(HexToString(asm_code[i]));
+        Print(" ");
+    }
+
+    //affiche la valeur renvoyée par la fonction
+    Print("Appel de la fonction en asm\n\r");
+    uint8_t ret = 0;
+    int n = 0x1269;
+    asm volatile ("call %1\n\t"
+                  "mov %0, %%al\n\t"
+                  : "=r"(ret)
+                  : "r"(asm_code)
+                  : "rax", "rbx", "rcx", "rdx");
+    Print("Valeur renvoyee: 0x");
+    Print(HexToString(ret));
+    Print("\n\r");
+
+
+        asm("call %0" : : "r"(hellow_addr));
+
+
+    //écrit une fonction asm qui affiche 12 avec la fonction afficher_rigolo
+    uint8_t asm_code2[] = {0x6a, 0x0c, 0xc3, 0xF4, 0xF4, 0xF4, 0xF4, 0xF4};
+    Print("Code de la fonction en asm: ");
+    for(int i = 0; i<8; i++){
+        Print(HexToString(asm_code2[i]));
+        Print(" ");
+    }
+
+    //affiche l'addresse actuelle de rip
+    Print("\n\rAdresse de rip: ");  
+    uint32_t rip = GET_RIP;
+    Print(HexToString(rip));
+    Print("\n\r");
 
     
+    //Affiche l'addresse de la fonction:
+    Print("Adresse de la fonction en asm: ");
+    Print(HexToString((uint64_t)asm_code2));
+    Print("\n\rce qui donne un offset de: ");
+    Print(IntToString((long long)((uint64_t)(asm_code2) - GET_RIP)));
+    Print("\n\r");
+
+
+
+    //execute la fonction
+    Print("Appel de la fonction en asm\n\r");
+    uint32_t result = 0;
+    asm ( "lea (%0), %%rax\n\t"
+                   "call %%rax\n\t"
+                   "pop %%rax\n\t"
+                   "mov %%rax, %1\n\t"
+                  : "=r"(result)
+                  : "r"(asm_code2)
+                  : "rbx", "rcx", "rdx");
+    Print("Valeur renvoyee: ");
+    Print(IntToString(result));
+    Print("\n\r");        
+
+    //call the function hellow in assembly
+
+
 
     while (true)
     {

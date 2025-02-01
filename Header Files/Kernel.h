@@ -4,7 +4,7 @@
 //#define VGA13
 
 extern const char Test[];
-extern const uint_8 Emi1[];
+extern const uint8_t Emi1[];
 
 
 

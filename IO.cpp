@@ -1,26 +1,26 @@
 #include "Header Files/IO.h"
 
-void outb(uint_16 port, uint_8 val){
+void outb(uint16_t port, uint8_t val){
     asm volatile ("outb %0, %1" : : "a"(val), "Nd"(port));
 }
 
-uint_8 inb(uint_16 port){
-    uint_8 returnVal;
+uint8_t inb(uint16_t port){
+    uint8_t returnVal;
     asm volatile ("inb %1, %0" : "=a"(returnVal) : "Nd"(port));
     return returnVal;
 }
 
-void insw (uint_16 __port, void *__addr)
+void insw (uint16_t __port, void *__addr)
 {
   asm volatile ("insw":"=D" (__addr) :"d" (__port), "0" (__addr));
 }
 
-void outsw(uint_16 __port, void* __addr){
+void outsw(uint16_t __port, void* __addr){
       asm volatile ("outsw":"=S" (__addr) :"d" (__port), "0" (__addr));
 }
 
 //unused
-void PIC_sendEOI(uint_8 irq)
+void PIC_sendEOI(uint8_t irq)
 {
 	if(irq >= 8){
 		outb(PIC2_COMMAND, PIC_EOI);
@@ -30,8 +30,8 @@ void PIC_sendEOI(uint_8 irq)
 }
 
 //"(It was an IBM design mistake.)" -> c'est pour ça que les interupts 0 à 7 sont déjà utilisé par les erreurs du cpu
-void RemapPic(uint_16 offset1, uint_16 offset2){
-  uint_8 a1, a2;
+void RemapPic(uint16_t offset1, uint16_t offset2){
+  uint8_t a1, a2;
 
   a1 = inb(PIC1_DATA); //save masks
   a2 = inb(PIC2_DATA);

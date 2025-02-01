@@ -8,7 +8,7 @@
 
 extern bool leftShiftPressed;
 extern bool rightShiftPressed;
-extern uint_8 LastScanCode;
+extern uint8_t LastScanCode;
 
 
 extern bool arrowEnabled;
@@ -22,5 +22,5 @@ extern char LookupTable[58];
 extern void setLanguage(const char* table);
 extern void enableArrow(bool enable);
 extern bool getArrowState();
-extern void StandarKeyBoardHandler(uint_8 scanCode, uint_8 chr);
-extern void KeyBoardHandler(uint_8 scanCode);
+extern void StandarKeyBoardHandler(uint8_t scanCode, uint8_t chr);
+extern void KeyBoardHandler(uint8_t scanCode);

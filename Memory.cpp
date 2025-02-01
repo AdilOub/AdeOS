@@ -1,29 +1,29 @@
 #include "Header Files/Memory.h"
 
 MemoryMapEntry* UsableMemoryRegion[10];
-uint_8 UsableMemeoryRegionCount = 0;
+uint8_t UsableMemeoryRegionCount = 0;
 
 
 //pourquoi :C
 /*
-void* memset(void* start, uint_64 value, uint_64 num){ 
+void* memset(void* start, uint64_t value, uint64_t num){ 
 	if(num<=8){
-		uint_8* valPtr = (uint_8*)&value;
-		for(uint_8* ptr = (uint_8*)start; ptr < (uint_8*)((uint_64)start + num); ptr++){
+		uint8_t* valPtr = (uint8_t*)&value;
+		for(uint8_t* ptr = (uint8_t*)start; ptr < (uint8_t*)((uint64_t)start + num); ptr++){
 			*ptr= *valPtr;
 		}
 		return start;
 
 	}
 
-	uint_64 proceedingByte = num % 8;
-	uint_64 newnum = num - proceedingByte;
-	for(uint_64* ptr = (uint_64*)start; ptr < (uint_64*)((uint_64)start + newnum); ptr++){
+	uint64_t proceedingByte = num % 8;
+	uint64_t newnum = num - proceedingByte;
+	for(uint64_t* ptr = (uint64_t*)start; ptr < (uint64_t*)((uint64_t)start + newnum); ptr++){
 		*ptr = value;
 	}
 
-	uint_8* valPtr = (uint_8*)&value;
-	for(uint_8* ptr = (uint_8*)start + newnum; ptr < (uint_8*)((uint_64)start + num); ptr++){
+	uint8_t* valPtr = (uint8_t*)&value;
+	for(uint8_t* ptr = (uint8_t*)start + newnum; ptr < (uint8_t*)((uint64_t)start + num); ptr++){
 		*ptr= *valPtr;
 	}
 	return start;
@@ -31,9 +31,9 @@ void* memset(void* start, uint_64 value, uint_64 num){
 */
 
 //moins rapide mais au moins c'est fiable...
-void* memset(void* start, uint_8 val, uint_64 size){
-	uint_8* ptr = (uint_8*)start;
-	for(uint_64 i = 0; i < size; i++){
+void* memset(void* start, uint8_t val, uint64_t size){
+	uint8_t* ptr = (uint8_t*)start;
+	for(uint64_t i = 0; i < size; i++){
 		*ptr = val;
 		ptr++;
 	}
@@ -41,34 +41,34 @@ void* memset(void* start, uint_8 val, uint_64 size){
 }
 
 
-void memcopy(void* destination, void* source, uint_64 num){
+void memcopy(void* destination, void* source, uint64_t num){
 	if(num<=8){
-		uint_8* valPtr = (uint_8*)source;
-		for(uint_8* ptr = (uint_8*)destination; ptr < (uint_8*)((uint_64)destination + num); ptr++){
+		uint8_t* valPtr = (uint8_t*)source;
+		for(uint8_t* ptr = (uint8_t*)destination; ptr < (uint8_t*)((uint64_t)destination + num); ptr++){
 			*ptr= *valPtr;
 			valPtr++;
 		}
 		return;
 	}
 	
-	uint_64 proceedingByte = num % 8;
-	uint_64 newnum = num - proceedingByte;
-	uint_64* srcptr = (uint_64*)source;
+	uint64_t proceedingByte = num % 8;
+	uint64_t newnum = num - proceedingByte;
+	uint64_t* srcptr = (uint64_t*)source;
 
-	for(uint_64* ptr = (uint_64*)destination; ptr < (uint_64*)((uint_64)destination + newnum); ptr++){
+	for(uint64_t* ptr = (uint64_t*)destination; ptr < (uint64_t*)((uint64_t)destination + newnum); ptr++){
 		*ptr = *srcptr;
 		srcptr++;
 	}
 
-	uint_8* valPtr = (uint_8*)((uint_64)source + newnum);
-	for(uint_8* ptr =  (uint_8*)((uint_64)source + newnum); ptr <  (uint_8*)((uint_64)source + num); ptr++){
+	uint8_t* valPtr = (uint8_t*)((uint64_t)source + newnum);
+	for(uint8_t* ptr =  (uint8_t*)((uint64_t)source + newnum); ptr <  (uint8_t*)((uint64_t)source + num); ptr++){
 		*ptr= *valPtr;
 		valPtr++;
 	}
 	return;
 }
 
-void PrintMemoryMap(MemoryMapEntry* memoryMap, uint_16 position){
+void PrintMemoryMap(MemoryMapEntry* memoryMap, uint16_t position){
 	SetCursorPosition(position);
 
 	PrintString("Memory Base: "); PrintString(IntToString(memoryMap->BaseAdress));
@@ -90,8 +90,8 @@ MemoryMapEntry** getUsableMemoryRegions(){
 	
 	MemoryRegionsGot = true;
 	
-	uint_8 UsableMemIndex = 0;
-	for(uint_8 i = 0; i < MemoryRegionCount; i++){
+	uint8_t UsableMemIndex = 0;
+	for(uint8_t i = 0; i < MemoryRegionCount; i++){
         MemoryMapEntry* memMap = (MemoryMapEntry*)MEMORY_COUNT_LOCATION;
         memMap += i;
 		if(memMap->RegionType == 1){

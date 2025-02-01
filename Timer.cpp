@@ -18,9 +18,9 @@ void initTimer(){
     */
     PrintString("Timer init...\n\r", FOREGROUND_GREEN);
 
-    uint_16 divisor = 0xFFFF;  // Fréquence maximale du PIT (en Hz)
-    uint_8 lobyte = (uint_8)(divisor & 0xFF);  // Partie basse du diviseur
-    uint_8 hibyte = (uint_8)((divisor >> 8) & 0xFF);  // Partie haute du diviseur
+    uint16_t divisor = 0xFFFF;  // Fréquence maximale du PIT (en Hz)
+    uint8_t lobyte = (uint8_t)(divisor & 0xFF);  // Partie basse du diviseur
+    uint8_t hibyte = (uint8_t)((divisor >> 8) & 0xFF);  // Partie haute du diviseur
 
     // Envoi de la commande de configuration du PIT
     outb(PIT_COMMAND_PORT, PIT_MODE);

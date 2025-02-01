@@ -7,12 +7,12 @@ char hexToStringOutput[128];
 template<typename T>
 const char* HexToString(T value){
     T* valPtr = &value;
-    uint_8* ptr;
-    uint_8 temp;
-    uint_8 size = (sizeof(T))*2 - 1;
-    uint_8 i;
+    uint8_t* ptr;
+    uint8_t temp;
+    uint8_t size = (sizeof(T))*2 - 1;
+    uint8_t i;
     for(i = 0; i < size; i++){
-        ptr = (uint_8*)valPtr + i;
+        ptr = (uint8_t*)valPtr + i;
         temp = (*ptr & 0xF0) >> 4;
         hexToStringOutput[size - (i*2 +1)] = temp + (temp > 9 ? 55 : 48);
         temp = (*ptr & 0x0F);
@@ -22,10 +22,10 @@ const char* HexToString(T value){
     return hexToStringOutput;
 }
 
-const char* HexToString(uint_8 value) { return HexToString<uint_8>(value); }
-const char* HexToString(uint_16 value) { return HexToString<uint_16>(value); }
-const char* HexToString(uint_32 value) { return HexToString<uint_32>(value); }
-const char* HexToString(uint_64 value) { return HexToString<uint_64>(value); }
+const char* HexToString(uint8_t value) { return HexToString<uint8_t>(value); }
+const char* HexToString(uint16_t value) { return HexToString<uint16_t>(value); }
+const char* HexToString(uint32_t value) { return HexToString<uint32_t>(value); }
+const char* HexToString(uint64_t value) { return HexToString<uint64_t>(value); }
 const char* HexToString(char value) { return HexToString<char>(value); }
 const char* HexToString(short value) { return HexToString<short>(value); }
 const char* HexToString(int value) { return HexToString<int>(value); }
@@ -35,46 +35,46 @@ const char* HexToString(long long value) { return HexToString<long long>(value);
 char intToStringOutput[128];
 template<typename T>
 const char* IntToString(T value){
-    uint_8 isNegative = 0;
+    uint8_t isNegative = 0;
     if(value < 0){
         isNegative = 1;
         value = -value;
         intToStringOutput[0] = '-';
     }
 
-    uint_8 size = 0;
-    uint_64 sizeTester = (uint_64)value;
+    uint8_t size = 0;
+    uint64_t sizeTester = (uint64_t)value;
     while(sizeTester / 10 > 0){
         sizeTester /= 10;
         size++;
     }
 
-    uint_8 index = 0;
-    uint_64 newValue = (uint_64)value;
+    uint8_t index = 0;
+    uint64_t newValue = (uint64_t)value;
     while(newValue / 10 > 0){
-        uint_8 reminder = newValue % 10;
+        uint8_t reminder = newValue % 10;
         newValue /= 10;
         intToStringOutput[size + isNegative - index] = reminder + 48;
         index++;
     }
-    uint_8 reminder = newValue % 10;
+    uint8_t reminder = newValue % 10;
     intToStringOutput[size + isNegative- index] = reminder + 48;
 
     intToStringOutput[size + isNegative+ 1] = 0;
     return intToStringOutput;
 }
 
-const char* IntToString(uint_8 value) { return IntToString<uint_8>(value); }
-const char* IntToString(uint_16 value) { return IntToString<uint_16>(value); }
-const char* IntToString(uint_32 value) { return IntToString<uint_32>(value); }
-const char* IntToString(uint_64 value) { return IntToString<uint_64>(value); }
+const char* IntToString(uint8_t value) { return IntToString<uint8_t>(value); }
+const char* IntToString(uint16_t value) { return IntToString<uint16_t>(value); }
+const char* IntToString(uint32_t value) { return IntToString<uint32_t>(value); }
+const char* IntToString(uint64_t value) { return IntToString<uint64_t>(value); }
 const char* IntToString(char value) { return IntToString<char>(value); }
 const char* IntToString(short value) { return IntToString<short>(value); }
 const char* IntToString(int value) { return IntToString<int>(value); }
 const char* IntToString(long long value) { return IntToString<long long>(value); }
 
 char floatToStringOutput[128];
-const char* FloatToString(float value, uint_8 decimalPlaces){
+const char* FloatToString(float value, uint8_t decimalPlaces){
 
     char* intPtr = (char*)IntToString((int)value);
     char* floatPtr = floatToStringOutput;
@@ -105,9 +105,9 @@ const char* FloatToString(float value, uint_8 decimalPlaces){
 }
 
 #ifndef VGA13
-uint_16 CursorPosition;
+uint16_t CursorPosition;
 
-void SetCursorPosition(uint_16 position){
+void SetCursorPosition(uint16_t position){
 
     if(position > 2000){
         position = 2000;
@@ -117,19 +117,19 @@ void SetCursorPosition(uint_16 position){
     }
 
     outb(0x3D4, 0x0F);
-    outb(0x3D5, (uint_8)(position & 0xFF));
+    outb(0x3D5, (uint8_t)(position & 0xFF));
     outb(0x3D4, 0x0E);
-    outb(0x3D5, (uint_8)((position >> 8) & 0xFF));
+    outb(0x3D5, (uint8_t)((position >> 8) & 0xFF));
     CursorPosition = position;
 }
 
-uint_16 PosFromCoord(uint_8 x, uint_8 y){
+uint16_t PosFromCoord(uint8_t x, uint8_t y){
     return y * VGA_WIDTH + x;
 }
 
-void PrintString(const char* str, uint_8 color, uint_8 unused){
+void PrintString(const char* str, uint8_t color, uint8_t unused){
     char* charPtr = (char*)str;
-    uint_16 index = CursorPosition;
+    uint16_t index = CursorPosition;
     
     while(*charPtr !=0){
         switch (*charPtr)
@@ -155,14 +155,14 @@ void jmpLine(){
     SetCursorPosition(CursorPosition + VGA_WIDTH - CursorPosition % VGA_WIDTH);
 }
 
-void PrintChar(char chr, uint_8 color ){
+void PrintChar(char chr, uint8_t color ){
     *(VGA_MEMORY + CursorPosition * 2) = chr;
     *(VGA_MEMORY + CursorPosition * 2 +1) = color;
     SetCursorPosition(CursorPosition + 1);
 }
 
-void ClearScreen(uint_8 ClearColor){
-    for(uint_32 i = 0; i < 80*25; i++){
+void ClearScreen(uint8_t ClearColor){
+    for(uint32_t i = 0; i < 80*25; i++){
         *(VGA_MEMORY + i * 2) = 0;
         *(VGA_MEMORY + i *2 + 1) = ClearColor;
     }
@@ -173,30 +173,30 @@ void ClearScreen(uint_8 ClearColor){
 #endif 
 
 #ifdef VGA13
-uint_16 CursorPosition;
-void SetCursorPosition(uint_16 position){
+uint16_t CursorPosition;
+void SetCursorPosition(uint16_t position){
     setCursorPosRenderer(position); //bad code mais c'est ma faute ça
 }
 
-uint_16 PosFromCoord(uint_8 x, uint_8 y){
+uint16_t PosFromCoord(uint8_t x, uint8_t y){
     return y * VGA_13_W + x;
 }
 
-void PrintString(const char *str, uint_8 foreground, uint_8 background){
+void PrintString(const char *str, uint8_t foreground, uint8_t background){
     Print(str, foreground, background);
 }
 
-void PrintChar(char chr, uint_8 color){
+void PrintChar(char chr, uint8_t color){
 
 }
 
-void ClearScreen(uint_8 ClearColor){
-    uint_8 value = 0;
+void ClearScreen(uint8_t ClearColor){
+    uint8_t value = 0;
     //value += ClearColor << 8;
     //value += ClearColor << 24;
     //value += ClearColor << 48;
     //value += ClearColor << 56;
-    for (uint_8* i = (uint_8*)VGA_OFFSET; i < (uint_8*)(VGA_OFFSET + 64000); i++){
+    for (uint8_t* i = (uint8_t*)VGA_OFFSET; i < (uint8_t*)(VGA_OFFSET + 64000); i++){
         *i = value;
     }
 

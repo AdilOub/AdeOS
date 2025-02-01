@@ -20,7 +20,7 @@ ld -T"link.ld"&&
 cat compiled/bootloader.bin compiled/kernel.bin > compiled/boot.bin&&
 cp compiled/boot.bin ./diskimg/boot.bin&&
 cd diskimg&&
-cp boot.bin boot2.bin&&
+#cp boot.bin boot2.bin&&
 #python3 merge.py&&
-truncate boot2.bin --size 128K&&
-qemu-system-x86_64 boot2.bin -m 32M -no-reboot -no-shutdown -d cpu_reset
+truncate boot.bin --size 512K&& #s'assure que le fichier fait 64K
+qemu-system-x86_64 boot.bin -m 2M -no-reboot -no-shutdown -d cpu_reset,int

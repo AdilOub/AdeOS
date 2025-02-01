@@ -74,7 +74,7 @@ void drawline(int p[2], int p2[2]){
     }
 }
 
-void Print(const char* str, uint_8 frontColor, uint_8 unused){
+void Print(const char* str, uint8_t frontColor, uint8_t unused){
     PrintString(str, frontColor, unused);
 }
 
@@ -82,22 +82,22 @@ void Print(const char* str, uint_8 frontColor, uint_8 unused){
 #endif
 
 #ifdef VGA13
-uint_16 CursorPositionRenderer = 0;
+uint16_t CursorPositionRenderer = 0;
 
-void put_pixel(uint_16 x, uint_16 y, uint_8 color){
-    uint_8* memory = (uint_8*)0xA0000;
+void put_pixel(uint16_t x, uint16_t y, uint8_t color){
+    uint8_t* memory = (uint8_t*)0xA0000;
     memory += VGA_13_W * x + y; //j'ai inversé x et y je crois ;-;
     *memory = color;
 }
 
-void draw_char(uint_16 x_offset, uint_16 y_offset, uint_8 chara, uint_8 frontColor, uint_8 backColor){ //TODO COLOR !!
+void draw_char(uint16_t x_offset, uint16_t y_offset, uint8_t chara, uint8_t frontColor, uint8_t backColor){ //TODO COLOR !!
     //char* ptr = policeA[chara];
-    uint_64 charaHex = font[chara];
-    uint_64 n = 1;
+    uint64_t charaHex = font[chara];
+    uint64_t n = 1;
 
    for(int x = 7; x>=0; x--){
     for(int y = 7; y>=0; y--){
-        uint_64 mask = charaHex & n;
+        uint64_t mask = charaHex & n;
         if(mask){
             put_pixel(x_offset+x, y_offset+y, frontColor);
         }else{
@@ -108,46 +108,46 @@ void draw_char(uint_16 x_offset, uint_16 y_offset, uint_8 chara, uint_8 frontCol
    }
 }
 
-uint_16 getCursorPosRenderer(){
+uint16_t getCursorPosRenderer(){
     return CursorPositionRenderer;
 }
 
-void setCursorPosRenderer(uint_16 newPos){
+void setCursorPosRenderer(uint16_t newPos){
     CursorPositionRenderer = newPos;
 }
 
-uint_16 cursorPositionFromCoo(uint_16 x, uint_16 y){
+uint16_t cursorPositionFromCoo(uint16_t x, uint16_t y){
     return y* SCREEN_MAX_LETTER_W + x;
 }
 
-void PrintCharRender(uint_16 cursorPosition, uint_8 chara, uint_8 frontColor, uint_8 backColor){
+void PrintCharRender(uint16_t cursorPosition, uint8_t chara, uint8_t frontColor, uint8_t backColor){
     if(chara == '\n'){
-        CursorPositionRenderer = cursorPositionFromCoo(0, (uint_16)((cursorPosition) / SCREEN_MAX_LETTER_H) + 1);
+        CursorPositionRenderer = cursorPositionFromCoo(0, (uint16_t)((cursorPosition) / SCREEN_MAX_LETTER_H) + 1);
         return;
     }
     if(chara == '\r'){
-        CursorPositionRenderer = cursorPositionFromCoo(-1, (uint_16)((cursorPosition) / SCREEN_MAX_LETTER_H));
+        CursorPositionRenderer = cursorPositionFromCoo(-1, (uint16_t)((cursorPosition) / SCREEN_MAX_LETTER_H));
         return;
     }
-    uint_16 y = (cursorPosition) % SCREEN_MAX_LETTER_W;
-    uint_16 x  = (uint_16)((cursorPosition) / SCREEN_MAX_LETTER_H);
-    draw_char(x*LETTER_WIDTH, y*LETTER_WIDTH, (uint_8)chara, frontColor, backColor);
+    uint16_t y = (cursorPosition) % SCREEN_MAX_LETTER_W;
+    uint16_t x  = (uint16_t)((cursorPosition) / SCREEN_MAX_LETTER_H);
+    draw_char(x*LETTER_WIDTH, y*LETTER_WIDTH, (uint8_t)chara, frontColor, backColor);
 }
 
 
-void Print(const char* str, uint_8 frontColor, uint_8 backColor){
+void Print(const char* str, uint8_t frontColor, uint8_t backColor){
     while(*str != 0){
-        PrintCharRender(CursorPositionRenderer, (uint_8)(*str), frontColor, backColor);
+        PrintCharRender(CursorPositionRenderer, (uint8_t)(*str), frontColor, backColor);
         str++;
         CursorPositionRenderer++;
     }
 }
 
-void PlotImg(char* ptr, uint_16 sizeX, uint_16 sizeY){
-    for(uint_32 i = 0; i < sizeX*sizeY; i++){
-        uint_16 x = i / sizeY;
-        uint_16 y = i % sizeY;
-        put_pixel(x, y, (uint_8)*ptr);
+void PlotImg(char* ptr, uint16_t sizeX, uint16_t sizeY){
+    for(uint32_t i = 0; i < sizeX*sizeY; i++){
+        uint16_t x = i / sizeY;
+        uint16_t y = i % sizeY;
+        put_pixel(x, y, (uint8_t)*ptr);
         ptr++; 
     }
 }

@@ -20,6 +20,7 @@ INPUT
     compiled/Timer.o
     compiled/DiskRead.o
     compiled/FileSystem.o
+    compiled/Compiler.o
 )
 
 OUTPUT
@@ -34,6 +35,8 @@ au lieu de ça text est load dans la mémoire
 
 EDIT: j'ai mis le rodata au dessus du data et c'est inversé:
 le rodata est load correctement dans la mémoire mais pas le data
+
+EDIT2: post résolution: le pb était dans la façon de load boot.bin en mémoire dans disk_read.asm
 */
 
 /*KERNEL_VMA = 0x8000;*/

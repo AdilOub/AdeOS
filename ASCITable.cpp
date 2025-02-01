@@ -99,7 +99,7 @@
 
 /* the values in this array are a 8x8 bitmap font for ascii characters */
 
-  uint_64 font[128] = {
+  uint64_t font[128] = {
 	0x7E7E7E7E7E7E0000,	/* NUL */
 	0x7E7E7E7E7E7E0000,	/* SOH */
 	0x7E7E7E7E7E7E0000,	/* STX */

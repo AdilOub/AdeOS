@@ -15,9 +15,9 @@
 //eax: 32 bits
 //ax: 16 bits
 //ah/al: 8 bits
-void readDataATASector(uint_64 lba, uint_8 num_sectors, uint_8* buffer) {
+void readDataATASector(uint64_t lba, uint8_t num_sectors, uint8_t* buffer) {
     
-    uint_32 masked_lba = lba & 0x0FFFFFFF;
+    uint32_t masked_lba = lba & 0x0FFFFFFF;
 
     outb(0x01F6, 0xE0 | ((masked_lba >> 24) & 0x0F)); // Bits 24-27 du LBA avec le mode LBA
 
@@ -29,21 +29,18 @@ void readDataATASector(uint_64 lba, uint_8 num_sectors, uint_8* buffer) {
 
     outb(0x01F7, 0x20); // Commande : lire avec retry
 
-    while(!(inb(0x01F7) & 0x08));
+    while(!(inb(0x01F7) & 0x08)); //TODO Fix may cause infinite loop on error (par exemple si le disque est pas de la bonne taille)
 
-    
-
-    uint_16 dataPort = 0x1F0;
-    uint_64 size = num_sectors * 512;
-    uint_16* data = (uint_16*)malloc(2);
+    uint16_t dataPort = 0x1F0;
+    uint64_t size = num_sectors * 512;
+    uint16_t* data = (uint16_t*)malloc(2);
 
 	//TODO il y a un décalage, des données ne sont jamais lu et ça fait que le disque est encore en cours de lecture
-    for(uint_64 i = 0; i < size; i+=2){
+    for(uint64_t i = 0; i < size; i+=2){
         insw(dataPort, data); //reversed
         buffer[i+1] = ((*data&0xFF00)>>8);
         buffer[i] = (*data&0x00FF);
     }
-
 
     free(data);
     return;
@@ -53,10 +50,10 @@ void readDataATASector(uint_64 lba, uint_8 num_sectors, uint_8* buffer) {
 //bit 7: BSY
 //bit 6: RDY (clear si rdy)
 //bit 5: DF (drive fault) PAS BIEN !!!
-uint_8 get_status(){
+uint8_t get_status(){
 	outb(0x1f6, 0x04);
     outb(0x1f6, 0x00);
-	uint_8 status;
+	uint8_t status;
     status = inb(0x1f6);
     status = inb(0x1f6);
     status = inb(0x1f6);
@@ -65,13 +62,13 @@ uint_8 get_status(){
 }
 
 void resetDisk(){
-	uint_32 portCommand = 0x01f7;
+	uint32_t portCommand = 0x01f7;
 	outb(portCommand, 0xE7 ); //reset
 	return;
 }
 
-void writeDataATASector(uint_64 lba, uint_8 num_sectors, uint_8* buffer){
-    uint_32 masked_lba = lba & 0x0FFFFFFF;
+void writeDataATASector(uint64_t lba, uint8_t num_sectors, uint8_t* buffer){
+    uint32_t masked_lba = lba & 0x0FFFFFFF;
 
     outb(0x01F6, 0xE0 | ((masked_lba >> 24) & 0x0F)); // Bits 24-27 du LBA avec le mode LBA
 
@@ -87,16 +84,16 @@ void writeDataATASector(uint_64 lba, uint_8 num_sectors, uint_8* buffer){
     while(!(inb(0x01F7) & 0x08));
     
 
-    uint_16 dataPort = 0x1F0;
-    uint_64 size = num_sectors * 512;
+    uint16_t dataPort = 0x1F0;
+    uint64_t size = num_sectors * 512;
 
 
 
-	for(uint_64 i = 0; i < size; i+=2){
+	for(uint64_t i = 0; i < size; i+=2){
 		outsw(dataPort, buffer+i);
 	}
 
-	// uint_8* error = (uint_8*)malloc(sizeof(uint_8)*2);
+	// uint8_t* error = (uint8_t*)malloc(sizeof(uint8_t)*2);
 	// *error = 0xca;
 	// *(error+1) = 0xfe;
 
@@ -112,23 +109,45 @@ void writeDataATASector(uint_64 lba, uint_8 num_sectors, uint_8* buffer){
 	return;
 }
 
-void readDataATA(uint_64 lba, uint_64 size, uint_8* buffer){
-    uint_8 num_sector = (size / 512) + (size%512) ? 1 : 0;
-    PrintString("Num sector: ");
-    PrintString(IntToString(num_sector));
-    uint_8* buffer_aligned = (uint_8*)malloc(sizeof(uint_8)*num_sector*512);
-    PrintString("start read-");
+void readDataATA(uint64_t lba, uint64_t size, uint8_t* buffer){
+    uint8_t num_sector = (size / 512) + (size%512) ? 1 : 0;
+    //PrintString("Num sector: ");
+    //PrintString(IntToString(num_sector));
+    uint8_t* buffer_aligned = (uint8_t*)malloc(sizeof(uint8_t)*num_sector*512);
+    //PrintString("\n\rstart read-");
     readDataATASector(lba, num_sector, buffer_aligned);
-    PrintString("-end read:");
-    memcopy(buffer, buffer_aligned, sizeof(uint_8)*size);
+    //PrintString("-end read:");
+    memcopy(buffer, buffer_aligned, sizeof(uint8_t)*size);
+    free(buffer_aligned);
     return;
 }
 
-void writeDataATA(uint_64 lba, uint_64 size, uint_8* buffer){
-    uint_8 num_sector = (size / 512) + (size%512) ? 1 : 0;
-    uint_8* buffer_aligned = (uint_8*)malloc(sizeof(uint_8)*num_sector*512);
+void writeDataATA(uint64_t lba, uint64_t size, uint8_t* buffer){
+    uint8_t num_sector = (size / 512) + (size%512) ? 1 : 0;
+    uint8_t* buffer_aligned = (uint8_t*)malloc(sizeof(uint8_t)*num_sector*512);
     readDataATASector(lba, num_sector, buffer_aligned);
-    memcopy(buffer_aligned, buffer, sizeof(uint_8)*size);
+    memcopy(buffer_aligned, buffer, sizeof(uint8_t)*size);
     writeDataATASector(lba, num_sector, buffer_aligned);
+    free(buffer_aligned);
+}
 
+void readDATA(uint64_t address, uint64_t size, uint8_t* buffer){
+    uint64_t lba = address / 512;
+    uint64_t offset = address % 512;
+    uint8_t* buffer_aligned = (uint8_t*)malloc(sizeof(uint8_t)*512);
+    readDataATASector(lba, 1, buffer_aligned);
+    memcopy(buffer, buffer_aligned+offset, size);
+    free(buffer_aligned);
+    return;
+}
+
+void writeDATA(uint64_t address, uint64_t size, uint8_t* buffer){
+    uint64_t lba = address / 512;
+    uint64_t offset = address % 512;
+    uint8_t* buffer_aligned = (uint8_t*)malloc(sizeof(uint8_t)*512);
+    readDataATASector(lba, 1, buffer_aligned);
+    memcopy(buffer_aligned+offset, buffer, size);
+    writeDataATASector(lba, 1, buffer_aligned);
+    free(buffer_aligned);
+    return;
 }

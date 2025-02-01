@@ -8,4 +8,3 @@
 %endmacro
 
 IncBin Test, "test.txt"
-;IncBin Emi1, "emi1.img"

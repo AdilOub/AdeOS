@@ -5,14 +5,17 @@
 #include "IDT.h"
 #include "Heap.h"
 
-extern "C" void ata_lba_read(uint_64 lba, uint_8 num_sectors, uint_8* buffer);
+extern "C" void ata_lba_read(uint64_t lba, uint8_t num_sectors, uint8_t* buffer);
 
-void readDataATASector(uint_64 lba, uint_8 num_sectors, uint_8* buffer);
-void writeDataATASector(uint_64 lba, uint_8 num_sectors, uint_8* buffer);
+void readDataATASector(uint64_t lba, uint8_t num_sectors, uint8_t* buffer);
+void writeDataATASector(uint64_t lba, uint8_t num_sectors, uint8_t* buffer);
 
 // TODO void resetDisk();
 
-uint_8 get_status();
+uint8_t get_status();
 
-void readDataATA(uint_64 lba, uint_64 size, uint_8* buffer);
-void writeDataATA(uint_64 lba, uint_64 size, uint_8* buffer);
+void readDataATA(uint64_t lba, uint64_t size, uint8_t* buffer);
+void writeDataATA(uint64_t lba, uint64_t size, uint8_t* buffer);
+
+void readDATA(uint64_t address, uint64_t size, uint8_t* buffer);
+void writeDATA(uint64_t address, uint64_t size, uint8_t* buffer);

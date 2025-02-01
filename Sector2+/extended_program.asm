@@ -17,9 +17,10 @@ jmp EnterProtectedMode
 ;load GDT
 ;set GDT in register
 
+;de base c'était set dans bootloader.asm en mode 0x03 (text mode)
 setVGA_graphic:
     mov ah, 0x00
-    mov al, 0x13
+    mov al, 0x12
     int 0x10
     ret
 
@@ -95,6 +96,10 @@ Start64Bit:
     mov rbp, 0x90000
     mov rsp, rbp
     call ActivateSSE
+
+    ;mov [0xA000], byte '6'
+    ;call _start 
+    ;jmp $
 
     mov [0xb8000], byte '6'
     mov [0xb8002], byte '4'

@@ -2,24 +2,24 @@
 #include "TextPrint.h"
 #define MEMORY_COUNT_LOCATION 0x5000 //set dans DetectMemory.asm
 
-extern uint_8 MemoryRegionCount;
+extern uint8_t MemoryRegionCount;
 
-void* memset(void* start, uint_8 value, uint_64 num);
-void memcopy(void* destination, void* source, uint_64 num);
+void* memset(void* start, uint8_t value, uint64_t num);
+void memcopy(void* destination, void* source, uint64_t num);
 
 
 struct  MemoryMapEntry
 {
-    uint_64 BaseAdress;
-    uint_64 RegionLength;
-    uint_32 RegionType;
-    uint_32 ExtendedAttributes;
+    uint64_t BaseAdress;
+    uint64_t RegionLength;
+    uint32_t RegionType;
+    uint32_t ExtendedAttributes;
 };
 
-void PrintMemoryMap(MemoryMapEntry* memoryMap, uint_16 position);
+void PrintMemoryMap(MemoryMapEntry* memoryMap, uint16_t position);
 
 extern MemoryMapEntry* UsableMemoryRegion[10];
-extern uint_8 UsableMemeoryRegionCount;
+extern uint8_t UsableMemeoryRegionCount;
 
 MemoryMapEntry** getUsableMemoryRegions();
 

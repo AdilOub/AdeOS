@@ -8,7 +8,7 @@
 
 
 
-void Print(const char* str, uint_8 frontColor = 0x0F, uint_8 backColor = 0x00);
+void Print(const char* str, uint8_t frontColor = 0x0F, uint8_t backColor = 0x00);
 
 
 #ifdef VGA13
@@ -22,18 +22,18 @@ void Print(const char* str, uint_8 frontColor = 0x0F, uint_8 backColor = 0x00);
 #define SCREEN_MAX_LETTER_W 40
 #define SCREEN_MAX_LETTER_H 40
 
-void put_pixel(uint_16 x, uint_16 y, uint_8 color);
+void put_pixel(uint16_t x, uint16_t y, uint8_t color);
 
-void draw_char(uint_16 x_offset, uint_16 y_offset, uint_8 chara, uint_8 frontColor = 0x0F, uint_8 backColor = 0x00); //TODO COLOR !!
+void draw_char(uint16_t x_offset, uint16_t y_offset, uint8_t chara, uint8_t frontColor = 0x0F, uint8_t backColor = 0x00); //TODO COLOR !!
 
-void PrintCharRender(uint_16 cursorPosition, uint_8 chara, uint_8 frontColor, uint_8 backColor);
+void PrintCharRender(uint16_t cursorPosition, uint8_t chara, uint8_t frontColor, uint8_t backColor);
 
-uint_16 cursorPositionFromCoo(uint_16 x, uint_16 y);
+uint16_t cursorPositionFromCoo(uint16_t x, uint16_t y);
 
-uint_16 getCursorPosRenderer();
-void setCursorPosRenderer(uint_16 newPos);
+uint16_t getCursorPosRenderer();
+void setCursorPosRenderer(uint16_t newPos);
 
-void PlotImg(char* ptr, uint_16 sizeX, uint_16 sizeY);
+void PlotImg(char* ptr, uint16_t sizeX, uint16_t sizeY);
 
 void drawline(int p[2], int p2[2]);
 
