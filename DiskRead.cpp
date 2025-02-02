@@ -102,7 +102,6 @@ void writeDataATASector(uint64_t lba, uint8_t num_sectors, uint8_t* buffer){
 		//outsw(dataPort, error);
 	}
 
-	//PrintString("write ok\n");
 
 	//free(error);
 
@@ -131,6 +130,9 @@ void writeDataATA(uint64_t lba, uint64_t size, uint8_t* buffer){
     free(buffer_aligned);
 }
 
+//TODO fix ou test ça, si on lit/ecrit qu'un secteur c'est pas bon
+//L'alginement est OK, mais il faut qu'on puisse lire 512+1 octets !!!
+//actuellement fine car BLOCKSIZE dans FileSystem est 512 mais pas ouf
 void readDATA(uint64_t address, uint64_t size, uint8_t* buffer){
     uint64_t lba = address / 512;
     uint64_t offset = address % 512;

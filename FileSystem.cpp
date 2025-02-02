@@ -125,9 +125,9 @@ uint16_t create_folder_in_parent(uint16_t parent, char* name){
         return -1;
     }
 
-    PrintString("Creating folder s in parent d at pos s: ");
-    PrintString(name); PrintString(" ");PrintString(IntToString(parent)); PrintString(" ");PrintString(IntToString(not_used));
-    PrintString("\n\r");
+    //PrintString("Creating folder s in parent d at pos s: ");
+    //PrintString(name); PrintString(" ");PrintString(IntToString(parent)); PrintString(" ");PrintString(IntToString(not_used));
+    //PrintString("\n\r");
 
     //on crée le dossier
     uint16_t new_inode = create_folder(parent, name);
@@ -156,17 +156,12 @@ uint16_t create_file(uint16_t parent, char* data, uint16_t nb_of_cluster, uint64
         //si c'est le dernier, on écrit que la taille restante
         //TODO fix et écrire la taille restante + 0 en padding pour la fin de block
         if(chunk == nb_of_cluster-1){
-            PrintString("Last cluster\n\r");
-            PrintString("Size: ");PrintString(IntToString(size));PrintString("\n\r");
-            //print value of last element
-            PrintString("Value of last element: ");PrintString(HexToString(data[size-1]));PrintString("\n\r");
-            //print val of chunk
-            PrintString("Value of chunk: ");PrintString(IntToString(chunk));PrintString("\n\r");
+            write(data+chunk*BLOCK_SIZE, size%BLOCK_SIZE, clusters[chunk] * BLOCK_SIZE + FAT_TABLE_SIZE);
         }else{
-            PrintString("Not last cluster\n\r", FOREGROUND_LIGHTCYAN);
+            write(data + chunk * BLOCK_SIZE, BLOCK_SIZE, clusters[chunk] * BLOCK_SIZE + FAT_TABLE_SIZE);
         }
         
-        write(data + chunk * BLOCK_SIZE, chunk == nb_of_cluster-1 ? size%BLOCK_SIZE : BLOCK_SIZE, clusters[chunk] * BLOCK_SIZE + FAT_TABLE_SIZE); //WHY DECALAGE DE 7
+        //write(data + chunk * BLOCK_SIZE, chunk == nb_of_cluster-1 ? size%BLOCK_SIZE : BLOCK_SIZE, clusters[chunk] * BLOCK_SIZE + FAT_TABLE_SIZE); //WHY DECALAGE DE 7
     }
 
     for(int chunk = 0; chunk < nb_of_cluster-1; chunk++){
@@ -181,13 +176,12 @@ uint16_t create_file(uint16_t parent, char* data, uint16_t nb_of_cluster, uint64
     return first_cluster;
 }
 
-//TODO maybe add a size parameter 
 uint16_t create_file_in_parent(uint16_t parent, char* name, char* data, uint64_t size){
     //uint64_t size = strlen(data);
     uint16_t nb_of_cluster = (size / BLOCK_SIZE) + !!(size%BLOCK_SIZE); //j'aime bien, !! pour avoir 0 ou 1
     //uint16_t nb_of_cluster = (size >> BLOCK_SIZE_POW2) + !!(size & BLOCK_SIZE_MASK); //encore plus opti parceque why not mdr
 
-    //on récupère le premier liens libre dans le dossier parent
+    //on récupère le premier liens libre dans le dossier parent //TODO verifier que le nom est unique !
     uint16_t not_used = find_not_used_in_folder(parent);
     if(not_used == 0xFFFF){
         PrintString("No more space in parent folder\n\r");
@@ -267,7 +261,7 @@ void write_in_data(char* data, const char* stuff){
     //data[strlen(stuff)] = '\0';
 }
 
-uint16_t* read_folder(uint16_t parent){
+/*uint16_t* read_folder(uint16_t parent){
     if(get_nth_inode(parent) != FOLDER_SIGNATURE){
         PrintString("Parent is not a folder\n\r");
         return NULL;
@@ -287,11 +281,100 @@ uint16_t* read_folder(uint16_t parent){
     }
     free(ptr);
     return inodes;
-}
+}*/
 
-file* read_inode_info(uint16_t inode){
-    file* f = (file*)malloc(sizeof(file));
+folder* read_folder_info(uint16_t inode){
+    if(get_nth_inode(inode) != FOLDER_SIGNATURE){
+        PrintString("Inode is not a folder\n\r");
+        return NULL;
+    }
+
+    folder* f = (folder*)malloc(sizeof(folder));
     f->inode = inode;
-    read((char*)f->name, 16, inode * BLOCK_SIZE + FAT_TABLE_SIZE + sizeof(uint16_t));
+    char* buffer = (char*)malloc(sizeof(char)*BLOCK_SIZE);
+    read(buffer, BLOCK_SIZE, inode * BLOCK_SIZE + FAT_TABLE_SIZE);
+    f->name = (char*)malloc(sizeof(char)*NAME_SIZE);
+    memcopy(f->name, buffer+SIGNATURE_SIZE, NAME_SIZE);
+    f->parent = *(uint16_t*)buffer;
+
+    uint16_t nb_of_cluster = 0;
+    f->children_names = (char**)malloc(sizeof(char*)*MAX_INODE_PER_DIR);
+    f->children_inodes = (uint16_t*)malloc(sizeof(uint16_t)*MAX_INODE_PER_DIR);
+    for(int i = 0; i<MAX_INODE_PER_DIR; i++){
+        uint8_t* child_inode = (uint8_t*)buffer + SIGNATURE_SIZE + NAME_SIZE + i * LINK_SIZE;
+        if(*((uint16_t*)child_inode) != NOT_USED){
+            nb_of_cluster++;
+        }
+        f->children_inodes[i] = *((uint16_t*)child_inode);
+        f->children_names[i] = (char*)malloc(sizeof(char)*(NAME_SIZE+1));
+        memcopy(f->children_names[i], child_inode+SIGNATURE_SIZE, NAME_SIZE);
+        f->children_names[i][NAME_SIZE] = '\0';
+    }
+    f->nb_of_cluster = nb_of_cluster;
+    free(buffer);
     return f;
 }
+
+uint8_t check_if_root(){
+    uint8_t* buffer = (uint8_t*)malloc(sizeof(uint8_t)*SIGNATURE_SIZE);
+    *buffer = 0x00;
+    *(buffer+1) = 0x00;
+
+    read((char*)buffer, SIGNATURE_SIZE, 0); 
+
+    if(*buffer == 0xFC && *(buffer+1) == 0xFF){ //TODO modifier ça si on change SIGNATURE_SIZE
+        free(buffer);
+        return 1;
+    }
+    free(buffer);
+    return 0;
+}
+
+void destroy_folder(folder* f){
+    free(f->name);
+    for(int i = 0; i<MAX_INODE_PER_DIR; i++){
+        free(f->children_names[i]);
+    }
+    free(f->children_names);
+    free(f->children_inodes);
+    free(f);
+}
+
+
+//TODO restructuré le projet un peu mdr
+bool strcmp2(char* a, char* b){
+    int n = 0;
+    while(a[n] != '\0'){
+        if(a[n] != b[n]){
+            return false;
+        } 
+        n++;
+    }
+
+    return a[n] == b[n];
+}
+
+uint16_t find_file_inode_by_name(uint16_t parent, char* name){
+    folder* f = NULL;
+    f = read_folder_info(parent);
+    if(f == NULL){
+        return -1;
+    }
+    for(int i = 0; i<MAX_INODE_PER_DIR; i++){
+        if(strcmp2(f->children_names[i], name) == 1){
+            uint16_t inode = f->children_inodes[i];
+            destroy_folder(f);
+            return inode;
+        }
+    }
+    destroy_folder(f);
+    return -1;
+}
+
+
+/*
+
+TODO des fonction à modifier si on prend plus de place!
+
+*/
+

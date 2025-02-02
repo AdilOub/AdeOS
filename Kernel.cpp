@@ -72,32 +72,6 @@ void test_disk(){
     Print(HexToString(get_status()));
 }
 
-void disk_test2(){
-    PrintString("Reading folder 0 (root dir)\n\r");
-    uint16_t* inodes = read_folder(0);
-    if(inodes == NULL){
-        Print("Error reading folder\n");
-        return;
-    }
-
-    for(int i = 0; false && i<MAX_INODE_PER_DIR; i++){
-        Print("Value of inode ");
-        Print(IntToString(i));
-        Print(": ");
-        Print(IntToString(i));
-        Print(" ");
-    }
-    Print("\n\r");
-    free(inodes);
-
-    Print("Test lecture information:\n\r", FOREGROUND_LIGHTCYAN);
-    file* f = read_inode_info(0);
-    Print("Name of inode 0: ");
-    Print(f->name);
-    Print("\n\r");
-    free(f);
-}
-
 void setup_disk_test(){
     
     setup_root(); //attention, doit être utiliser qu'une seule fois !!!
@@ -108,7 +82,7 @@ void setup_disk_test(){
     create_folder_in_parent(0, "usr");
 
 
-    uint8_t data_for_file[] = { 0xB8, 0x00, 0x00, 0x00, 0x00, 0xCD, 0x80, 0xC3}; //TODO fix le bug dans filesystem qui fait que tout n'est pas tout le temps écrit (exemple essayer d'écrire 17 va ignorer le last, faut écrire 24 ??)
+    uint8_t data_for_file[] = { 0xB8, 0x00, 0x00, 0x00, 0x00, 0xCD, 0x80, 0xC3, 0x01}; //TODO fix le bug dans filesystem qui fait que tout n'est pas tout le temps écrit (exemple essayer d'écrire 17 va ignorer le last, faut écrire 24 ??)
     //Print("size of data_for_file: ");
     //Print(IntToString((uint64_t)sizeof(data_for_file)));
     //Print("\n\r");
@@ -117,6 +91,27 @@ void setup_disk_test(){
     Print("File created: ");
     Print(IntToString(f), FOREGROUND_LIGHTGREEN);
     Print("\n\r");
+
+
+    folder* root = read_folder_info(0);
+    Print("Root folder: ");
+    Print(HexToString(root->inode), FOREGROUND_LIGHTGREEN);
+    Print("\n\rName: ");Print(root->name, FOREGROUND_LIGHTGREEN);
+    Print("\n\rParent: ");Print(HexToString(root->parent), FOREGROUND_LIGHTGREEN);
+    Print("\n\rNb of cluster: ");Print(IntToString(root->nb_of_cluster), FOREGROUND_LIGHTGREEN);
+    Print("\n\rChildren: ");
+    for(int i = 0; i<MAX_INODE_PER_DIR; i++){
+        Print("\n\r'");Print(root->children_names[i], FOREGROUND_LIGHTGREEN);Print("' ");Print(HexToString(root->children_inodes[i]), FOREGROUND_LIGHTGREEN);
+    }
+    
+    Print("\n\r");
+
+    uint16_t bin2 = find_file_inode_by_name(0, "bin");
+    Print("Bin folder: ");
+    Print(HexToString(bin2), FOREGROUND_LIGHTGREEN);
+    Print("\n\r");
+
+
 
     //free(data_for_file);
 
@@ -154,14 +149,22 @@ extern "C" void _start(){
     //PrintString(Test);
     PrintString("Bienvenue sur "); PrintString("AdeOs", FOREGROUND_LIGHTGREEN); PrintString(" !\n\r\n\r");
     
-    Print("Test affichage:\n\r", FOREGROUND_LIGHTCYAN);
-    Print("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
-    Print("!\"#$%&\'()*+,-./0123456789\n\r\n\r");
+    //Print("Test affichage:\n\r", FOREGROUND_LIGHTCYAN);
+    //Print("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
+    //Print("!\"#$%&\'()*+,-./0123456789\n\r\n\r");
 
 
 
 
     Print("Test filesystem:\n\r", FOREGROUND_LIGHTCYAN);
+
+    if(check_if_root()){
+        Print("Root detected\n\r", FOREGROUND_LIGHTGREEN);
+    }else{
+        Print("Root not detected\n\r", FOREGROUND_LIGHTRED);
+        Print("Setting up root...\n\r", FOREGROUND_LIGHTMAGENTA);
+        setup_disk_test();
+    }
     //setup_disk_test();    //TODO add root detector
     
 

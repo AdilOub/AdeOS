@@ -30,6 +30,12 @@ void* memset(void* start, uint64_t value, uint64_t num){
 }
 */
 
+
+/*
+
+TODO OPTIMISER AVEC uint64_t et alignement
+
+*/
 //moins rapide mais au moins c'est fiable...
 void* memset(void* start, uint8_t val, uint64_t size){
 	uint8_t* ptr = (uint8_t*)start;
@@ -40,7 +46,20 @@ void* memset(void* start, uint8_t val, uint64_t size){
 	return start;
 }
 
+//fix de memcopy
 
+void memcopy(void* destination, void* source, uint64_t num){
+	uint8_t* valPtr = (uint8_t*)source;
+	uint8_t* ptr = (uint8_t*)destination;
+	for(uint64_t i = 0; i < num; i++){
+		*ptr = *valPtr;
+		ptr++;
+		valPtr++;
+	}
+}
+
+/* 
+//mdr c'est ça de recopier du code en 2022(???) omg ça date, mais merci quand même poncho <3
 void memcopy(void* destination, void* source, uint64_t num){
 	if(num<=8){
 		uint8_t* valPtr = (uint8_t*)source;
@@ -66,7 +85,7 @@ void memcopy(void* destination, void* source, uint64_t num){
 		valPtr++;
 	}
 	return;
-}
+}*/
 
 void PrintMemoryMap(MemoryMapEntry* memoryMap, uint16_t position){
 	SetCursorPosition(position);
