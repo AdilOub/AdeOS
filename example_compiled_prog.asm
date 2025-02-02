@@ -1,3 +1,10 @@
+[BITS 64]
+
 main:
-    mov eax, 0x1242
+    push rbp
+    mov rbp, rsp
+    mov DWORD [rbp-4], edi
+    mov eax, DWORD [rbp-4]
+    add eax, 0x1
+    pop rbp
     ret

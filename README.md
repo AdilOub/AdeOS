@@ -26,3 +26,16 @@ memory: tout ce qui gère la mémoire (heap.cpp, memoru.cpp)
 graphics: tout ce qui permet d'afficher (Textprint, Render)
 utils: tout les fichiers qui sont pas directement lié à l'os (typedef, arbre, )
 core: Command & Compilateur & FileSystem
+
+NOTE3:
+Pour simplifier le compilo j'utilise des syscalls pour appeler des fonctions de base (surement print, malloc, et des fonction lecture/ecriture)
+int 0x80 (=128) en ref à unix
+dans rax le numéro du syscall
+le reste depend du syscall mais l'idée sera globalement: 
+- soit il utilise quelque registre
+- soit il utilise rbx et la pile
+
+
+rax: description : argument=description
+0 : affiche un msg de debug
+1 : print : rbx: addresse de la chaine de caractère

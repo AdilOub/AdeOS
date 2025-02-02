@@ -24,21 +24,11 @@ extern uint64_t isr8;
 // extern uint64_t isr12;
 // extern uint64_t isr13;
 extern uint64_t isr14;
-// extern uint64_t isr15;
 // extern uint64_t isr16;
 // extern uint64_t isr17;
 // extern uint64_t isr18;
 // extern uint64_t isr19;
 // extern uint64_t isr20;
-// extern uint64_t isr21;
-// extern uint64_t isr22;
-// extern uint64_t isr23;
-// extern uint64_t isr24;
-// extern uint64_t isr25;
-// extern uint64_t isr26;
-// extern uint64_t isr27;
-// extern uint64_t isr28;
-// extern uint64_t isr29;
 // extern uint64_t isr30;
 // extern uint64_t isr31;
 
@@ -50,8 +40,6 @@ extern uint64_t isr32; //timer
 extern uint64_t isr33; //keyboard
 
 extern uint64_t isr44; //mouse ps2
-
-extern uint64_t isr38;
 
 extern uint64_t isr128; //software interupt, 128=0x80 arbritraire 
 
@@ -148,14 +136,6 @@ void InitIDT(){
 	_idt[33].selector = 0x08;
 	_idt[33].types_attr = 0x8e;
     
-    //floppy disk irq6 donc 0x26 ie 38
-    _idt[38].zero = 0;
-    _idt[38].offset_low = (uint16_t)(((uint64_t)&isr38 & 0x000000000000ffff));
-    _idt[38].offset_mid = (uint16_t)(((uint64_t)&isr38 & 0x00000000ffff0000) >> 16);
-    _idt[38].offset_high = (uint32_t)(((uint64_t)&isr38 & 0xffffffff00000000) >> 32);
-    _idt[38].ist = 0;
-    _idt[38].selector = 0x08;
-    _idt[38].types_attr = 0x8e;
 
     //mouse
     _idt[44].zero = 0;
@@ -198,14 +178,12 @@ void InitIDT(){
 }
 
 
-//software interupt
-extern "C" void isr128_handler(){
-    asm("cli");
-    PrintString("isr128 called\n\r", BACKGROUND_BLUE);
-    asm("sti");
-    outb(0x20, 0x20);
-    outb(0xa0, 0x20);
-}
+/*
+
+HARDWARE INTERUPTS
+
+*/
+
 
 
 //timer remap !
@@ -293,7 +271,50 @@ void set_flpydisk_int(uint8_t val){
 
 
 
+//software interupt
+uint64_t handle_syscall(uint64_t syscall);
 
+extern "C" void isr128_handler(){
+    asm("cli");
+    uint64_t syscall = 0;
+    asm("mov %%rax, %0" : "=r"(syscall) : : "rax");
+    if(syscall == 0){
+        PrintString("syscall 0\n\r", BACKGROUND_BLUE);
+    }else{
+        handle_syscall(syscall);
+    }
+    outb(0x20, 0x20);
+    outb(0xa0, 0x20);
+    asm("sti");
+
+}
+
+uint64_t handle_syscall(uint64_t syscall){
+    uint64_t arg1 = 0;
+    switch (syscall)
+    {
+        case 1: //print, address is in rbx
+            asm("mov %%rbx, %0" : "=r"(arg1) : : "rbx");
+            PrintString("syscall 1\n\r", BACKGROUND_BLUE);
+            PrintString(HexToString(arg1));
+            PrintString("\n\r", BACKGROUND_BLUE);
+            PrintString((char*)arg1);
+            PrintString("\n\ri am done\n\r", BACKGROUND_BLUE | FOREGROUND_RED);
+
+            break;
+        default:
+            PrintString("syscall default\n\r", BACKGROUND_RED);
+            break;
+    }
+
+    return 0;
+}
+
+/*
+
+CPU ERROR HANDLER
+
+*/
 
 
 
@@ -419,13 +440,7 @@ extern "C" void isr14_handler(){
     asm("hlt");
 }
 
-// extern "C" void isr15_handler(){
-//     SetCursorPosition(0);asm("cli");
-//     PrintString("Kernel panic: reserved\n\r", BACKGROUND_RED | FOREGROUND_WHITE);
-//     //c'est surement grave
-//     asm("hlt");
-// }
-
+// i think we need to enable this one for backward compatibility (cf. le wiki comme d'hab)
 // extern "C" void isr16_handler(){
 //     SetCursorPosition(0);asm("cli");
 //     PrintString("Kernel panic: x87 FPU floating-point error\n\r", BACKGROUND_RED | FOREGROUND_WHITE);
@@ -468,72 +483,9 @@ extern "C" void isr14_handler(){
 //     asm("hlt");
 // }
 
-// extern "C" void isr22_handler(){
-//     SetCursorPosition(0);asm("cli");
-//     PrintString("Kernel panic: reserved\n\r", BACKGROUND_RED | FOREGROUND_WHITE);
-//     //c'est surement grave
-//     asm("hlt");
-// }
-
-// extern "C" void isr23_handler(){
-//     SetCursorPosition(0);asm("cli");
-//     PrintString("Kernel panic: reserved\n\r", BACKGROUND_RED | FOREGROUND_WHITE);
-//     //c'est surement grave
-//     asm("hlt");
-// }
-
-// extern "C" void isr24_handler(){
-//     SetCursorPosition(0);asm("cli");
-//     PrintString("Kernel panic: reserved\n\r", BACKGROUND_RED | FOREGROUND_WHITE);
-//     //c'est surement grave
-//     asm("hlt");
-// }
-
-// extern "C" void isr25_handler(){
-//     SetCursorPosition(0);asm("cli");
-//     PrintString("Kernel panic: reserved\n\r", BACKGROUND_RED | FOREGROUND_WHITE);
-//     //c'est surement grave
-//     asm("hlt");
-// }
-
-// extern "C" void isr26_handler(){
-//     SetCursorPosition(0);asm("cli");
-//     PrintString("Kernel panic: reserved\n\r", BACKGROUND_RED | FOREGROUND_WHITE);
-//     //c'est surement grave
-//     asm("hlt");
-// }
-
-// extern "C" void isr27_handler(){
-//     SetCursorPosition(0);asm("cli");
-//     PrintString("Kernel panic: reserved\n\r", BACKGROUND_RED | FOREGROUND_WHITE);
-//     //c'est surement grave
-//     asm("hlt");
-// }
-
-// extern "C" void isr28_handler(){
-//     SetCursorPosition(0);asm("cli");
-//     PrintString("Kernel panic: reserved\n\r", BACKGROUND_RED | FOREGROUND_WHITE);
-//     //c'est surement grave
-//     asm("hlt");
-// }
-
-// extern "C" void isr29_handler(){
-//     SetCursorPosition(0);asm("cli");
-//     PrintString("Kernel panic: reserved\n\r", BACKGROUND_RED | FOREGROUND_WHITE);
-//     //c'est surement grave
-//     asm("hlt");
-// }
-
 // extern "C" void isr30_handler(){
 //     SetCursorPosition(0);asm("cli");
 //     PrintString("Kernel panic: security exception\n\r", BACKGROUND_RED | FOREGROUND_WHITE);
-//     //c'est surement grave
-//     asm("hlt");
-// }
-
-// extern "C" void isr31_handler(){
-//     SetCursorPosition(0);asm("cli");
-//     PrintString("Kernel panic: reserved\n\r", BACKGROUND_RED | FOREGROUND_WHITE);
 //     //c'est surement grave
 //     asm("hlt");
 // }

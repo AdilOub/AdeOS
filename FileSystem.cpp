@@ -168,7 +168,7 @@ uint16_t create_file(uint16_t parent, char* data, uint16_t nb_of_cluster){
     free(clusters);
     return first_cluster;
 }
-
+//TODO maybe add a size parameter 
 uint16_t create_file_in_parent(uint16_t parent, char* name, char* data){
     uint64_t size = strlen(data);
     uint16_t nb_of_cluster = (size / BLOCK_SIZE) + !!(size%BLOCK_SIZE); //j'aime bien, !! pour avoir 0 ou 1

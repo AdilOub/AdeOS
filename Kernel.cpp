@@ -78,21 +78,18 @@ void setup_disk_test(){
 
 
     int t = create_folder_in_parent(0, "test");
-    create_folder_in_parent(0, "bin");
+    int bin = create_folder_in_parent(0, "bin");
     create_folder_in_parent(0, "usr");
-    create_folder_in_parent(t, "HIHI");
 
 
-    char* data = (char*) malloc(BLOCK_SIZE*2);
-    for(int i = 0; i<BLOCK_SIZE; i++){
-        data[i] = '-';
+    char* data_for_file = (char*)malloc(BLOCK_SIZE*2);
+    for(int i = 0; i<BLOCK_SIZE*2; i++){
+        data_for_file[i] = 'a';
     }
-    for(int i = BLOCK_SIZE; i<BLOCK_SIZE*2; i++){
-        data[i] = '+';
-    }
-    data[BLOCK_SIZE*2-1] = '*';
-    write_in_data(data, "Hello World");
-    int f = create_file_in_parent(0, "test.txt", data);
+    data_for_file[BLOCK_SIZE*2-1] = '\0';
+    write_in_data(data_for_file, "Hello world !\n\r"); //TODO this file should be the compiled version of an simple calculator
+    uint16_t f = create_file_in_parent(bin, "arithm", data_for_file);
+    free(data_for_file);
 
 
 
@@ -178,69 +175,77 @@ extern "C" void _start(){
     asm("nop");
 
 
-    //écrit une fonction en asm qui renvoie la valeur 0x69
-    uint8_t asm_code[] = {0xB8, 0x69, 0x00, 0x00, 0x00, 0xC3};
+    // //écrit une fonction en asm qui renvoie la valeur 0x69
+    // uint8_t asm_code[] = {0xB8, 0x69, 0x00, 0x00, 0x00, 0xC3, 0xF4};
+    // Print("Code de la fonction en asm: ");
+    // for(int i = 0; i<6; i++){
+    //     Print(HexToString(asm_code[i]));
+    //     Print(" ");
+    // }
+
+    // //affiche la valeur renvoyée par la fonction
+    // Print("Appel de la fonction en asm\n\r");
+    // uint8_t ret = 0;
+    // int n = 0x1269;
+    // asm volatile ("call %1\n\t"
+    //               "mov %0, %%al\n\t"
+    //               : "=r"(ret)
+    //               : "r"(asm_code)
+    //               : "rax", "rbx", "rcx", "rdx");
+    // Print("Valeur renvoyee: 0x");
+    // Print(HexToString(ret));
+    // Print("\n\r");
+
+
+    //     asm("call %0" : : "r"(hellow_addr));
+
+    Print("Everything is fine\n\r", FOREGROUND_LIGHTGREEN);
+
+    //83 c0 01  = add eax, 1
+    uint8_t asm_code2[] = {0x83, 0xC0, 0x01, 0xC3};
     Print("Code de la fonction en asm: ");
-    for(int i = 0; i<6; i++){
-        Print(HexToString(asm_code[i]));
-        Print(" ");
-    }
-
-    //affiche la valeur renvoyée par la fonction
-    Print("Appel de la fonction en asm\n\r");
-    uint8_t ret = 0;
-    int n = 0x1269;
-    asm volatile ("call %1\n\t"
-                  "mov %0, %%al\n\t"
-                  : "=r"(ret)
-                  : "r"(asm_code)
-                  : "rax", "rbx", "rcx", "rdx");
-    Print("Valeur renvoyee: 0x");
-    Print(HexToString(ret));
-    Print("\n\r");
-
-
-        asm("call %0" : : "r"(hellow_addr));
-
-
-    //écrit une fonction asm qui affiche 12 avec la fonction afficher_rigolo
-    uint8_t asm_code2[] = {0x6a, 0x0c, 0xc3, 0xF4, 0xF4, 0xF4, 0xF4, 0xF4};
-    Print("Code de la fonction en asm: ");
-    for(int i = 0; i<8; i++){
+    for(int i = 0; i<4; i++){
         Print(HexToString(asm_code2[i]));
         Print(" ");
     }
 
-    //affiche l'addresse actuelle de rip
-    Print("\n\rAdresse de rip: ");  
-    uint32_t rip = GET_RIP;
-    Print(HexToString(rip));
+    Print("Address of the function in asm: ");
+    Print(HexToString((uint64_t)asm_code2));
+    Print("\n\r");
+
+    //affiche la valeur renvoyée par la fonction
+    Print("Appel de la fonction en asm\n\r");
+    char* str= "omg";
+    uint64_t addstr = (uint64_t)str;
+    Print("Address of the string: ");
+    Print(HexToString(addstr));
+    Print("\n\r");
+
+
+    //pour l'appel, l'argument est 0x69 et doit être stocké dans %edi avant un call. puis on doit appeler hellow
+    uint32_t ret2 = 0x12;
+    asm volatile ("mov $0x69, %%eax\n\t"
+                  "call *%1\n\t"
+                  "mov %%eax, %0\n\t"
+                  "push %%rax\n\t"
+                  "push %%rbx\n\t"
+                  "mov $1, %%rax\n\t"
+                  "mov %2, %%rbx\n\t"
+                  "int $0x80\n\t"
+                  "pop %%rbx\n\t"
+                  "pop %%rax\n\t"
+                  "call *%3\n\t"
+                  : "=b"(ret2)
+                  : "c"(asm_code2) ,"m"(addstr), "m"(hellow_addr)
+                  : );
+    Print("Valeur renvoyee: 0x");
+    Print(HexToString(ret2));
     Print("\n\r");
 
     
-    //Affiche l'addresse de la fonction:
-    Print("Adresse de la fonction en asm: ");
-    Print(HexToString((uint64_t)asm_code2));
-    Print("\n\rce qui donne un offset de: ");
-    Print(IntToString((long long)((uint64_t)(asm_code2) - GET_RIP)));
-    Print("\n\r");
 
 
-
-    //execute la fonction
-    Print("Appel de la fonction en asm\n\r");
-    uint32_t result = 0;
-    asm ( "lea (%0), %%rax\n\t"
-                   "call %%rax\n\t"
-                   "pop %%rax\n\t"
-                   "mov %%rax, %1\n\t"
-                  : "=r"(result)
-                  : "r"(asm_code2)
-                  : "rbx", "rcx", "rdx");
-    Print("Valeur renvoyee: ");
-    Print(IntToString(result));
-    Print("\n\r");        
-
+    
     //call the function hellow in assembly
 
 
@@ -272,4 +277,12 @@ donc on a surement une erreur quand on lit en 2 fois
 il faut comprendre cette erreur pour aficher le message de la fonction test :)
 
 cf. disk_read.asm pour les explications.
+*/
+
+
+/*
+Idée du pseudo linker:
+on rajoute les libs dans le fichier à compiler
+Le compilateur s'occupe de charger l'addresse des fonctions dans les libs importante
+
 */
