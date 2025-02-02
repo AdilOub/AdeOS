@@ -4,6 +4,8 @@
 #include "TextPrint.h"
 #include "Keyboard.h"
 #include "KBScanCodeSet1.h"
+#include "FileSystem.h"
+#include "Heap.h"
 
 
 void clearCmdBuffer(char* buffer, int bufferSize);

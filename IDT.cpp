@@ -279,7 +279,7 @@ extern "C" void isr128_handler(){
     uint64_t syscall = 0;
     asm("mov %%rax, %0" : "=r"(syscall) : : "rax");
     if(syscall == 0){
-        PrintString("syscall 0\n\r", BACKGROUND_BLUE);
+        PrintString("syscall 0\n\r", FOREGROUND_LIGHTMAGENTA);
     }else{
         handle_syscall(syscall);
     }

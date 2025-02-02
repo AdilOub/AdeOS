@@ -72,6 +72,32 @@ void test_disk(){
     Print(HexToString(get_status()));
 }
 
+void disk_test2(){
+    PrintString("Reading folder 0 (root dir)\n\r");
+    uint16_t* inodes = read_folder(0);
+    if(inodes == NULL){
+        Print("Error reading folder\n");
+        return;
+    }
+
+    for(int i = 0; false && i<MAX_INODE_PER_DIR; i++){
+        Print("Value of inode ");
+        Print(IntToString(i));
+        Print(": ");
+        Print(IntToString(i));
+        Print(" ");
+    }
+    Print("\n\r");
+    free(inodes);
+
+    Print("Test lecture information:\n\r", FOREGROUND_LIGHTCYAN);
+    file* f = read_inode_info(0);
+    Print("Name of inode 0: ");
+    Print(f->name);
+    Print("\n\r");
+    free(f);
+}
+
 void setup_disk_test(){
     
     setup_root(); //attention, doit être utiliser qu'une seule fois !!!
@@ -82,29 +108,31 @@ void setup_disk_test(){
     create_folder_in_parent(0, "usr");
 
 
-    char* data_for_file = (char*)malloc(BLOCK_SIZE*2);
-    for(int i = 0; i<BLOCK_SIZE*2; i++){
-        data_for_file[i] = 'a';
-    }
-    data_for_file[BLOCK_SIZE*2-1] = '\0';
-    write_in_data(data_for_file, "Hello world !\n\r"); //TODO this file should be the compiled version of an simple calculator
-    uint16_t f = create_file_in_parent(bin, "arithm", data_for_file);
-    free(data_for_file);
+    uint8_t data_for_file[] = { 0xB8, 0x00, 0x00, 0x00, 0x00, 0xCD, 0x80, 0xC3}; //TODO fix le bug dans filesystem qui fait que tout n'est pas tout le temps écrit (exemple essayer d'écrire 17 va ignorer le last, faut écrire 24 ??)
+    //Print("size of data_for_file: ");
+    //Print(IntToString((uint64_t)sizeof(data_for_file)));
+    //Print("\n\r");
+    uint64_t size = sizeof(data_for_file);
+    uint16_t f = create_file_in_parent(bin, "print", (char*)data_for_file, size);
+    Print("File created: ");
+    Print(IntToString(f), FOREGROUND_LIGHTGREEN);
+    Print("\n\r");
+
+    //free(data_for_file);
 
 
-
-    create_folder_in_parent(0, "test2");
-
-    char* s = (char*)malloc(BLOCK_SIZE*2);
-    *s = 'E';
+    // char* s = (char*)malloc(BLOCK_SIZE);
+    // *s = 'E';
+    // *(s+17)=0x69;
     
-    read_begin_of_file(f, s, BLOCK_SIZE*2);
-    Print("Read: ");
-    PrintString(s);
-    Print("\n\r");
-    Print("\n\r");
-    Print("Everything is fine\n\r");
-    free(s);
+    // read_begin_of_file(f, s, 17);
+    // Print("Read: 0x");Print(HexToString(*s));Print(" and 0x");Print(HexToString(*(s+17)));Print("\n\r");
+    // Print("\n\r");
+    // Print("Everything is fine if it's 0x89-0xC3\n\r");
+    // free(s);
+
+
+    //disk_test2();
     
 }
 
@@ -131,48 +159,49 @@ extern "C" void _start(){
     Print("!\"#$%&\'()*+,-./0123456789\n\r\n\r");
 
 
+
+
     Print("Test filesystem:\n\r", FOREGROUND_LIGHTCYAN);
-    //setup_disk_test();
-    PrintString("Reading folder 0 (root dir)\n\r");
-    uint16_t* inodes = read_folder(0);
-    if(inodes == NULL){
-        Print("Error reading folder\n");
-        return;
-    }
-
-    for(int i = 0; false && i<MAX_INODE_PER_DIR; i++){
-        Print("Value of inode ");
-        Print(IntToString(i));
-        Print(": ");
-        Print(IntToString(i));
-        Print(" ");
-    }
-    Print("\n\r");
-    free(inodes);
-
-    Print("Test lecture information:\n\r", FOREGROUND_LIGHTCYAN);
-    file* f = read_inode_info(0);
-    Print("Name of inode 0: ");
-    Print(f->name);
-    Print("\n\r");
-    free(f);
+    //setup_disk_test();    //TODO add root detector
+    
 
 
-    Print("\n\r Everything is fine\n\r", FOREGROUND_GREEN);
+    Print("\n\rEverything is fine\n\r", FOREGROUND_GREEN);
 
     //padding to see in hexfile, 64 'a'
 
+
+    //     asm("call %0" : : "r"(hellow_addr));
+
+    Print("Everything is fine...\n\r", FOREGROUND_LIGHTGREEN);
+
+
+
+
+    
+    //call the function hellow in assembly
+
+
+
+    while (true)
+    {
+        /* code */
+    }
+    
+
+    return;
+    
+}
+
+void test_inline_call(){
+    
     //get address of the function hellow
     uint64_t hellow_addr = (uint64_t)hellow;
     Print("Address of hellow: ");
     Print(HexToString(hellow_addr));
     Print("\n\r");
     hellow();
-    asm("nop");
-    asm("nop");
-    asm("nop");
-    asm("nop");
-    asm("nop");
+
 
 
     // //écrit une fonction en asm qui renvoie la valeur 0x69
@@ -197,10 +226,6 @@ extern "C" void _start(){
     // Print("\n\r");
 
 
-    //     asm("call %0" : : "r"(hellow_addr));
-
-    Print("Everything is fine\n\r", FOREGROUND_LIGHTGREEN);
-
     //83 c0 01  = add eax, 1
     uint8_t asm_code2[] = {0x83, 0xC0, 0x01, 0xC3};
     Print("Code de la fonction en asm: ");
@@ -221,7 +246,7 @@ extern "C" void _start(){
     Print(HexToString(addstr));
     Print("\n\r");
 
-
+    //cette fonction maaaarche ! en gros elle montre la nécessité d'utiliser des registre pour call des fonction écrite en mémoire artificiellement, mais qu'on peut utiliser la mémoire si la fonction existe déjà (avec un ptr) 
     //pour l'appel, l'argument est 0x69 et doit être stocké dans %edi avant un call. puis on doit appeler hellow
     uint32_t ret2 = 0x12;
     asm volatile ("mov $0x69, %%eax\n\t"
@@ -236,28 +261,12 @@ extern "C" void _start(){
                   "pop %%rax\n\t"
                   "call *%3\n\t"
                   : "=b"(ret2)
-                  : "c"(asm_code2) ,"m"(addstr), "m"(hellow_addr)
+                  : "c"(asm_code2) ,"m"(addstr), "m"(hellow_addr), "m"(asm_code2)
                   : );
     Print("Valeur renvoyee: 0x");
     Print(HexToString(ret2));
     Print("\n\r");
 
-    
-
-
-    
-    //call the function hellow in assembly
-
-
-
-    while (true)
-    {
-        /* code */
-    }
-    
-
-    return;
-    
 }
 
 

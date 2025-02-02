@@ -125,10 +125,9 @@ uint16_t create_folder_in_parent(uint16_t parent, char* name){
         return -1;
     }
 
-    PrintString("Creating folder s in parent d at pos s\n\r");
-    PrintString(name);
-    PrintString(IntToString(parent));
-    PrintString(IntToString(not_used));
+    PrintString("Creating folder s in parent d at pos s: ");
+    PrintString(name); PrintString(" ");PrintString(IntToString(parent)); PrintString(" ");PrintString(IntToString(not_used));
+    PrintString("\n\r");
 
     //on crée le dossier
     uint16_t new_inode = create_folder(parent, name);
@@ -143,7 +142,7 @@ uint16_t create_folder_in_parent(uint16_t parent, char* name){
 }
 
 
-uint16_t create_file(uint16_t parent, char* data, uint16_t nb_of_cluster){
+uint16_t create_file(uint16_t parent, char* data, uint16_t nb_of_cluster, uint64_t size){
     //on veut commencer par trouver nb_of_cluster clusters libres dnas la fat table
     uint16_t* clusters = (uint16_t*)malloc(nb_of_cluster * sizeof(uint16_t));
 
@@ -154,7 +153,20 @@ uint16_t create_file(uint16_t parent, char* data, uint16_t nb_of_cluster){
             PrintString("No more space in the fat table\n\r");
             return -1;
         }
-        write(data + chunk * BLOCK_SIZE, chunk == nb_of_cluster-1 ? strlen(data+chunk*BLOCK_SIZE) : BLOCK_SIZE, clusters[chunk] * BLOCK_SIZE + FAT_TABLE_SIZE);
+        //si c'est le dernier, on écrit que la taille restante
+        //TODO fix et écrire la taille restante + 0 en padding pour la fin de block
+        if(chunk == nb_of_cluster-1){
+            PrintString("Last cluster\n\r");
+            PrintString("Size: ");PrintString(IntToString(size));PrintString("\n\r");
+            //print value of last element
+            PrintString("Value of last element: ");PrintString(HexToString(data[size-1]));PrintString("\n\r");
+            //print val of chunk
+            PrintString("Value of chunk: ");PrintString(IntToString(chunk));PrintString("\n\r");
+        }else{
+            PrintString("Not last cluster\n\r", FOREGROUND_LIGHTCYAN);
+        }
+        
+        write(data + chunk * BLOCK_SIZE, chunk == nb_of_cluster-1 ? size%BLOCK_SIZE : BLOCK_SIZE, clusters[chunk] * BLOCK_SIZE + FAT_TABLE_SIZE); //WHY DECALAGE DE 7
     }
 
     for(int chunk = 0; chunk < nb_of_cluster-1; chunk++){
@@ -168,9 +180,10 @@ uint16_t create_file(uint16_t parent, char* data, uint16_t nb_of_cluster){
     free(clusters);
     return first_cluster;
 }
+
 //TODO maybe add a size parameter 
-uint16_t create_file_in_parent(uint16_t parent, char* name, char* data){
-    uint64_t size = strlen(data);
+uint16_t create_file_in_parent(uint16_t parent, char* name, char* data, uint64_t size){
+    //uint64_t size = strlen(data);
     uint16_t nb_of_cluster = (size / BLOCK_SIZE) + !!(size%BLOCK_SIZE); //j'aime bien, !! pour avoir 0 ou 1
     //uint16_t nb_of_cluster = (size >> BLOCK_SIZE_POW2) + !!(size & BLOCK_SIZE_MASK); //encore plus opti parceque why not mdr
 
@@ -184,7 +197,7 @@ uint16_t create_file_in_parent(uint16_t parent, char* name, char* data){
 
 
     //on crée le fichier
-    uint16_t new_inode = create_file(parent, data, nb_of_cluster);
+    uint16_t new_inode = create_file(parent, data, nb_of_cluster, size);
     uint16_t* ptr = (uint16_t*)malloc(sizeof(uint16_t));
     *ptr = new_inode;
 

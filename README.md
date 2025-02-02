@@ -39,3 +39,10 @@ le reste depend du syscall mais l'idée sera globalement:
 rax: description : argument=description
 0 : affiche un msg de debug
 1 : print : rbx: addresse de la chaine de caractère
+
+
+
+
+Encore une note:
+possibilité d'avoir des commandes compilé dans le file system et de les lancer en chargeant leur fichier en mémoire + en utilisant un handler tout simple (cf. la fonction asm_handler dans Command.cpp) qui gère le passage des arguments du code kernel (en C) à la fonction compilé (en asm)
+Cette fonction compilé peut appeler des interupts sytème en utilisant la NOTE3, et est censé (TODO: test similaire au truc à la fin de Kernel.C) pouvoir appeler d'autre fonction par leur addresse (technique lea + call)

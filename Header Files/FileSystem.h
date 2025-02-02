@@ -39,7 +39,7 @@ void setup_root();
 
 //creation
 uint16_t create_folder_in_parent(uint16_t parent, char* name);
-uint16_t create_file_in_parent(uint16_t parent, char* name, char* data);
+uint16_t create_file_in_parent(uint16_t parent, char* name, char* data, uint64_t size);
 void write_in_data(char* data, const char* stuff);
 uint16_t read_begin_of_file(uint16_t inode, char* buffer, int size);
 

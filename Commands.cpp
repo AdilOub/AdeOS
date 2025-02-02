@@ -379,10 +379,29 @@ void initCmds(){
 }
 
 
+void asm_handler(uint64_t arg0, uint64_t arg1, uint64_t ptr){
+    asm ( "mov %1, %%rax\n\t"
+          "mov %2, %%rbx\n\t"
+          "call *%0\n\t"
+    : : "c"(ptr), "m"(arg0), "m"(arg1)
+    );
+    return;
+}
 
 void handleCmds(char* cmd){
     //todo separer la cmd et les arguments
-    PrintString("getting cmd (actually no)...\n\r", FOREGROUND_GREEN);
+    PrintString("getting cmd (actually just testint print)...\n\r", FOREGROUND_GREEN);
+    uint8_t *ptr = (uint8_t*)malloc(BLOCK_SIZE);
+    read_begin_of_file(4, (char*)ptr, BLOCK_SIZE);
+    //PrintString(HexToString(*ptr), FOREGROUND_LIGHTRED);
+    uint64_t arg0 = 0;
+    uint64_t arg1 = 0;
+    asm_handler(arg0, arg1, (uint64_t)ptr);
+
+
+    free(ptr);
+
+
     endCmd();
     return;
     void (*cmdFunc)(char*) = get(cmdTable, cmd);
