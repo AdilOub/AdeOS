@@ -21,6 +21,7 @@ INPUT
     compiled/DiskRead.o
     compiled/FileSystem.o
     compiled/Compiler.o
+    compiled/Mouse.o
 )
 
 OUTPUT

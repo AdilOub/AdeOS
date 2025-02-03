@@ -3,7 +3,7 @@ bootloader: Sector1/bootloader.asm Sector2+/extended_program.asm binaries.asm
 	nasm -f elf64 Sector2+/extended_program.asm -o compiled/extended_program.o
 	nasm -f elf64 binaries.asm -o compiled/binaries.o
 
-kernel: Kernel.cpp IDT.cpp IO.cpp Keyboard.cpp Memory.cpp TextPrint.cpp Commands.cpp Heap.cpp ASCITable.cpp Render.cpp Math.cpp Timer.cpp Timer.cpp DiskRead.cpp FileSystem.cpp
+kernel: Kernel.cpp IDT.cpp IO.cpp Keyboard.cpp Memory.cpp TextPrint.cpp Commands.cpp Heap.cpp ASCITable.cpp Render.cpp Math.cpp Timer.cpp Timer.cpp DiskRead.cpp FileSystem.cpp Mouse.cpp
 	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c Kernel.cpp -o compiled/kernelC.o
 	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c IDT.cpp -o compiled/IDT.o
 	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c IO.cpp -o compiled/IO.o
@@ -19,6 +19,7 @@ kernel: Kernel.cpp IDT.cpp IO.cpp Keyboard.cpp Memory.cpp TextPrint.cpp Commands
 	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c DiskRead.cpp -o compiled/DiskRead.o
 	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c FileSystem.cpp -o compiled/FileSystem.o
 	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c Compiler.cpp -o compiled/Compiler.o
+	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c Mouse.cpp -o compiled/Mouse.o
 
 link: 
 	ld -T"link.ld"

@@ -215,7 +215,7 @@ extern "C" void isr32_handler(){
 extern "C" void isr33_handler(){
     asm("cli");
 
-
+    setKeyPressed();
     //PrintString("isr1", BACKGROUND_BLUE);
     uint8_t scanCode = inb(0x60);
     //uint8_t chr = 0;
@@ -309,6 +309,11 @@ uint64_t handle_syscall(uint64_t syscall){
 
     return 0;
 }
+
+
+
+
+
 
 /*
 

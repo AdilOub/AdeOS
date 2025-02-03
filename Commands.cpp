@@ -216,90 +216,6 @@ void cube(char* args){
 }
 #pragma endregion cmds
 
-
-
-//TODO: trouver une permutation pour avoir une fonction de hachage plus efficace voir changer de fonction de hachage
-
-//une permutation de [0;255]
-#define CMDS_TABLE_SIZE 256
-unsigned int pearson_table[CMDS_TABLE_SIZE] = {131,73,96,115,237,223,74,236,41,166,186,192,242,34,56,122,173,164,84,138,152,167,231,43,8,184,63,136,195,159,146,144,102,226,10,52,38,40,163,25,88,199,83,36,37,233,94,212,11,178,64,85,215,180,240,194,210,130,134,82,109,214,72,135,112,68,220,20,45,225,252,181,53,104,126,157,234,213,98,200,127,227,92,255,91,78,65,13,9,175,31,7,238,118,156,217,105,3,254,29,162,250,170,116,100,93,209,230,222,39,16,185,132,216,190,125,137,249,95,26,168,169,70,123,177,114,241,196,108,239,15,103,59,67,193,229,202,171,203,208,66,0,87,189,154,183,201,120,6,149,142,197,139,46,50,80,219,151,57,161,86,117,22,49,30,153,205,77,32,5,228,12,211,124,89,243,1,33,14,48,140,76,232,24,119,148,188,90,113,75,207,245,58,69,97,111,179,145,19,2,28,55,110,221,23,147,107,21,27,44,4,129,158,62,61,155,251,54,206,187,101,248,42,128,99,71,244,141,246,17,176,79,235,133,204,121,174,81,35,224,191,51,143,160,60,18,172,165,150,106,182,198,253,247,218,47};
-cmd_table* cmdTable;
-
-//collision entre int49 et timer
-
-
-//const void cmdFuncs[]  = {&helpCmd, &clearCmd, &arrowCmd, &langFrCmd, &langEnCmd, &sltCmd, &fatalCmd, &rebootCmd, &interupt49};
-
-
-unsigned int pearson(const char* str){
-    //PrintString("Hashing: ", FOREGROUND_LIGHTGRAY, BACKGROUND_BLACK);
-    //PrintString(str, FOREGROUND_LIGHTGRAY, BACKGROUND_BLACK);
-    //PrintString("\n\r", FOREGROUND_LIGHTGRAY, BACKGROUND_BLACK);
-    unsigned int hash = 0;
-    for (int i = 0; str[i] != '\0'; i++)
-    {
-        hash = pearson_table[hash ^ str[i]];
-    }
-    return hash;
-}
-
-
-unsigned int hashfunction(char *key){
-    int hash = 0;
-    for (int i = 0; key[i] != '\0'; i++)
-    {
-        hash += key[i];
-    }
-    return hash % CMDS_TABLE_SIZE; //le modulo est inutile
-}
-
-
-unsigned int djb2(char* str){
-    unsigned long hash = 5381;
-    int c;
-    while ((c = *str++)){
-        hash = ((hash << 5) + hash) + c; // 33 parceque ca marche bien 
-    }
-    return hash;
-}
-
-
-cmd_table* create_table(){
-    cmd_table* t = (cmd_table*)malloc(sizeof(cmd_table));
-    t->items = (cmd_item*)malloc(sizeof(cmd_item) * CMDS_TABLE_SIZE);
-    for(int i = 0; i<CMDS_TABLE_SIZE; i++){
-        t->items[i].key = NULL;
-        t->items[i].value = NULL;
-    }
-    t->size = CMDS_TABLE_SIZE;
-    t->count = 0;
-    return t;
-}
-
-void set(cmd_table* t, const char* key, void (*value)(char*)){
-    int index = pearson(key);
-    if(t->items[index].key == NULL){
-        t->items[index].key = key;
-        t->items[index].value = value;
-        t->count++;
-    }
-}
-
-void (*get(cmd_table* t, const char* key))(char*){
-    int index = pearson(key);
-
-    if(t->items[index].key == NULL){
-        //printf("No value found for key: %s\n", key);
-        //PrintString("Pas de valeur pour la clé: ", FOREGROUND_RED);
-        //PrintString(key, FOREGROUND_RED);
-        return NULL;
-    } else {
-        return t->items[index].value;
-    }
-}
-
-
-
 void endCmd(){
     PrintString("\n\r>");
 }
@@ -330,55 +246,6 @@ bool strcmp(char* a, const char* b){
     return a[n] == b[n];
 }
 
-
-//const char* cmds[] = {"help", "clear", "arrow", "langfr", "langen", "slt", "fatal", "reboot", "int32", "int49", "ttimer", "cube", "read"};
-
-void initCmds(){
-    //PrintString("Loading cmds...\n\r", FOREGROUND_GREEN);
-    //PrintString(IntToString(pearson_table[0]));
-
-    const char* cmds[] = {"help", "clear", "arrow", "langfr", "langen", "slt", "fatal", "reboot", "int32", "int49", "ttimer", "cube", "read"};
-
-    cmdTable = create_table();
-    //peut etre utiliser un fichier texte pour faire ça automatiquement
-    set(cmdTable, cmds[0], &helpCmd);
-    set(cmdTable, cmds[1], &clearCmd);
-
-    //on va afficher les addresses des char* 
-   /* PrintString("Address of help: ");
-    PrintString(HexToString((uint64_t)cmds[0]));
-    PrintString("\n\r");
-
-    PrintString("Address of clear: ");
-    PrintString(HexToString((uint64_t)cmds[1]));
-    PrintString("\n\r");
-
-    int index = pearson(cmds[0]);
-    PrintString("Index of help: ");
-    PrintString(HexToString(index));
-    PrintString("\n\r");
-
-    index = pearson(cmds[1]);
-    PrintString("Index of clear: ");
-    PrintString(HexToString(index));
-    PrintString("\n\r");
-*/
-    set(cmdTable, "clear", &clearCmd);
-    set(cmdTable, "arrow", &arrowCmd);
-    set(cmdTable, "langfr", &langFrCmd);
-    set(cmdTable, "langen", &langEnCmd);
-    set(cmdTable, "slt", &sltCmd);
-    set(cmdTable, "fatal", &fatalCmd);
-    set(cmdTable, "reboot", &rebootCmd);
-    set(cmdTable, "int32", &raise_interupt32);
-    set(cmdTable, "int49", &raise_interupt49);
-    set(cmdTable, "ttimer", &timer);
-    set(cmdTable, "cube", &cube);
-    //set(cmdTable, "read", &readDiskCmd);
-    PrintString("Cmds loaded!\n\r", FOREGROUND_GREEN);
-}
-
-
 void asm_handler(uint64_t arg0, uint64_t arg1, uint64_t ptr){
     asm ( "mov %1, %%rax\n\t"
           "mov %2, %%rbx\n\t"
@@ -388,79 +255,100 @@ void asm_handler(uint64_t arg0, uint64_t arg1, uint64_t ptr){
     return;
 }
 
+
+uint8_t get_nb_of_args(char* cmd){
+    uint8_t n = 0;
+    uint8_t args = 0;
+    while(cmd[n] != '\0'){
+        n++;
+        if(cmd[n] == ' '){
+            args++;
+        }
+    }
+    return args + (*cmd != '\0');
+}
+
+uint8_t strportionlength(char* str, char sep){
+    uint8_t n = 0;
+    while(str[n] != sep && str[n] != '\0'){
+        n++;
+    }
+    return str[n] == '\0' ? (sep==0 ? n : -1) : n+1;
+}
+
+char** separe_string(char* str, char separator){
+    uint8_t nb_of_args = get_nb_of_args(str);
+    char** res = (char**)malloc(sizeof(char*) * nb_of_args);
+    char** res_begin = res;
+    char* str_begin = str;
+    uint8_t res_debut = 0;
+    while(*str != '\0'){
+        uint8_t len = strportionlength(str, separator);
+        *res = (char*)malloc(len+1);
+        for(int i = 0; i<len; i++){
+            (*res)[i] = str[i];
+        }
+        (*res)[len] = '\0';
+        res++;
+        str += len;
+    }
+    return res_begin;
+}
+
+
 void handleCmds(char* cmd){
     //todo separer la cmd et les arguments
-    PrintString("getting cmd (actually just testint print)...\n\r", FOREGROUND_GREEN);
-    uint8_t *ptr = (uint8_t*)malloc(BLOCK_SIZE);
-    read_begin_of_file(4, (char*)ptr, BLOCK_SIZE);
-    //PrintString(HexToString(*ptr), FOREGROUND_LIGHTRED);
-    uint64_t arg0 = 0;
-    uint64_t arg1 = 0;
-    asm_handler(arg0, arg1, (uint64_t)ptr);
-
-
-    free(ptr);
-
-
-    endCmd();
-    return;
-    void (*cmdFunc)(char*) = get(cmdTable, cmd);
-    PrintString("ok!\n\r", FOREGROUND_GREEN);
-    if(cmdFunc == NULL){
-        errorCmd(cmd);
+    //PrintString("handling...\n\r", FOREGROUND_GREEN);
+    PrintString("\n\r");
+    uint8_t nb_of_args = get_nb_of_args(cmd);
+    
+    if(nb_of_args == 0){
+        Print("\n\rNo cmd\n\r");
+        endCmd();
         return;
     }
-    (*cmdFunc)(NULL);
+
+    char** args = separe_string(cmd, ' ');
+
+    //affichage des arguments
+    for(int i = 0; i<nb_of_args; i++){
+        PrintString(args[i], FOREGROUND_LIGHTCYAN);
+        PrintString("\n\r", FOREGROUND_LIGHTCYAN);
+    }
+
+
+    //on essaye de trouver la commande dans bin
+    uint16_t bin = find_file_inode_by_name(0, "bin");
+    if(bin == 0xFFFF){
+        PrintString("No bin folder found\n\r", FOREGROUND_RED);
+        for(int i = 0; i<nb_of_args; i++){
+            free(args[i]);
+        }
+        free(args);
+        return;
+    }
+
+    uint16_t cmd_inode = find_file_inode_by_name(bin, args[0]);
+    if(cmd_inode == 0xFFFF){
+        errorCmd(args[0]);
+        for(int i = 0; i<nb_of_args; i++){
+            free(args[i]);
+        }
+        free(args);
+        return;
+    }
+
+
+    //on lit le fichier
+    uint8_t* buffer = (uint8_t*)malloc(BLOCK_SIZE);
+    read_begin_of_file(cmd_inode, (char*)buffer, BLOCK_SIZE);
+
+    //on execute la commande
+    asm_handler((uint64_t)args[1], (uint64_t)args[2], (uint64_t)buffer);
+    free(buffer);
+
+
     endCmd();
     return;
-}
 
-/*
-//j'avais pas encore connaisance des strucures de donnée
-//todo 1: utiliser une hashmap
-//todo 2: utiliser un systeme de fichier ou les commandes sont des exectuables dans un dossier (comme pour lionux)
-void handleCmds(char* cmd){
-    if(strcmp(cmd, "help")){
-        //PrintChar('n');
-        PrintString(" Cmds: help; clear; arrow; lang-fr; lang-en");
-        endCmd();
-    }
-    else if(strcmp(cmd, "clear")){
-        ClearScreen();
-        SetCursorPosition(PosFromCoord(0,0));
-        endCmd();
-    }else if(strcmp(cmd, "arrow")){
-        if(getArrowState()){
-            enableArrow(false);
-            PrintString(" Arrow disabled");
-        }else{
-            enableArrow(true);
-            PrintString(" Arrow enabled");
-        }
-        endCmd();
-    }else if(strcmp(cmd, "lang-fr")){
-        setLanguage(KBSet1::ScanCodeLookupTableAZERTY);
-        PrintString(" Keyboard set to azerty");
-        endCmd();
-    }else if(strcmp(cmd, "lang-en")){
-        setLanguage(KBSet1::ScanCodeLookupTableQWERTY);
-        PrintString(" Keyboard set to qwerty");
-        endCmd();
-    }else if(strcmp(cmd, "slt")){
-        ClearScreen(BACKGROUND_BLACK);
-        SetCursorPosition(0);
-        PrintString(Test);
-        endCmd();
-    }else if(strcmp(cmd, "fatal")){
-        PrintString("Fatal error: ", FOREGROUND_RED);
-        endCmd();
-        int a = 1/0;
-    }else if(strcmp(cmd, "reboot")){
-        asm("jmp 0xFFFF");
-    }
-    else{
-        errorCmd(cmd);
-    }
 }
-*/
-

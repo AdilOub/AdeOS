@@ -20,6 +20,9 @@
 //compiler
 #include "Header Files/Compiler.h"
 
+//mouse
+#include "Header Files/Mouse.h"
+
 #define GET_RIP (uint32_t)({uint32_t rip; asm volatile ("lea (%%rip), %%eax\n\t" "mov %%eax, %0\n\t" : "=r"(rip)); rip;}) 
 
 #define NULL 0
@@ -72,6 +75,8 @@ void test_disk(){
     Print(HexToString(get_status()));
 }
 
+uint16_t bin;
+
 void setup_disk_test(){
     
     setup_root(); //attention, doit être utiliser qu'une seule fois !!!
@@ -82,26 +87,26 @@ void setup_disk_test(){
     create_folder_in_parent(0, "usr");
 
 
-    uint8_t data_for_file[] = { 0xB8, 0x00, 0x00, 0x00, 0x00, 0xCD, 0x80, 0xC3, 0x01}; //TODO fix le bug dans filesystem qui fait que tout n'est pas tout le temps écrit (exemple essayer d'écrire 17 va ignorer le last, faut écrire 24 ??)
-    //Print("size of data_for_file: ");
-    //Print(IntToString((uint64_t)sizeof(data_for_file)));
+    uint8_t data_print_cmd[] = { 0xB8, 0x00, 0x00, 0x00, 0x00, 0xCD, 0x80, 0xC3, 0x01}; //mov eax, 0; int 0x80; ret trigger le syscall d'example
+    //Print("size of data_print_cmd: ");
+    //Print(IntToString((uint64_t)sizeof(data_print_cmd)));
     //Print("\n\r");
-    uint64_t size = sizeof(data_for_file);
-    uint16_t f = create_file_in_parent(bin, "print", (char*)data_for_file, size);
-    Print("File created: ");
-    Print(IntToString(f), FOREGROUND_LIGHTGREEN);
-    Print("\n\r");
+    uint64_t size = sizeof(data_print_cmd);
+    uint16_t f = create_file_in_parent(bin, "print", (char*)data_print_cmd, size);
+    // Print("File created: ");
+    // Print(IntToString(f), FOREGROUND_LIGHTGREEN);
+    // Print("\n\r");
 
 
     folder* root = read_folder_info(0);
-    Print("Root folder: ");
-    Print(HexToString(root->inode), FOREGROUND_LIGHTGREEN);
-    Print("\n\rName: ");Print(root->name, FOREGROUND_LIGHTGREEN);
-    Print("\n\rParent: ");Print(HexToString(root->parent), FOREGROUND_LIGHTGREEN);
-    Print("\n\rNb of cluster: ");Print(IntToString(root->nb_of_cluster), FOREGROUND_LIGHTGREEN);
-    Print("\n\rChildren: ");
+    // Print("Root folder: ");
+    // Print(HexToString(root->inode), FOREGROUND_LIGHTGREEN);
+    // Print("\n\rName: ");Print(root->name, FOREGROUND_LIGHTGREEN);
+    // Print("\n\rParent: ");Print(HexToString(root->parent), FOREGROUND_LIGHTGREEN);
+    // Print("\n\rNb of cluster: ");Print(IntToString(root->nb_of_cluster), FOREGROUND_LIGHTGREEN);
+    // Print("\n\rChildren: ");
     for(int i = 0; i<MAX_INODE_PER_DIR; i++){
-        Print("\n\r'");Print(root->children_names[i], FOREGROUND_LIGHTGREEN);Print("' ");Print(HexToString(root->children_inodes[i]), FOREGROUND_LIGHTGREEN);
+        // Print("\n\r'");Print(root->children_names[i], FOREGROUND_LIGHTGREEN);Print("' ");Print(HexToString(root->children_inodes[i]), FOREGROUND_LIGHTGREEN);
     }
     
     Print("\n\r");
@@ -110,10 +115,6 @@ void setup_disk_test(){
     Print("Bin folder: ");
     Print(HexToString(bin2), FOREGROUND_LIGHTGREEN);
     Print("\n\r");
-
-
-
-    //free(data_for_file);
 
 
     // char* s = (char*)malloc(BLOCK_SIZE);
@@ -135,8 +136,12 @@ void hellow(){
     Print("Helloow ^_^\n\r", FOREGROUND_LIGHTMAGENTA);
 }
 
+bool key_pressed = false;
+void setKeyPressed(){
+    key_pressed = true;
+}
+
 extern "C" void _start(){
-    
     InitIDT();
     setLanguage(KBSet1::ScanCodeLookupTableAZERTY);
     MainKeyBoardHandler = KeyBoardHandler;
@@ -165,6 +170,8 @@ extern "C" void _start(){
         Print("Setting up root...\n\r", FOREGROUND_LIGHTMAGENTA);
         setup_disk_test();
     }
+    bin = find_file_inode_by_name(0, "bin");
+    
     //setup_disk_test();    //TODO add root detector
     
 
@@ -177,8 +184,16 @@ extern "C" void _start(){
     //     asm("call %0" : : "r"(hellow_addr));
 
     Print("Everything is fine...\n\r", FOREGROUND_LIGHTGREEN);
+    
+    //wait for a key to be pressed
 
 
+    while(!key_pressed){
+        //asm("hlt");
+    }
+
+
+    initPS2Mouse();
 
 
     

@@ -1,5 +1,5 @@
 #pragma once
-
+#include "Kernel.h"
 #include "Typedefs.h"
 #include "IO.h"
 #include "TextPrint.h"
