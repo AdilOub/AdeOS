@@ -206,6 +206,7 @@ uint16_t create_file_in_parent(uint16_t parent, char* name, char* data, uint64_t
 void setup_root(){
     //on initialise le disque dur en overwritant le root
     write_nth_inode(0, FOLDER_SIGNATURE);
+    Print("Wrote!\n\r", FOREGROUND_GREEN);
 
     uint16_t new_inode = 0; //OVERWRITE ROOT
     uint16_t parent = NOT_USED;
@@ -319,9 +320,9 @@ uint8_t check_if_root(){
     uint8_t* buffer = (uint8_t*)malloc(sizeof(uint8_t)*SIGNATURE_SIZE);
     *buffer = 0x00;
     *(buffer+1) = 0x00;
-
+    Print("Reading signature\n\r", FOREGROUND_RED);
     read((char*)buffer, SIGNATURE_SIZE, 0); 
-
+    Print("Read signature\n\r", FOREGROUND_GREEN);
     if(*buffer == 0xFC && *(buffer+1) == 0xFF){ //TODO modifier ça si on change SIGNATURE_SIZE
         free(buffer);
         return 1;

@@ -6,6 +6,15 @@
 #include "KBScanCodeSet1.h"
 #include "DiskRead.h"
 
+#define PIC 0x20
+#define PIC2 0xA0
+#define PIC1_CMD PIC1
+#define PIC1_DATA (PIC1 + 1)
+#define PIC2_CMD PIC2
+#define PIC2_DATA (PIC2 + 1)
+
+#define PIC_EOI 0x20
+
 struct IDT64{
     uint16_t offset_low;
     uint16_t selector;

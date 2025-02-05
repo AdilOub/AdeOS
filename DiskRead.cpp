@@ -122,11 +122,14 @@ void readDataATA(uint64_t lba, uint64_t size, uint8_t* buffer){
 }
 
 void writeDataATA(uint64_t lba, uint64_t size, uint8_t* buffer){
+    PrintString("writeDATA_ATA\n\r", FOREGROUND_LIGHTMAGENTA);
     uint8_t num_sector = (size / 512) + (size%512) ? 1 : 0;
     uint8_t* buffer_aligned = (uint8_t*)malloc(sizeof(uint8_t)*num_sector*512);
     readDataATASector(lba, num_sector, buffer_aligned);
     memcopy(buffer_aligned, buffer, sizeof(uint8_t)*size);
+    PrintString("start write-");
     writeDataATASector(lba, num_sector, buffer_aligned);
+    PrintString("-end write:");
     free(buffer_aligned);
 }
 

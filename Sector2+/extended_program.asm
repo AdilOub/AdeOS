@@ -66,13 +66,13 @@ StartProtectedMode:
     ;mov esp, ebp
 
 
-    ;mov [0xb8000], byte '3'
-    ;mov [0xb8002], byte '2'
-    ;mov [0xb8004], byte ' '
-    ;mov [0xb8006], byte 'b'
-    ;mov [0xb8008], byte 'i'
-    ;mov [0xb800A], byte 't'
-    ;mov [0xb800C], byte 's'
+    mov [0xb8000], byte '3'
+    mov [0xb8002], byte '2'
+    mov [0xb8004], byte ' '
+    mov [0xb8006], byte 'b'
+    mov [0xb8008], byte 'i'
+    mov [0xb800A], byte 't'
+    mov [0xb800C], byte 's'
 
     ;TODO break memory print
     call DetectCPUID

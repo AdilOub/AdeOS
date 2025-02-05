@@ -27,10 +27,10 @@ link:
 new_disk: bootloader kernel link
 	cat compiled/bootloader.bin compiled/kernel.bin > compiled/boot.bin
 	cp compiled/boot.bin ./diskimg/boot.bin
-	truncate diskimg/boot.bin --size 512K #pour s'assurer que le disque virtuel est assez grand
+	truncate diskimg/boot.bin --size 1M #pour s'assurer que le disque virtuel est assez grand
 
 quemu_new_disk: new_disk
-	qemu-system-x86_64 diskimg/boot.bin -m 2M -no-reboot -no-shutdown -d cpu_reset
+	qemu-system-x86_64 diskimg/boot.bin -m 8M -no-reboot -no-shutdown -d cpu_reset
 
 
 recomp_only_kernel: bootloader kernel link
@@ -40,7 +40,7 @@ recomp_only_kernel: bootloader kernel link
 	dd if=diskimg/boot_new.bin of=diskimg/boot.bin bs=1 count=$$(stat -c %s diskimg/boot_new.bin) conv=notrunc
 
 quemu_persist_disk: recomp_only_kernel
-	qemu-system-x86_64 diskimg/boot.bin -m 2M -no-reboot -no-shutdown -d cpu_reset,int
+	qemu-system-x86_64 diskimg/boot.bin -m 8M -no-reboot -no-shutdown -d cpu_reset,int 
 
 
 @PHONY: clean

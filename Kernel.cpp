@@ -80,7 +80,7 @@ uint16_t bin;
 void setup_disk_test(){
     
     setup_root(); //attention, doit être utiliser qu'une seule fois !!!
-
+    //Print("Root setup\n\r", FOREGROUND_LIGHTGREEN);
 
     int t = create_folder_in_parent(0, "test");
     int bin = create_folder_in_parent(0, "bin");
@@ -109,12 +109,11 @@ void setup_disk_test(){
         // Print("\n\r'");Print(root->children_names[i], FOREGROUND_LIGHTGREEN);Print("' ");Print(HexToString(root->children_inodes[i]), FOREGROUND_LIGHTGREEN);
     }
     
-    Print("\n\r");
 
     uint16_t bin2 = find_file_inode_by_name(0, "bin");
-    Print("Bin folder: ");
-    Print(HexToString(bin2), FOREGROUND_LIGHTGREEN);
-    Print("\n\r");
+    //Print("Bin folder: ");
+    //Print(HexToString(bin2), FOREGROUND_LIGHTGREEN);
+    //Print("\n\r");
 
 
     // char* s = (char*)malloc(BLOCK_SIZE);
@@ -161,12 +160,12 @@ extern "C" void _start(){
 
 
 
-    Print("Test filesystem:\n\r", FOREGROUND_LIGHTCYAN);
+    //Print("Test filesystem:\n\r", FOREGROUND_LIGHTCYAN);
 
     if(check_if_root()){
         Print("Root detected\n\r", FOREGROUND_LIGHTGREEN);
     }else{
-        Print("Root not detected\n\r", FOREGROUND_LIGHTRED);
+        //Print("Root not detected\n\r", FOREGROUND_LIGHTRED);
         Print("Setting up root...\n\r", FOREGROUND_LIGHTMAGENTA);
         setup_disk_test();
     }
@@ -176,14 +175,14 @@ extern "C" void _start(){
     
 
 
-    Print("\n\rEverything is fine\n\r", FOREGROUND_GREEN);
+    //Print("\n\rEverything is fine\n\r", FOREGROUND_GREEN);
 
     //padding to see in hexfile, 64 'a'
 
 
     //     asm("call %0" : : "r"(hellow_addr));
 
-    Print("Everything is fine...\n\r", FOREGROUND_LIGHTGREEN);
+    //Print("Everything is fine...\n\r", FOREGROUND_LIGHTGREEN);
     
     //wait for a key to be pressed
 

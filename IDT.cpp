@@ -165,8 +165,9 @@ void InitIDT(){
     RemapPic(0x20, 0x28); //le probleme c'est les interupts 0 à 7 sont déjà utilisé par les erreurs du cpu dont on va les remapper
 
 
+    //TODO reactivé les interupts
     outb(0x21, 0xfd); //11111100 on n'autorise que l'irq0 et l'irq1 (timer et clavier) + remap 
-    outb(0xa1, 0xff); //et la souris sur le slave
+    outb(0xa1, 0x10); //et la souris sur le slave
 
     //outb(0x28, 0xf7); //11110111 on n'autorise que l'irq11 (mouse)
 
@@ -188,7 +189,7 @@ HARDWARE INTERUPTS
 
 //timer remap !
 extern "C" void isr32_handler(){    
-    PrintString("isr32 called\n\r", BACKGROUND_BLUE);
+    //PrintString("isr32 called\n\r", BACKGROUND_BLUE);
     
     //on va faire clignoter un point en haut à droite
     uint16_t pos = PosFromCoord(79, 0);
@@ -237,10 +238,6 @@ extern "C" void isr33_handler(){
 //irq6, floppy disk
 //on utilise le mode DMA, donc l'interupt est raise que à l'init, et au début de read & write
 extern "C" void isr38_handler(){
-    //asm("cli");
-    flpydisk_int = 1;
-    PrintString("isr38 called\n\r", BACKGROUND_BLUE);
-    //asm("sti");
     outb(0x20, 0x20);
     outb(0xa0, 0x20);
 }
@@ -249,9 +246,9 @@ extern "C" void isr38_handler(){
 extern "C" void isr44_handler(){
     asm("cli");
     PrintString("isr44 called\n\r", BACKGROUND_BLUE);
-    asm("sti");
     outb(0x20, 0x20);
     outb(0xa0, 0x20);
+    asm("sti");
 }
 
 /*
