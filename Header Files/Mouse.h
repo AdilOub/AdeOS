@@ -13,7 +13,7 @@
 
 
 
-
+uint8_t readControllerConfig();
 
 
 void initPS2Mouse();

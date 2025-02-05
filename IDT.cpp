@@ -167,7 +167,7 @@ void InitIDT(){
 
     //TODO reactivé les interupts
     outb(0x21, 0xfd); //11111100 on n'autorise que l'irq0 et l'irq1 (timer et clavier) + remap 
-    outb(0xa1, 0x10); //et la souris sur le slave
+    outb(0xa1, 0xef); //et la souris sur le slave
 
     //outb(0x28, 0xf7); //11110111 on n'autorise que l'irq11 (mouse)
 
@@ -189,6 +189,12 @@ HARDWARE INTERUPTS
 
 //timer remap !
 extern "C" void isr32_handler(){    
+    asm("cli");
+    outb(0x20, 0x20); //on envoie un eoi
+
+    asm("sti");
+
+
     //PrintString("isr32 called\n\r", BACKGROUND_BLUE);
     
     //on va faire clignoter un point en haut à droite
@@ -205,8 +211,6 @@ extern "C" void isr32_handler(){
         tick = 0;
     }
 
-    outb(0x20, 0x20); //on envoie un eoi
-    outb(0xa0, 0x20);
 }
 
 
@@ -228,10 +232,9 @@ extern "C" void isr33_handler(){
         MainKeyBoardHandler(scanCode);
     }else{
         PrintString("No Keyboard Handler\n\r", BACKGROUND_RED);
-    }
-    asm("sti");
+    }    
     outb(0x20, 0x20);
-    outb(0xa0, 0x20);
+    asm("sti");
 
 }
 
@@ -245,7 +248,10 @@ extern "C" void isr38_handler(){
 //mouse
 extern "C" void isr44_handler(){
     asm("cli");
-    PrintString("isr44 called\n\r", BACKGROUND_BLUE);
+    PrintString("isr44 called: ", BACKGROUND_MAGENTA);
+    uint8_t scanCode = inb(0x60);
+    PrintString(HexToString(scanCode), BACKGROUND_MAGENTA);
+    PrintString("\n\r", BACKGROUND_MAGENTA);
     outb(0x20, 0x20);
     outb(0xa0, 0x20);
     asm("sti");

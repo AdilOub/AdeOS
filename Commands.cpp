@@ -23,7 +23,7 @@ void helpCmd(char* args){
     endCmd();
 }
 
-void clearCmd(char* args){
+void clearCmd(){
     ClearScreen();
     SetCursorPosition(PosFromCoord(0,0));
     endCmd();
@@ -316,6 +316,14 @@ void handleCmds(char* cmd){
         PrintString("\n\r", FOREGROUND_LIGHTCYAN);
     }
 
+    if(strcmp(args[0], "clear")){
+        for(int i = 0; i<nb_of_args; i++){
+            free(args[i]);
+        }
+        free(args);
+        clearCmd();
+        return;
+    }
 
     //on essaye de trouver la commande dans bin
     uint16_t bin = find_file_inode_by_name(0, "bin");
