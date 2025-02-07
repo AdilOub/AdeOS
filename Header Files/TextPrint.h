@@ -11,6 +11,7 @@
 extern uint16_t CursorPosition;
 
 void SetCursorPosition(uint16_t position);
+uint16_t GetCursorPosition();
 uint16_t PosFromCoord(uint8_t x, uint8_t y);
 void PrintChar(char chr, uint8_t color = BACKGROUND_BLACK | FOREGROUND_WHITE);
 void PrintString(const char* str, uint8_t color = BACKGROUND_BLACK | FOREGROUND_WHITE, uint8_t unused = 0);

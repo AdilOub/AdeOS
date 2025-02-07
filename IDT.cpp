@@ -248,10 +248,14 @@ extern "C" void isr38_handler(){
 //mouse
 extern "C" void isr44_handler(){
     asm("cli");
-    PrintString("isr44 called: ", BACKGROUND_MAGENTA);
+    ClearScreen(BACKGROUND_BLUE);
+    SetCursorPosition(0);
+    PrintString("isr44 called\n\r", BACKGROUND_BLUE);
     uint8_t scanCode = inb(0x60);
     PrintString(HexToString(scanCode), BACKGROUND_MAGENTA);
-    PrintString("\n\r", BACKGROUND_MAGENTA);
+    
+    asm("hlt");
+
     outb(0x20, 0x20);
     outb(0xa0, 0x20);
     asm("sti");

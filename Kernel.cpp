@@ -186,7 +186,7 @@ extern "C" void _start(){
     
     //wait for a key to be pressed
 
-
+    Print("Press a key to continue...\n\r", FOREGROUND_LIGHTCYAN);
     while(!key_pressed){
         //asm("hlt");
     }

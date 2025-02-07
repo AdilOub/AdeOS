@@ -107,6 +107,11 @@ const char* FloatToString(float value, uint8_t decimalPlaces){
 #ifndef VGA13
 uint16_t CursorPosition;
 
+
+uint16_t GetCursorPosition(){
+    return CursorPosition;
+}
+
 void SetCursorPosition(uint16_t position){
 
     if(position > 2000){
@@ -166,7 +171,6 @@ void ClearScreen(uint8_t ClearColor){
         *(VGA_MEMORY + i * 2) = 0;
         *(VGA_MEMORY + i *2 + 1) = ClearColor;
     }
-
 }
 
 

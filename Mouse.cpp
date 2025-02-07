@@ -14,8 +14,8 @@ uint8_t readControllerConfig(){
         timeout--;
     }
     if(timeout == 0){
-        Print("\n\tError with PS2 controller config: timeout", BACKGROUND_RED);
-        return 0xFF;
+        Print("\n\rError with PS2 controller config: timeout", BACKGROUND_RED);
+        return 0x69;
     }
     return config;
 }
@@ -42,7 +42,7 @@ void wait_status_write_ok(){
         timeout--;
     }
     if(timeout == 0){
-        Print("\n\tError with PS2 status write: timeout", BACKGROUND_RED);
+        Print("\n\rError with PS2 status write: timeout", BACKGROUND_RED);
         return;
     }
 }
@@ -55,57 +55,58 @@ void wait_status_read_ok(){
         timeout--;
     }
     if(timeout == 0){
-        Print("\n\tError with PS2 status read: timeout", BACKGROUND_RED);
+        Print("\n\rError with PS2 status read: timeout", BACKGROUND_RED);
         return;
     }
 }
 
-void sendDataToDevice(uint8_t device, uint8_t command){
+void sendDataToDevice(uint8_t port, uint8_t command){
     uint64_t timeout = 1000;
-    if(device==1){
+    if(port==1){
+    wait_status_write_ok();
     outb(COMMAND_PORT, 0xD4);
     }
+    wait_status_read_ok();
     //wait_for_controller_ready();
-    readControllerConfig();
     uint8_t response = inb(COMMAND_PORT);
     while(response  & 0x02 != 0 && timeout > 0){
+        wait_status_read_ok();
         response = inb(COMMAND_PORT);
         timeout--;
     }
     if(timeout == 0){
-        Print("\n\tError with PS2 send: timeout", BACKGROUND_RED);
+        Print("\n\rError with PS2 send: timeout", BACKGROUND_RED);
         return;
     }
+    wait_status_write_ok();
     outb(DATA_PORT, command);
     return;
 }
 
 uint8_t readDataFromDevice(){
-    uint64_t timeout = 1000;
-    readControllerConfig();
+    uint64_t timeout = 10000;
     uint8_t response = inb(COMMAND_PORT);
     while(response  & 0x01 != 1 && timeout > 0){
         response = inb(COMMAND_PORT);
         timeout--;
     }
     if(timeout == 0){
-        Print("\n\tError with PS2 read: timeout", BACKGROUND_RED);
-        asm("hlt");
-        return 0xFF;
+        Print("\n\rError with PS2 read: timeout", BACKGROUND_RED);
+        return 0x69;
     }
     return inb(DATA_PORT);
 }
 
 uint8_t waitACKFromDevice(){
-    uint64_t timeout = 1000;
-    uint8_t response = inb(DATA_PORT);
+    uint64_t timeout = 1000000;
+    uint8_t response = readDataFromDevice();
     while(response != 0xFA && timeout > 0){
-        response = inb(DATA_PORT);
+        response = readDataFromDevice();
         timeout--;
     }
     if(timeout == 0){
-        Print("\n\tError with PS2 ACK: timeout", BACKGROUND_RED);
-        return 0xFF;
+        Print("\n\rError with PS2 device_ACK: timeout\n\r", BACKGROUND_RED);
+        return 0x69;
     }
     return response;
 }
@@ -118,7 +119,22 @@ uint8_t readMouseResponse(){
 }
 
 
+void sendResetToDevice(uint8_t port){
+    sendDataToDevice(port, 0xFF);
 
+    uint8_t rep1 = readDataFromDevice();
+    uint8_t rep2 = readDataFromDevice();
+    while(rep2==rep1){
+        rep2 = readDataFromDevice();
+    }
+    uint8_t id = readDataFromDevice();
+
+    Print("Response of reset devices num: ");Print(IntToString(port));Print(" should be 0xFA 0xAA 0x00): ");Print(HexToString(rep1));
+    Print(" ");Print(HexToString(rep2));
+    Print(" ");Print(HexToString(id));Print("\n\r");
+
+    
+}
 
 
 void initPS2(){
@@ -140,6 +156,7 @@ void initPS2(){
     outb(COMMAND_PORT, 0xAA);
     uint8_t response = inb(DATA_PORT);
     while(response != 0x55 && response != 0xFC){
+        Print("Self test failed, retrying\n\r", BACKGROUND_RED);
         response = inb(DATA_PORT);
     }
     Print("Response of self test (should be 0x55): ");Print(HexToString(response));Print("\n\r");
@@ -150,74 +167,113 @@ void initPS2(){
     Print("Response of 2nd PS2 (5th bit should be 0): ");Print(HexToString(res2));Print(" (");Print(IntToString(res2 & 0x20));Print(")\n\r");
     //if it's set, it means there is no mouse, and we're sad
     //sinon on disable la mouse:
-    outb(COMMAND_PORT, 0xA7); //disable devices
+    outb(COMMAND_PORT, 0xA7); //disable 2nd PS2 port
     //clear bits 1 and 5 of the controller config
     config = readControllerConfig();
-    config &= 0xDD;
+    config &= 0xDD; //clear bit 1 and 5
     outb(COMMAND_PORT, 0x60); //write controller command
     outb(DATA_PORT, config);
 
     //interface test
     outb(COMMAND_PORT, 0xAB);
     response = inb(DATA_PORT);
-    Print("Response of 1st interface test (should be 0): ");Print(HexToString(response));Print("\n\r");
+    Print("Response of interface test 1: (should be 0): ");Print(HexToString(response));
     outb(COMMAND_PORT, 0xA9);
+    response = 0xFF;
     response = inb(DATA_PORT);
-    Print("Response of 2nd interface test (should be 0): ");Print(HexToString(response));Print("\n\r");
+    Print(" and  2 (should be 0): ");Print(HexToString(response));Print("\n\r");
 
-    //enable devices
-    Print("enabling devices\n\r", BACKGROUND_GREEN);
-    outb(COMMAND_PORT, 0xAE); //enable devices for first port
-    Print("1st port enabled\n\r", BACKGROUND_GREEN);
-    outb(COMMAND_PORT, 0xA8); //enable devices for second port
-    Print("2nd port enabled\n\r", BACKGROUND_GREEN);
+    
 
     //ack from keyboard
 
     //enable interrupts
     config = readControllerConfig();
     config |= 0x03; //enable IRQ, setting bit 0 and 1
-    outb(COMMAND_PORT, 0x60); //write controller command
-    outb(DATA_PORT, config);
+    config &= ~0x20; //clear bit 5= disable mouse signal
+    outb(COMMAND_PORT, 0x60); //set compaq status
+    outb(DATA_PORT, config); //status byte
+
+    //enable devices
+    //Print("enabling devices\n\r", BACKGROUND_GREEN);
+    outb(COMMAND_PORT, 0xAE); //enable devices for first port
+    //waitACKFromDevice(); d'après os dev y'a pas de ACK
+    outb(COMMAND_PORT, 0xA8); //enable devices for second port
+    //waitACKFromDevice();
+    Print("1 & 2nd port enabled\n\r", BACKGROUND_GREEN);
+
 
     
-    Print("Resetting devices\n\r", BACKGROUND_BLUE);
+    Print("Resetting 1st devices\n\r", BACKGROUND_BLUE);
     //reset devices
-    sendDataToDevice(0, 0xFF); //reset device 0
-    sendDataToDevice(1, 0xFF); //reset device 1
+    //sendDataToDevice(0, 0xFF); //reset device 0
+    //sendDataToDevice(1, 0xFF); //reset device 1
 
-    uint8_t rep1 = waitACKFromDevice();
-    uint8_t rep2 = inb(DATA_PORT);
-    Print("Response of reset devices 1 (should be 0xFA): ");Print(HexToString(rep1));Print("\n\r");
-    Print("Response of reset devices 2 (should be 0xAA): ");Print(HexToString(rep2));Print("\n\r");
-    uint8_t rep3 = inb(DATA_PORT); //clear buffer
-    Print("Response of reset devices 3 (should be 0x00): ");Print(HexToString(rep3));Print("\n\r");
+    sendResetToDevice(0);
+    Print("reseting 2nd device\n\r", BACKGROUND_BLUE);
+    sendResetToDevice(1);
+
     //print config
     //Print("PS2 config: ");Print(HexToString(readControllerConfig()));Print("\n\r");
     
 }
 
-uint16_t getDeviceID(uint8_t device){
-    sendDataToDevice(device, 0xF5); //disable scanning
+void disableTranlation(){
+    uint8_t config = readControllerConfig();
+    config &= 0xBF; //clear bit 6
+    outb(COMMAND_PORT, 0x60); //write controller command
+    outb(DATA_PORT, config);
+}
 
+void enableTranslation(){
+    uint8_t config = readControllerConfig();
+    config |= 0x40; //set bit 6
+    outb(COMMAND_PORT, 0x60); //write controller command
+    outb(DATA_PORT, config);
+}
+
+uint16_t getDeviceID(uint8_t port){
+    if(port==0)
+        disableTranlation();
+
+    //sendDataToDevice(port, 0xF5); //disable scanning
+
+    //uint8_t response = readDataFromDevice();
+
+    //Print("\n\rSending identify command");
+    sendDataToDevice(port, 0xF2); //identify
+    //Print("\n\rIdentifying PS2 port");
     uint8_t response = readDataFromDevice();
-
-
-    Print("\n\rSending identify command");
-    sendDataToDevice(device, 0xF2); //identify
-    Print("\n\rIdentifying PS2 device");
-    response = readDataFromDevice();
-    Print("\n\rResponse from ID: ");Print(HexToString(response));
-    Print("OKKK", BACKGROUND_GREEN);
+    //Print("\n\rResponse from ID: ");Print(HexToString(response));Print("\n\r");
+    if(response != 0xFA){
+        Print("Error with PS2 device ID: response not 0xFA\n\r", BACKGROUND_RED);
+        return 0x69;
+    }
 
     uint8_t id1 = readDataFromDevice();
     uint8_t id2 = readDataFromDevice();
-    Print(" ID1: ");Print(HexToString(id1));Print("\n\r");
-    Print(" ID2: ");Print(HexToString(id2));Print("\n\r");
+    //Print("\n\rID1: ");Print(HexToString(id1));
+    //Print(" ID2: ");Print(HexToString(id2));Print("\n\r");
 
-    sendDataToDevice(device, 0xF4); //enable scanning
+    if(port==0)
+        enableTranslation();
+    
+    //sendDataToDevice(port, 0xF4); //enable scanning
 
-    return (id2 << 8) | id1;
+    return (id2<<8) | id1;
+}
+
+
+
+void tellDeviceToSendPacket(uint8_t port){
+    sendDataToDevice(port, 0xEB); //tell device to send packet
+    uint8_t response = readDataFromDevice();
+    Print("Response from packet request 1,2 3 (0xFA, 0xAA, 0X00): ");Print(HexToString(response));
+    response = readDataFromDevice();
+    Print("  ");Print(HexToString(response));
+    response = readDataFromDevice();
+    Print(" ");Print(HexToString(response));Print("\n\r");
+
 }
 
 void initPS2Mouse(){
@@ -226,12 +282,43 @@ void initPS2Mouse(){
     Print("FINISHED INITIALIZING PS2\n\r", BACKGROUND_GREEN);
    // uint16_t id = getDeviceID(1);
     //print ps2 config
-    Print("PS2 config: ");Print(HexToString(readControllerConfig()));Print("\n\r");
 
-    //enable mouse
-    sendDataToDevice(0, 0xFF); //enable mouse
-    Print("Mouse enabled\n\r", BACKGROUND_GREEN);
 
+    Print("PSdos config: ");Print(HexToString(readControllerConfig()));Print("\n\r");
+
+    //print device 1 id
+    uint16_t id = getDeviceID(1);
+    Print("Device ID: ");Print(HexToString(id));Print("\n\r");
+
+    //allumer led du clavier (device 0)
+    sendDataToDevice(0, 0xED);
+    sendDataToDevice(0, 0x04); //allumer led 2
+    uint8_t response = readDataFromDevice();
+    Print("Response from led command (0xFA): ");Print(HexToString(response));Print("\n\r"); //work on vbox, not qemu
+
+    //tell mouse to work
+    sendDataToDevice(1, 0xF4);
+    //read 3 byte from mouse and print them
+    //Print("Reading FA+3 bytes from mouse: ");
+    Print(HexToString(readDataFromDevice()));Print(" ");
+    Print(HexToString(readDataFromDevice()));Print(" ");
+    Print(HexToString(readDataFromDevice()));Print(" ");
+    Print(HexToString(readDataFromDevice()));Print(" ");
+    Print(HexToString(readDataFromDevice()));Print(" ");
+
+    while(1){
+        uint16_t pos = GetCursorPosition();
+        SetCursorPosition(0);
+        Print("Mouse info:                              ");
+        SetCursorPosition(12);
+        Print(HexToString(readDataFromDevice()));Print(" ");
+        Print(HexToString(readDataFromDevice()));Print(" ");
+        Print(HexToString(readDataFromDevice()));Print(" ");
+            Print(HexToString(readDataFromDevice()));Print(" ");
+        Print(HexToString(readDataFromDevice()));Print(" ");
+
+        SetCursorPosition(pos);
+    }
 
     return;
 }

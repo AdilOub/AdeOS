@@ -42,6 +42,8 @@ recomp_only_kernel: bootloader kernel link
 quemu_persist_disk: recomp_only_kernel
 	qemu-system-x86_64 diskimg/boot.bin -m 8M -no-reboot -no-shutdown -d cpu_reset,int 
 
+vbox_img: new_disk
+	qemu-img convert -O vdi diskimg/boot.bin diskimg/vbox_disk.vdi
 
 @PHONY: clean
 clean:
