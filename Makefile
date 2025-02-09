@@ -1,25 +1,32 @@
-bootloader: Sector1/bootloader.asm Sector2+/extended_program.asm binaries.asm
-	nasm -f bin Sector1/bootloader.asm -o compiled/bootloader.bin
-	nasm -f elf64 Sector2+/extended_program.asm -o compiled/extended_program.o
-	nasm -f elf64 binaries.asm -o compiled/binaries.o
+rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
+ALL_CPP_FILES = $(call rwildcard,src/,*.cpp)
+ALL_ASM_FILES = $(call rwildcard,src/,*.asm)
 
-kernel: Kernel.cpp IDT.cpp IO.cpp Keyboard.cpp Memory.cpp TextPrint.cpp Commands.cpp Heap.cpp ASCITable.cpp Render.cpp Math.cpp Timer.cpp Timer.cpp DiskRead.cpp FileSystem.cpp Mouse.cpp
-	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c Kernel.cpp -o compiled/kernelC.o
-	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c IDT.cpp -o compiled/IDT.o
-	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c IO.cpp -o compiled/IO.o
-	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c Keyboard.cpp -o compiled/Keyboard.o
-	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c Memory.cpp -o compiled/Memory.o
-	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c TextPrint.cpp -o compiled/TextPrint.o
-	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c Commands.cpp -o compiled/Commands.o
-	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c Heap.cpp -o compiled/Heap.o
-	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c ASCITable.cpp -o compiled/ASCITable.o
-	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c Render.cpp -o compiled/Render.o
-	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c Math.cpp -o compiled/Math.o
-	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c Timer.cpp -o compiled/Timer.o
-	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c DiskRead.cpp -o compiled/DiskRead.o
-	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c FileSystem.cpp -o compiled/FileSystem.o
-	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c Compiler.cpp -o compiled/Compiler.o
-	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c Mouse.cpp -o compiled/Mouse.o
+gcc_options = -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c
+
+
+bootloader: src/bootloader/Sector1/bootloader.asm src/bootloader/Sector2+/extended_program.asm src/binaries/binaries.asm
+	nasm -f bin src/bootloader/Sector1/bootloader.asm -o compiled/bootloader.bin
+	nasm -f elf64 src/bootloader/Sector2+/extended_program.asm -o compiled/extended_program.o
+	nasm -f elf64 src/binaries/binaries.asm -o compiled/binaries.o
+
+kernel: $(ALL_CPP_FILES)
+	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/Kernel.cpp -o compiled/kernelC.o
+	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/cpu/IDT.cpp -o compiled/IDT.o
+	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/cpu/IO.cpp -o compiled/IO.o
+	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/drivers/Keyboard.cpp -o compiled/Keyboard.o
+	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/Memory.cpp -o compiled/Memory.o
+	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/TextPrint.cpp -o compiled/TextPrint.o
+	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/Commands.cpp -o compiled/Commands.o
+	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/Heap.cpp -o compiled/Heap.o
+	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/ASCITable.cpp -o compiled/ASCITable.o
+	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/Render.cpp -o compiled/Render.o
+	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/Math.cpp -o compiled/Math.o
+	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/Timer.cpp -o compiled/Timer.o
+	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/DiskRead.cpp -o compiled/DiskRead.o
+	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/FileSystem.cpp -o compiled/FileSystem.o
+	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/Compiler.cpp -o compiled/Compiler.o
+	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/drivers/Mouse.cpp -o compiled/Mouse.o
 
 link: 
 	ld -T"link.ld"
