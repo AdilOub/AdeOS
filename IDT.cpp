@@ -166,7 +166,7 @@ void InitIDT(){
 
 
     //TODO reactivé les interupts
-    outb(0x21, 0xfd); //11111100 on n'autorise que l'irq0 et l'irq1 (timer et clavier) + remap 
+    outb(0x21, 0xf9); //11111001 on n'autorise que ~~l'irq0~~ et l'irq1 (~~timer~~ et clavier) + irq2 (cascade, pour utiliser le slave)
     outb(0xa1, 0xef); //et la souris sur le slave
 
     //outb(0x28, 0xf7); //11110111 on n'autorise que l'irq11 (mouse)
@@ -246,15 +246,114 @@ extern "C" void isr38_handler(){
 }
 
 //mouse
+int16_t mouse_dx = 0;
+int16_t mouse_dy = 0;
+char ptr = 158;
+
+uint16_t inv_sensibility = 1;
+
+int32_t mouseX = 0;
+int32_t mouseY = 0;
+
+int32_t clamp(int32_t val, int32_t min, int32_t max){
+    if(val < min){
+        return min;
+    }else if(val > max){
+        return max;
+    }else{
+        return val;
+    }
+}
+
+int16_t linearConversion(int16_t val, int16_t min, int16_t max, int16_t new_min, int16_t new_max){
+    float v = (float)((val - min) * (new_max - new_min)) / (float)(max - min) + (float)new_min;
+    return (int16_t)v;
+}
+
+int32_t min(int32_t a, int32_t b){
+    return a < b ? a : b;
+}
+
 extern "C" void isr44_handler(){
     asm("cli");
-    ClearScreen(BACKGROUND_BLUE);
-    SetCursorPosition(0);
-    PrintString("isr44 called\n\r", BACKGROUND_BLUE);
-    uint8_t scanCode = inb(0x60);
-    PrintString(HexToString(scanCode), BACKGROUND_MAGENTA);
+    uint16_t old_pos = PosFromCoord(mouseX, mouseY);
+
+    //PrintString("isr44 called\n\rScanCode: ", BACKGROUND_BLUE);
+    uint8_t pack1 = inb(0x60);
+    uint8_t pack2 = inb(0x60);
+    uint8_t pack3 = inb(0x60);
+
+    if(pack1 & 0b11000000){ //overflow, on ignore le packet
+        outb(0x20, 0x20);
+        outb(0xa0, 0x20);
+        asm("sti");
+        return;
+    }
+
+    if(pack1 & 0b10){ //right clicked
+
+        SetCursorPosition(0);
+        ClearScreen();
+    }
+
+    if(pack1 & 0b01){ //left click
+        mouseX = 40;
+        mouseY = 12;
+    }
+
+
+    // PrintString(HexToString(pack1), BACKGROUND_MAGENTA);
+    // PrintString(" ", BACKGROUND_BLUE);
+    // PrintString(HexToString(pack2), BACKGROUND_MAGENTA);
+    // PrintString(" ", BACKGROUND_BLUE);    
+    // PrintString(HexToString(pack3), BACKGROUND_MAGENTA);
+    // PrintString("\n\r", BACKGROUND_BLUE);
+
+    int8_t signX = pack1 & 0b00010000 ? -1 : 1;
+    int8_t signY = pack1 & 0b00100000 ? -1 : 1;
+
+
+    mouse_dx = pack2 & 0xFF; 
+    mouse_dy = pack3 & 0xFF;
+    if(signX == -1){
+        mouse_dx = pack2 | 0xFF00;
+    }
+    if(signY == -1){
+        mouse_dy = pack3 | 0xFF00;
+    }
+
+    mouse_dx=clamp(mouse_dx, -254, 254);
+    mouse_dy=clamp(mouse_dy, -254, 254);
+
+    // mouse_dx=((int16_t)pack2)*signX;
+    // mouse_dy= (pack3)*signY;
     
-    asm("hlt");
+    //mouseX = clamp(mouseX+mouse_dx, -10000, 10000);
+    //mouseY = clamp(mouseY-mouse_dy, -10000, 10000);
+
+
+
+    //putting char on screen
+
+
+    
+        //PrintString(HexToString(pack1));    
+        PrintString("\n\rMouse mov x: ");PrintString(IntToString(mouse_dx));PrintString(" y: ");PrintString(IntToString(mouse_dy));PrintString("   ");
+        //PrintString("\n\rMouse pos x: ");PrintString(IntToString(mouseX));PrintString(" y: ");PrintString(IntToString(mouseY));PrintString("            ");
+        
+        int16_t x_in_range = linearConversion(mouse_dx, -254, 254, -40, 40);
+        int16_t y_in_range = linearConversion(mouse_dy, -254, 254, -12, 12);
+        PrintString(" Mouse inr x: ");PrintString(IntToString(x_in_range));PrintString(" y: ");PrintString(IntToString(y_in_range));PrintString("            ");
+        
+        mouseX = clamp(mouseX+x_in_range, 0, 79);
+        mouseY = clamp(mouseY-y_in_range, 0, 24);
+
+        uint16_t pos = PosFromCoord(mouseX, mouseY);
+        ((uint16_t*)0xb8000)[old_pos] = 0x0f00 | ' ';
+        ((uint16_t*)0xb8000)[pos] = 0x0f00 | ptr;
+    
+
+    
 
     outb(0x20, 0x20);
     outb(0xa0, 0x20);

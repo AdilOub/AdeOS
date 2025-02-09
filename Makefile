@@ -30,7 +30,7 @@ new_disk: bootloader kernel link
 	truncate diskimg/boot.bin --size 1M #pour s'assurer que le disque virtuel est assez grand
 
 quemu_new_disk: new_disk
-	qemu-system-x86_64 diskimg/boot.bin -m 8M -no-reboot -no-shutdown -d cpu_reset,int
+	qemu-system-x86_64 diskimg/boot.bin -m 8M -no-reboot -no-shutdown -d cpu_reset 
 
 
 recomp_only_kernel: bootloader kernel link

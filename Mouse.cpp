@@ -129,9 +129,9 @@ void sendResetToDevice(uint8_t port){
     }
     uint8_t id = readDataFromDevice();
 
-    Print("Response of reset devices num: ");Print(IntToString(port));Print(" should be 0xFA 0xAA 0x00): ");Print(HexToString(rep1));
-    Print(" ");Print(HexToString(rep2));
-    Print(" ");Print(HexToString(id));Print("\n\r");
+    //Print("Response of reset devices num: ");Print(IntToString(port));Print(" should be 0xFA 0xAA 0x00): ");Print(HexToString(rep1));
+    //Print(" ");Print(HexToString(rep2));
+    //Print(" ");Print(HexToString(id));Print("\n\r");
 
     
 }
@@ -276,6 +276,14 @@ void tellDeviceToSendPacket(uint8_t port){
 
 }
 
+void enableMouse(){
+    sendDataToDevice(1, 0xF4);
+}
+
+void disableMouse(){
+    sendDataToDevice(1, 0xF5);
+}
+
 void initPS2Mouse(){
     initPS2();
 
@@ -284,7 +292,7 @@ void initPS2Mouse(){
     //print ps2 config
 
 
-    Print("PSdos config: ");Print(HexToString(readControllerConfig()));Print("\n\r");
+    Print("PS2 new conf: ");Print(HexToString(readControllerConfig()));Print("\n\r");
 
     //print device 1 id
     uint16_t id = getDeviceID(1);
@@ -296,30 +304,17 @@ void initPS2Mouse(){
     uint8_t response = readDataFromDevice();
     Print("Response from led command (0xFA): ");Print(HexToString(response));Print("\n\r"); //work on vbox, not qemu
 
-    //tell mouse to work
-    sendDataToDevice(1, 0xF4);
-    //read 3 byte from mouse and print them
-    //Print("Reading FA+3 bytes from mouse: ");
-    Print(HexToString(readDataFromDevice()));Print(" ");
-    Print(HexToString(readDataFromDevice()));Print(" ");
-    Print(HexToString(readDataFromDevice()));Print(" ");
-    Print(HexToString(readDataFromDevice()));Print(" ");
-    Print(HexToString(readDataFromDevice()));Print(" ");
+    //set sample rate to 40
+    sendDataToDevice(1, 0xF3);
+    sendDataToDevice(1, 20);
+    response = readDataFromDevice();
 
-    while(1){
-        uint16_t pos = GetCursorPosition();
-        SetCursorPosition(0);
-        Print("Mouse info:                              ");
-        SetCursorPosition(12);
-        Print(HexToString(readDataFromDevice()));Print(" ");
-        Print(HexToString(readDataFromDevice()));Print(" ");
-        Print(HexToString(readDataFromDevice()));Print(" ");
-            Print(HexToString(readDataFromDevice()));Print(" ");
-        Print(HexToString(readDataFromDevice()));Print(" ");
-
-        SetCursorPosition(pos);
+    if(response != 0xFA){
+        Print("Error with PS2 mouse sample rate: response not 0xFA\n\r", BACKGROUND_RED);
+        return;
     }
 
+    sendDataToDevice(1, 0xF4);
     return;
 }
 
