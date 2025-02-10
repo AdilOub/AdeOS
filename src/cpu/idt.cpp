@@ -220,13 +220,21 @@ extern "C" void isr32_handler(){
 extern "C" void isr33_handler(){
     asm("cli");
 
-    setKeyPressed();
-    //PrintString("isr1", BACKGROUND_BLUE);
     uint8_t scanCode = inb(0x60);
-    //uint8_t chr = 0;
-    //if(scanCode < 0x3A){
-    //    chr = KBSet1::ScanCodeLookupTableQWERTY[scanCode];
-    //}
+
+    if(scanCode == 00 || scanCode == 0xff){
+        outb(0x20, 0x20);
+        asm("sti");
+        return;
+    }
+    
+    if(scanCode < 0x80){
+        keyboard_input[scanCode] = 1;
+        keyboard_input[256] = 1;
+    }else{
+        keyboard_input[scanCode - 0x80] = 0;
+        keyboard_input[256] = 0;
+    }
     
     if(MainKeyBoardHandler != 0){
         MainKeyBoardHandler(scanCode);

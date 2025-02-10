@@ -1,7 +1,4 @@
 #include "includes/Commands.h"
-#include "includes/Heap.h"
-#include "includes/Timer.h"
-#include "includes/Render.h"
 /*
 const char* colorString[] = {"blue", "green", "red", "purple", "white", "black"};
 const int colorForeground[] = {};
@@ -255,6 +252,14 @@ void asm_handler(uint64_t arg0, uint64_t arg1, uint64_t ptr){
     return;
 }
 
+void asm_no_arg_handler(uint64_t ptr){
+    asm (   "lea (%0), %%rax\n\t"
+            "call *%%rax\n\t"
+    : : "c"(ptr)
+    );
+    return;
+}
+
 
 uint8_t get_nb_of_args(char* cmd){
     uint8_t n = 0;
@@ -296,6 +301,56 @@ char** separe_string(char* str, char separator){
 }
 
 
+void hi(){
+    PrintString("Hi\n\r", FOREGROUND_LIGHTMAGENTA);
+}
+
+//va compiler un "lea rax, [function_ptr]; call *rax"
+uint8_t* functionToAsmHandler(uint64_t function_ptr){
+   uint8_t* buffer = (uint8_t*)malloc(11);
+
+    uint8_t add_1 = (uint8_t)function_ptr;
+    uint8_t add_2 = (uint8_t)(function_ptr >> 8);
+    uint8_t add_3 = (uint8_t)(function_ptr >> 16);
+    uint8_t add_4 = (uint8_t)(function_ptr >> 24);
+
+    //TODO verifier que le jmp est pas trop loin pour l'instant
+    //plus tard on essayera de gerer les jmps plus loin
+
+
+    //lea rax, [function_ptr]; call rax; ret
+   uint8_t asm_code[11] = { 0x48, 0x8D, 0x04, 0x25, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xD0, 0xC3 };
+    for(int i = 0; i<11; i++){
+         buffer[i] = asm_code[i];
+    }
+    buffer[4] = add_1;
+    buffer[5] = add_2;
+    buffer[6] = add_3;
+    buffer[7] = add_4;
+
+
+    return buffer;
+}
+
+//TODO faire un truc plus propre en utilisant es et des décalages (pour gerer les 64 bits de mémoires !)
+void addCommandToFileSystem(char* name, uint64_t fptr){
+    uint8_t* buffer = functionToAsmHandler(fptr);
+    uint16_t bin = find_file_inode_by_name(0, "bin");
+    if(bin == 0xFFFF){
+        PrintString("No bin folder found\n\r", FOREGROUND_RED);
+        return;
+    }
+    PrintString("bin: ");
+    PrintString(HexToString(bin));
+
+    uint64_t size = 11;
+    uint16_t f = create_file_in_parent(bin, name, (char*)buffer, size);
+    free(buffer);
+    return;
+}
+
+
+//todo gerer les arguments !
 void handleCmds(char* cmd){
     //todo separer la cmd et les arguments
     //PrintString("handling...\n\r", FOREGROUND_GREEN);
@@ -312,8 +367,8 @@ void handleCmds(char* cmd){
 
     //affichage des arguments
     for(int i = 0; i<nb_of_args; i++){
-        PrintString(args[i], FOREGROUND_LIGHTCYAN);
-        PrintString("\n\r", FOREGROUND_LIGHTCYAN);
+        //PrintString(args[i], FOREGROUND_LIGHTCYAN);
+        //PrintString("\n\r", FOREGROUND_LIGHTCYAN);
     }
 
     if(strcmp(args[0], "clear")){
@@ -352,6 +407,17 @@ void handleCmds(char* cmd){
     read_begin_of_file(cmd_inode, (char*)buffer, BLOCK_SIZE);
 
     //on execute la commande
+    if(nb_of_args == 1){
+        asm_no_arg_handler((uint64_t)buffer);
+        free(buffer);
+        for(int i = 0; i<nb_of_args; i++){
+            free(args[i]);
+        }
+        free(args);
+        endCmd();
+        return;
+    }
+
     asm_handler((uint64_t)args[1], (uint64_t)args[2], (uint64_t)buffer);
     free(buffer);
 

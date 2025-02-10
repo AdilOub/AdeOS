@@ -4,7 +4,7 @@ nasm -f elf64 binaries.asm -o compiled/binaries.o&&
 
 x86_64-elf-gcc -Ttext 0x8000 -ffreestanding  -mcmodel=kernel -mno-red-zone -m64 -c "Kernel.cpp" -o "compiled/kernelC.o"&&
 x86_64-elf-gcc -Ttext 0x8000 -ffreestanding  -mcmodel=kernel -mno-red-zone -m64 -c "IDT.cpp" -o "compiled/IDT.o"&&
-x86_64-elf-gcc -Ttext 0x8000 -ffreestanding  -mcmodel=kernel -mno-red-zone -m64 -c "IO.cpp" -o "compiled/IO.o"&&
+x86_64-elf-gcc -Ttext 0x8000 -ffreestanding  -mcmodel=kernel -mno-red-zone -m64 -c "io.cpppp" -o "compiled/IO.o"&&
 x86_64-elf-gcc -Ttext 0x8000 -ffreestanding  -mcmodel=kernel -mno-red-zone -m64 -c "Keyboard.cpp" -o "compiled/Keyboard.o"&&
 x86_64-elf-gcc -Ttext 0x8000 -ffreestanding  -mcmodel=kernel -mno-red-zone -m64 -c "Memory.cpp" -o "compiled/Memory.o"&&
 x86_64-elf-gcc -Ttext 0x8000 -ffreestanding  -mcmodel=kernel -mno-red-zone -m64 -c "TextPrint.cpp" -o "compiled/TextPrint.o"&&

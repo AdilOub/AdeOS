@@ -12,8 +12,8 @@ bootloader: src/bootloader/Sector1/bootloader.asm src/bootloader/Sector2+/extend
 
 kernel: $(ALL_CPP_FILES)
 	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/Kernel.cpp -o compiled/kernelC.o
-	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/cpu/IDT.cpp -o compiled/IDT.o
-	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/cpu/IO.cpp -o compiled/IO.o
+	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/cpu/idt.cpp -o compiled/idt.o
+	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/cpu/io.cpp -o compiled/io.o
 	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/drivers/Keyboard.cpp -o compiled/Keyboard.o
 	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/Memory.cpp -o compiled/Memory.o
 	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/TextPrint.cpp -o compiled/TextPrint.o

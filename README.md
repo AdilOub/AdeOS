@@ -21,7 +21,7 @@ On utilisera peut être mcmodel=kernel (ou large) si on veut mettre le code dans
 NOTE 2:
 TODO réorganiser les fichires (car on commence a en avoir bcp)
 /: kernel.cpp drivers/ utils/ memory/ graphics/ core/
-driver: tout ce qui utilise les IO pour communiquer avec le hardware (IO.cpp, IDT.cpp, Timer.cpp, DiskRead.cpp Keyboard.cpp)
+driver: tout ce qui utilise les IO pour communiquer avec le hardware (io.cpppp, IDT.cpp, Timer.cpp, DiskRead.cpp Keyboard.cpp)
 memory: tout ce qui gère la mémoire (heap.cpp, memoru.cpp)
 graphics: tout ce qui permet d'afficher (Textprint, Render)
 utils: tout les fichiers qui sont pas directement lié à l'os (typedef, arbre, )

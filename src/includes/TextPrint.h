@@ -1,5 +1,5 @@
 #pragma once
-#include "cpu/IO.h"
+#include "cpu/io.h"
 #include "libc/stdtypes.h"
 #include "TextModeColorCodes.h"
 #include "KBScanCodeSet1.h"

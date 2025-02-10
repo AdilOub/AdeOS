@@ -6,6 +6,8 @@
 #include "KBScanCodeSet1.h"
 #include "FileSystem.h"
 #include "Heap.h"
+#include "Timer.h"
+#include "Render.h"
 
 
 void clearCmdBuffer(char* buffer, int bufferSize);
@@ -37,3 +39,6 @@ void set(cmd_table* t, const char* key, void (*value)(char*));
 void (*get(cmd_table* t, const char* key))(char*);
 
 void initCmds();
+
+
+void addCommandToFileSystem(char* name, uint64_t fptr);

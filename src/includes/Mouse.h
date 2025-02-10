@@ -6,7 +6,7 @@
 #include "cpu/IDT.h"
 #include "Heap.h"
 #include "Memory.h"
-#include "cpu/IO.h"
+#include "cpu/io.h"
 
 #define COMMAND_PORT 0x64
 #define DATA_PORT 0x60

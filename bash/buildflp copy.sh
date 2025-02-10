@@ -3,7 +3,7 @@ nasm -f elf64 Sector2+/extended_program.asm -o compiled/extended_program.o&&
 nasm -f elf64 binaries.asm -o compiled/binaries.o&&
 x86_64-elf-gcc  -march=x86-64 -fno-pie -ffreestanding -nostdlib -nostartfiles -Ttext=0x8000 -mno-red-zone -c "Kernel.cpp" -o "compiled/kernelC.o"&&
 x86_64-elf-gcc  -march=x86-64 -fno-pie -ffreestanding -nostdlib -nostartfiles -Ttext=0x8000 -mno-red-zone -c "IDT.cpp" -o "compiled/IDT.o"&&
-x86_64-elf-gcc  -march=x86-64 -fno-pie -ffreestanding -nostdlib -nostartfiles -Ttext=0x8000 -mno-red-zone -c "IO.cpp" -o "compiled/IO.o"&&
+x86_64-elf-gcc  -march=x86-64 -fno-pie -ffreestanding -nostdlib -nostartfiles -Ttext=0x8000 -mno-red-zone -c "io.cpppp" -o "compiled/IO.o"&&
 x86_64-elf-gcc  -march=x86-64 -fno-pie -ffreestanding -nostdlib -nostartfiles -Ttext=0x8000 -mno-red-zone -c "Keyboard.cpp" -o "compiled/Keyboard.o"&&
 x86_64-elf-gcc  -march=x86-64 -fno-pie -ffreestanding -nostdlib -nostartfiles -Ttext=0x8000 -mno-red-zone -c "Memory.cpp" -o "compiled/Memory.o"&&
 x86_64-elf-gcc  -march=x86-64 -fno-pie -ffreestanding -nostdlib -nostartfiles -Ttext=0x8000 -mno-red-zone -c "TextPrint.cpp" -o "compiled/TextPrint.o"&&

@@ -2,7 +2,7 @@
 
 
 #include "libc/stdtypes.h"
-#include "cpu/IO.h"
+#include "cpu/io.h"
 #include "TextPrint.h"
 
 #define PIT_COMMAND_PORT    0x43

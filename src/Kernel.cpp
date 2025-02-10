@@ -4,7 +4,7 @@
 #include "includes/cpu/IDT.h"
 #include "includes/drivers/Keyboard.h"
 #include "includes/Memory.h"
-#include "includes/cpu/IO.h"
+#include "includes/cpu/io.h"
 #include "includes/Heap.h"
 #include "includes/libc/stdtypes.h"
 #include "includes/Timer.h"
@@ -25,7 +25,6 @@
 
 #define GET_RIP (uint32_t)({uint32_t rip; asm volatile ("lea (%%rip), %%eax\n\t" "mov %%eax, %0\n\t" : "=r"(rip)); rip;}) 
 
-#define NULL 0
 
 
 
@@ -110,7 +109,7 @@ void setup_disk_test(){
     }
     
 
-    uint16_t bin2 = find_file_inode_by_name(0, "bin");
+    //uint16_t bin2 = find_file_inode_by_name(0, "bin");
     //Print("Bin folder: ");
     //Print(HexToString(bin2), FOREGROUND_LIGHTGREEN);
     //Print("\n\r");
@@ -131,14 +130,12 @@ void setup_disk_test(){
     
 }
 
+uint8_t keyboard_input[256];
+
 void hellow(){
     Print("Helloow ^_^\n\r", FOREGROUND_LIGHTMAGENTA);
 }
 
-bool key_pressed = false;
-void setKeyPressed(){
-    key_pressed = true;
-}
 
 extern "C" void _start(){
     InitIDT();
@@ -150,7 +147,7 @@ extern "C" void _start(){
     
     ClearScreen();
     SetCursorPosition(PosFromCoord(0, 0));
-    //PrintString(Test);
+    PrintString(Test);
     PrintString("Bienvenue sur "); PrintString("AdeOs", FOREGROUND_LIGHTGREEN); PrintString(" !\n\r\n\r");
     
     //Print("Test affichage:\n\r", FOREGROUND_LIGHTCYAN);
@@ -166,11 +163,14 @@ extern "C" void _start(){
         Print("Root detected\n\r", FOREGROUND_LIGHTGREEN);
     }else{
         //Print("Root not detected\n\r", FOREGROUND_LIGHTRED);
-        Print("Setting up root...\n\r", FOREGROUND_LIGHTMAGENTA);
+        Print("Warning ! No root detected...\n\r", FOREGROUND_LIGHTRED);
+        Print("Press any key to setup the root... (this will delete all data !)\n\r", FOREGROUND_LIGHTRED);
+        while(!keyboard_input[256]){
+        }
         setup_disk_test();
     }
     bin = find_file_inode_by_name(0, "bin");
-    
+
     //setup_disk_test();    //TODO add root detector
     
 
@@ -182,7 +182,7 @@ extern "C" void _start(){
 
     //     asm("call %0" : : "r"(hellow_addr));
 
-    //Print("Everything is fine...\n\r", FOREGROUND_LIGHTGREEN);
+    Print("Everything is fine...\n\r", FOREGROUND_LIGHTGREEN);
     
     //wait for a key to be pressed
 
@@ -192,7 +192,10 @@ extern "C" void _start(){
     // }
 
     
-    initPS2Mouse();
+    //initPS2Mouse();
+
+    PrintString(HexToString((uint64_t)hellow), FOREGROUND_LIGHTGREEN);
+    addCommandToFileSystem("hellow", (uint64_t)hellow);
 
     
     //call the function hellow in assembly

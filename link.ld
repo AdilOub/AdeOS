@@ -7,8 +7,8 @@ INPUT
     compiled/extended_program.o
     compiled/kernelC.o
     compiled/binaries.o
-    compiled/IDT.o
-    compiled/IO.o
+    compiled/idt.o
+    compiled/io.o
     compiled/Keyboard.o
     compiled/Memory.o
     compiled/TextPrint.o
