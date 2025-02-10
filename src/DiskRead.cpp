@@ -156,3 +156,46 @@ void writeDATA(uint64_t address, uint64_t size, uint8_t* buffer){
     free(buffer_aligned);
     return;
 }
+
+
+/*
+
+void test_disk(){
+    Print("\n\rlecture1...");
+    uint8_t* buffer3 = (uint8_t*)calloc(512*sizeof(uint8_t));
+    readDataATA(0, 1, buffer3);
+    for(int i = 0; i<16; i++){
+         Print(HexToString(buffer3[i]));
+         Print(" ");
+     }
+
+    Print("\n\rlecture1 res: ");
+    Print(HexToString(get_status()));
+
+    Print("\n\rEcriture...");
+    uint8_t* buffer_write = (uint8_t*)calloc(sizeof(uint8_t)*512);
+    for(int i = 0; i<256; i++){
+        buffer_write[i] = i;
+    }
+    for(int i = 255; i<512; i++){
+        buffer_write[i] = 0x69;
+    }
+    buffer_write[0]= 0x69;
+
+    writeDataATA(0, 1, buffer_write);
+    Print("\n\rEcriture resultat: ");
+    Print(HexToString(get_status()));
+
+
+    Print("\n\rlecture2...");
+    uint8_t* buffer4 = (uint8_t*)calloc(512*sizeof(uint8_t));
+    readDataATA(0, 1, buffer4);
+    for(int i = 0; i<16; i++){
+         Print(HexToString(buffer4[i]));
+         Print(" ");
+     }
+        Print("\n\rlecture 2 res: ");
+    Print(HexToString(get_status()));
+}
+    
+*/

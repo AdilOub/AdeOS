@@ -2,7 +2,7 @@
 #include "Keyboard.h"
 
 #include "../TextPrint.h"
-#include "../cpu/IDT.h"
+#include "../cpu/idt.h"
 #include "../Commands.h"
 #include "../KBScanCodeSet1.h"
 #include "../libc/stdtypes.h"

@@ -2,7 +2,7 @@
 
 #include "libc/stdtypes.h"
 #include "TextPrint.h"
-#include "cpu/IDT.h"
+#include "cpu/idt.h"
 #include "Heap.h"
 
 extern "C" void ata_lba_read(uint64_t lba, uint8_t num_sectors, uint8_t* buffer);

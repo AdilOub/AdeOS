@@ -1,4 +1,4 @@
-#include "../includes/cpu/IDT.h"
+#include "../includes/cpu/idt.h"
 
 /*du nettoyage à faire ici
 1- refaire la structure

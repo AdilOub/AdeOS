@@ -3,8 +3,8 @@
 
 //#define VGA13
 
-void setKeyPressed();
 
+//Dans le futur, peut être utiliser des fonctions plutot que des variables pour eviter les erreurs de ma part (il ne faut pas écrire dans ces variables !!!)
 
 
 //va contenir pour chaque scancode (pressed) 0 si relaché, 1 si pressé
@@ -17,3 +17,4 @@ extern const uint8_t Emi1[];
 
 
 
+void hellow();

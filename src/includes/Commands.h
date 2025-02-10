@@ -42,3 +42,4 @@ void initCmds();
 
 
 void addCommandToFileSystem(char* name, uint64_t fptr);
+void add_basic_commands();

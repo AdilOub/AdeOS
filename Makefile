@@ -1,5 +1,6 @@
 rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
 ALL_CPP_FILES = $(call rwildcard,src/,*.cpp)
+ALL_HEADER_FILES = $(call rwildcard,src/,*.h)
 ALL_ASM_FILES = $(call rwildcard,src/,*.asm)
 
 gcc_options = -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c
@@ -10,7 +11,7 @@ bootloader: src/bootloader/Sector1/bootloader.asm src/bootloader/Sector2+/extend
 	nasm -f elf64 src/bootloader/Sector2+/extended_program.asm -o compiled/extended_program.o
 	nasm -f elf64 src/binaries/binaries.asm -o compiled/binaries.o
 
-kernel: $(ALL_CPP_FILES)
+kernel: $(ALL_CPP_FILES) $(ALL_HEADER_FILES)
 	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/Kernel.cpp -o compiled/kernelC.o
 	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/cpu/idt.cpp -o compiled/idt.o
 	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/cpu/io.cpp -o compiled/io.o

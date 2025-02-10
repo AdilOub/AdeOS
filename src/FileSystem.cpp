@@ -359,17 +359,17 @@ uint16_t find_file_inode_by_name(uint16_t parent, char* name){
     folder* f = NULL;
     f = read_folder_info(parent);
     if(f == NULL){
-        return -1;
+        return 0xFFFF;
     }
     for(int i = 0; i<MAX_INODE_PER_DIR; i++){
-        if(strcmp2(f->children_names[i], name) == 1){
+        if(strcmp2(f->children_names[i], name) == 1 && f->children_inodes[i] != NOT_USED){
             uint16_t inode = f->children_inodes[i];
             destroy_folder(f);
             return inode;
         }
     }
     destroy_folder(f);
-    return -1;
+    return 0xFFFF;
 }
 
 

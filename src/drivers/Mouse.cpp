@@ -1,4 +1,4 @@
-#include "../includes/Mouse.h"
+#include "../includes/drivers/mouse.h"
 
 /*TODO normalement: 
 Toucher à du USB pour desactiver USB legacy support (pour l'instant flm)

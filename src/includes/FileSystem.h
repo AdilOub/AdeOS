@@ -19,7 +19,7 @@
 #define SIGNATURE_SIZE 2 //signature de 2 bytes
 
 //#define BLOCK_SIZE 1024
-#define BLOCK_SIZE_POW2 6
+#define BLOCK_SIZE_POW2 8
 #define BLOCK_SIZE (2 << BLOCK_SIZE_POW2)
 
 #define LINK_SIZE 0x10

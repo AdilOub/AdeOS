@@ -29,7 +29,7 @@ bool getArrowState(){
 
 
 
-void StandarKeyBoardHandler(uint8_t scanCode, uint8_t chr){ //pk printstring ne marche pas ici ?
+void StandarKeyBoardHandler(uint8_t scanCode, uint8_t chr){ //pk printstring ne marche pas ici ? //edit 2076: si je savais l'enfer que j'ai du vivre pour fix ça mdr
     //PrintChar('s'); //std keyboard handler loaded
 
     if(chr != 0){
