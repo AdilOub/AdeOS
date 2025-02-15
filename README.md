@@ -38,3 +38,7 @@ possibilité d'avoir des commandes compilé dans le file system et de les lancer
 Cette fonction compilé peut appeler des interupts sytème, et est censé (TODO: test similaire au truc à la fin de Kernel.C) pouvoir appeler d'autre fonction par leur addresse (technique lea + call)
 
 ![image](https://github.com/user-attachments/assets/ef78049b-8935-44a0-b524-7940a00b854c)
+
+<br>
+Example de la souris (on log aussi les coo):
+![image](https://github.com/AdilOub/AdeOS/blob/main/images/souris_example.gif)
