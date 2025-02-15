@@ -40,5 +40,5 @@ Cette fonction compilé peut appeler des interupts sytème, et est censé (TODO:
 ![image](https://github.com/user-attachments/assets/ef78049b-8935-44a0-b524-7940a00b854c)
 
 <br>
-Example de la souris (on log aussi les coo):
-![Alt text](images/souris_example.gif)
+Example de la souris (on log aussi les coo): <br>
+![](https://raw.githubusercontent.com/AdilOub/AdeOS/refs/heads/main/images/souris_example.gif)
