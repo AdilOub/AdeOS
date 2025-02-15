@@ -1,6 +1,9 @@
-# Message pour mon moi futur
-Après plusieurs heures de débug:
-On a determiné que l'erreur ne provenais surement pas du linker, mais de la façon dont on charge l'OS en mémoire
+# AdeOS
+Un OS 64bit, écrit en asm_x86 et en C (C++ utilisé uniquement pour les templates).
+
+Le but du projet est principalement de se familiariser avec l'architecture des ordinateurs moderne.
+Tester sur qemu et vbox
+Attention: L'utiliser sur une vrai machine est déconsillé ! (jamais testé sur machine, l'OS écrase les donnés du disque, et il est possible de generer des KernelPanic...)
 
 
 Avancée du projet:
