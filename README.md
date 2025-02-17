@@ -1,6 +1,9 @@
-# Message pour mon moi futur
-Après plusieurs heures de débug:
-On a determiné que l'erreur ne provenais surement pas du linker, mais de la façon dont on charge l'OS en mémoire
+# AdeOS
+Un OS 64bit, écrit en asm_x86 et en C (C++ utilisé uniquement pour les templates).
+
+Le but du projet est principalement de se familiariser avec l'architecture des ordinateurs moderne.
+Tester sur qemu et vbox
+Attention: L'utiliser sur une vrai machine est déconsillé ! (jamais testé sur machine, l'OS écrase les donnés du disque, et il est possible de generer des KernelPanic...)
 
 
 Avancée du projet:
@@ -40,5 +43,5 @@ Cette fonction compilé peut appeler des interupts sytème, et est censé (TODO:
 ![image](https://github.com/user-attachments/assets/ef78049b-8935-44a0-b524-7940a00b854c)
 
 <br>
-Example de la souris (on log aussi les coo):
-![](https://github.com/AdilOub/AdeOS/blob/main/images/souris_example.gif)
+Example de la souris (on log aussi les coo): <br>
+![](https://raw.githubusercontent.com/AdilOub/AdeOS/refs/heads/main/images/souris_example.gif)
