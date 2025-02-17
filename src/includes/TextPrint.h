@@ -3,10 +3,14 @@
 #include "libc/stdtypes.h"
 #include "TextModeColorCodes.h"
 #include "KBScanCodeSet1.h"
+#include "libc/string.h"
 
 #define VGA_MEMORY (uint8_t*)0xb8000
 #define VGA_WIDTH 80
 #define VGA_HEIGHT 25
+
+#define MAX_PRINTF_BUFFER 256
+
 
 extern uint16_t CursorPosition;
 
@@ -42,3 +46,4 @@ const char* IntToString(long long value);
 
 
 void testPrint();
+void printf(char* format, ...);

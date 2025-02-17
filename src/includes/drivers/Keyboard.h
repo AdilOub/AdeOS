@@ -14,8 +14,6 @@ extern uint8_t LastScanCode;
 
 extern bool arrowEnabled;
 
-extern char cmdsBuffer[256];
-extern int bufferIndex;
 
 extern char LookupTable[58];
 
@@ -25,3 +23,6 @@ extern void enableArrow(bool enable);
 extern bool getArrowState();
 extern void StandarKeyBoardHandler(uint8_t scanCode, uint8_t chr);
 extern void KeyBoardHandler(uint8_t scanCode);
+
+
+char getc();

@@ -48,6 +48,33 @@ char** strsplit(char* str, char separator){
 }
 
 
+const char* strcat(char* dest, const char* src) {
+    uint64_t dest_len = strlen(dest);
+    uint64_t src_len = strlen(src);
+    char* new_str = (char*)realloc(dest, dest_len + src_len + 1);
+    for(uint64_t i = 0; i < src_len; i++) {
+        new_str[dest_len + i] = src[i];
+    }
+    new_str[dest_len + src_len] = '\0';
+    return new_str;
+}
+
+void strcatover(char** dest, const char* src) {
+    *dest = (char*)realloc(dest, strlen(*dest) + strlen(src) + 1);
+    strcat(*dest, src);
+    return;
+}
+
+void strcpy(char* dest, const char* src) {
+    while(*src) {
+        *dest = *src;
+        dest++;
+        src++;
+    }
+    *dest = '\0';
+}
+
+
 /*
 TODO add to makefile et le finir
 */

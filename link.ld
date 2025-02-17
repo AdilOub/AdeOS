@@ -22,6 +22,8 @@ INPUT
     compiled/FileSystem.o
     compiled/Compiler.o
     compiled/Mouse.o
+    compiled/shell.o
+    compiled/string.o
 )
 
 OUTPUT

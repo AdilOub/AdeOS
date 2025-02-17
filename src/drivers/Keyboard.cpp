@@ -8,8 +8,6 @@ uint8_t LastScanCode;
 
 bool arrowEnabled = false;
 
-char cmdsBuffer[256];
-int bufferIndex = 0;
 
 char LookupTable[58];
 
@@ -27,7 +25,18 @@ bool getArrowState(){
     return arrowEnabled;
 }
 
+char currentChar = '\0';
 
+char getc(){
+    while(currentChar == '\0'){
+        asm("hlt"); 
+    }
+    char c = currentChar;
+    currentChar = '\0';
+    return c;
+}
+
+/*
 
 void StandarKeyBoardHandler(uint8_t scanCode, uint8_t chr){ //pk printstring ne marche pas ici ? //edit 2076: si je savais l'enfer que j'ai du vivre pour fix ça mdr
     //PrintChar('s'); //std keyboard handler loaded
@@ -37,7 +46,7 @@ void StandarKeyBoardHandler(uint8_t scanCode, uint8_t chr){ //pk printstring ne 
         switch (leftShiftPressed | rightShiftPressed)
         {
         case true: //shift pressed
-            PrintChar(chr - 32);
+            (*callBack)(chr - 32);
             if(bufferIndex<256){
                 cmdsBuffer[bufferIndex] = chr - 32;
                 bufferIndex++;
@@ -50,7 +59,7 @@ void StandarKeyBoardHandler(uint8_t scanCode, uint8_t chr){ //pk printstring ne 
             PrintCharRender(getCursorPosRenderer(), chr, 0x0F, 0x00);
             setCursorPosRenderer(getCursorPosRenderer() + 1);
             #else
-            PrintChar(chr);
+            (*callBack)(chr);
             #endif
             
             if(bufferIndex<256){
@@ -118,69 +127,52 @@ void StandarKeyBoardHandler(uint8_t scanCode, uint8_t chr){ //pk printstring ne 
     }
 }
 
+*/
 
 
-int i = 0;
 
-void memDmp2(uint8_t* ptr, uint64_t size){
-    for(uint64_t i = 0; i < size; i++){
-        PrintString(HexToString(ptr[i]));
-        PrintChar(' ');
+void setCharWithScanCode(uint8_t scanCode, uint8_t chr){
+    if(chr != 0){
+        switch (leftShiftPressed | rightShiftPressed)
+        {
+        case true:
+            currentChar = chr - 32;
+            break;
+        case false: //no uppercase
+            currentChar = chr;
+            break;
+        }
+    }else{
+        int i = 0;
+        int n = 0;
+        uint64_t current_add = 0;
+        switch (scanCode)
+        {
+        case 0x8E: //backspace
+            currentChar = '\b';
+            break;
+        case 0x2A: //leftshiftPress
+            leftShiftPressed = true;
+            break;
+        case 0xAA: //leftshiftRealsed
+            leftShiftPressed = false;
+            break;
+        case 0x36: //rightshiftPress
+            rightShiftPressed = true;
+            break;
+        case 0xB6: //rightshiftRealsed
+            rightShiftPressed = false;
+            break;
+        case 0x9C: //enter released
+            currentChar = '\n';
+            break;
+
+        default:
+                //PrintChar('?');
+            break;
+        }
     }
 }
-
-#ifdef DEBUG_MEMORY_PRINT
-void KeyBoardHandler(uint8_t scanCode){
-    //PrintString(IntToString(scanCode));
-    //PrintString("\n\r");
-    uint8_t chr = 0;
-    if(scanCode < 0x3A){
-        chr = LookupTable[scanCode];
-        ClearScreen();
-        SetCursorPosition(0);
-        memDmp2((uint8_t*)0x8000 +0x7000 + 512*i, 512);
-        //memDmp2((uint8_t*)0xFFFF, 512);
-        //on affiche l'adresse de la page
-        SetCursorPosition(PosFromCoord(0, 24));
-        PrintString(HexToString(0x8000 + 0x7000 + 512*i), BACKGROUND_RED | FOREGROUND_WHITE);
-        if(chr == 'b'){
-            i--;
-            ClearScreen();
-            SetCursorPosition(0);
-            memDmp2((uint8_t*)0x8000 +0x7000 + 512*i, 512);
-            //memDmp2((uint8_t*)0xFFFF, 512);
-            //on affiche l'adresse de la page
-            SetCursorPosition(PosFromCoord(0, 24));
-            PrintString(HexToString(0x8000 + 0x7000 + 512*i), BACKGROUND_RED | FOREGROUND_WHITE);
-        }else{
-            i++;
-            PrintChar(chr, BACKGROUND_RED | FOREGROUND_GREEN);
-        }
-    }
-
-    //erk pourquoi j'ai fait ça ? enft si c'est logique
-    switch (LastScanCode)
-    {
-    case 0x50: //down key
-        if(arrowEnabled){
-            SetCursorPosition(CursorPosition + VGA_WIDTH);
-        }
-        break;
-    case 0x48: //up key
-        if(arrowEnabled){
-            SetCursorPosition(CursorPosition - VGA_WIDTH);
-        }
-        break;
-
-    default:
-        StandarKeyBoardHandler(scanCode, chr);
-        break;
-    }
-
-    LastScanCode = scanCode;
-}
-
-#else
 
 void KeyBoardHandler(uint8_t scanCode){
     //PrintString(IntToString(scanCode));
@@ -188,7 +180,7 @@ void KeyBoardHandler(uint8_t scanCode){
     uint8_t chr = 0;
     if(scanCode < 0x3A){
         chr = LookupTable[scanCode];
-        StandarKeyBoardHandler(scanCode, chr);
+        setCharWithScanCode(scanCode, chr);
         return;
     }
     
@@ -206,11 +198,9 @@ void KeyBoardHandler(uint8_t scanCode){
         break;
 
     default:
-        StandarKeyBoardHandler(scanCode, chr);
+        setCharWithScanCode(scanCode, chr);
         break;
     }
 
     LastScanCode = scanCode;
 }
-
-#endif

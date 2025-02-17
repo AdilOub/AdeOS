@@ -2,14 +2,6 @@
 
 
 
-int strlen(const char* str){
-    int i = 0;
-    while(str[i] != '\0'){
-        i++;
-    }
-    return i;
-}
-
 
 void read(char* buffer, int size, int offset){
     readDATA(offset+DISK_OFFSET, size, (uint8_t*)buffer);

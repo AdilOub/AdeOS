@@ -25,10 +25,22 @@
 #include "includes/drivers/Keyboard.h"
 //#include "includes/drivers/mouse.h"
 
+#include "includes/usr/shell.h"
+
 #define GET_RIP (uint32_t)({uint32_t rip; asm volatile ("lea (%%rip), %%eax\n\t" "mov %%eax, %0\n\t" : "=r"(rip)); rip;}) 
 
 
-
+void var(int n, ...){
+    __builtin_va_list args;
+    __builtin_va_start(args, n);
+    for(int i = 0; i < n; i++){
+        int val = __builtin_va_arg(args, int);
+        PrintString("Argument ");
+        PrintString(IntToString(val));
+        PrintString("\n");
+    }
+    __builtin_va_end(args);
+}
 
 //kernel entry, called by extended_program.asm
 void afficher_rigolo(uint8_t a){
@@ -95,7 +107,8 @@ extern "C" void _start(){
 
 
     Print("Everything is fine...\n\r", FOREGROUND_LIGHTGREEN);
-    
+    const char* s = "aaa";
+    startShell();
 
     //initPS2Mouse();
 

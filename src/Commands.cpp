@@ -227,6 +227,7 @@ void add_basic_commands(){
     addCommandToFileSystem("clear", (uint64_t)clearCmd);
 }
 
+
 //todo gerer les arguments !
 void handleCmds(char* cmd){
     //todo separer la cmd et les arguments
@@ -291,15 +292,12 @@ void handleCmds(char* cmd){
             free(args[i]);
         }
         free(args);
-        endCmd();
         return;
     }
 
     asm_handler((uint64_t)args[1], (uint64_t)args[2], (uint64_t)buffer);
     free(buffer);
 
-
-    endCmd();
     return;
 
 }

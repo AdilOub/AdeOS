@@ -28,6 +28,8 @@ kernel: $(ALL_CPP_FILES) $(ALL_HEADER_FILES)
 	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/FileSystem.cpp -o compiled/FileSystem.o
 	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/Compiler.cpp -o compiled/Compiler.o
 	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/drivers/Mouse.cpp -o compiled/Mouse.o
+	gcc $(gcc_options) src/usr/shell.cpp -o compiled/shell.o
+	gcc $(gcc_options) src/libc/string.cpp -o compiled/string.o
 
 link: 
 	ld -T"link.ld"

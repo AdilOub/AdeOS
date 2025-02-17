@@ -173,6 +173,60 @@ void ClearScreen(uint8_t ClearColor){
     }
 }
 
+void printf(char* format, ...){
+    __builtin_va_list args; //on aurait pu lire la pile directement (tout les 2 elements à partir de la pos +7 de format) mais c'est berk
+    __builtin_va_start(args, format);
+    char buff[MAX_PRINTF_BUFFER];
+    uint16_t buffIndex = 0; //index du buffer
+
+    uint64_t arg;
+    while(*format && buffIndex < MAX_PRINTF_BUFFER - 1){
+        if(*format == '%'){
+            format++;
+            switch (*format)
+            {
+            case 's':
+                arg = (uint64_t)__builtin_va_arg(args, char*);
+                strcpy(buff + buffIndex, (char*)arg);
+                buffIndex += strlen((char*)arg);
+                break;
+            case 'c':
+                arg = (uint64_t)__builtin_va_arg(args, int32_t); //can't read char directly ?!
+                buff[buffIndex] = (char)arg;
+                buffIndex++;
+                break;
+            case 'd':
+                arg = (uint64_t)__builtin_va_arg(args, int32_t);
+                strcpy(buff + buffIndex, IntToString((int32_t)arg));
+                buffIndex += strlen(IntToString((int32_t)arg));
+                break;
+            case 'l':
+                arg = (uint64_t)__builtin_va_arg(args, int64_t);
+                strcpy(buff + buffIndex, IntToString((int64_t)arg));
+                buffIndex += strlen(IntToString((int64_t)arg));
+                break;
+            case 'x':
+                arg = (uint64_t)__builtin_va_arg(args, int64_t);
+                strcpy(buff + buffIndex, HexToString((int64_t)arg));
+                buffIndex += strlen(HexToString((int64_t)arg));
+                break;
+            default:
+                buff[buffIndex] = *format;
+                buffIndex++;
+                break;
+            }
+            format++;
+        }else{
+            buff[buffIndex] = *format;
+            buffIndex++;
+            format++;
+        }
+    }
+
+    buff[buffIndex] = 0;
+    PrintString(buff, FOREGROUND_WHITE | BACKGROUND_BLACK);
+}
+
 
 #endif 
 
