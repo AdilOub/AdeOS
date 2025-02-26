@@ -15,9 +15,10 @@ Creation de la hashtable des commandes
 
 
 #pragma region cmds
-void helpCmd(){
-    PrintString(" Cmds: help; clear; arrow; lang-fr; lang-en; slt; fatal; reboot; cube");
+uint8_t helpCmd(uint8_t argc){
+    printf(" Cmds: help; clear; arrow; lang-fr; lang-en; slt; fatal; reboot; cube. argc: %d.", argc);
     endCmd();
+    return 0;
 }
 
 void clearCmd(){
@@ -62,6 +63,14 @@ void fatalCmd(char* args){
     int a = 1/0;
 }
 
+void ls(){
+    folder* info = read_folder_info(0);
+    for(uint16_t i = 0; i< info->nb_of_cluster; i++){
+        printf("Cluster %d: %s\n\r", i, info->children_names[i]);
+    }
+    destroy_folder(info);
+    return;
+}
 
 
 //geré
@@ -87,8 +96,7 @@ void endCmd(){
 }
 
 void errorCmd(char* cmd){
-    PrintString("--Unknown cmd: ", FOREGROUND_RED);
-    PrintString(cmd, FOREGROUND_RED);
+    printf("Unknown command '%s'.", cmd);
     endCmd();
 }
 
@@ -99,18 +107,6 @@ void clearCmdBuffer(char* buffer, int bufferSize){
     }
 }
 
-
-bool strcmp(char* a, const char* b){
-    int n = 0;
-    while(a[n] != '\0'){
-        if(a[n] != b[n]){
-            return false;
-        } 
-        n++;
-    }
-
-    return a[n] == b[n];
-}
 
 void asm_handler(uint64_t arg0, uint64_t arg1, uint64_t ptr){
     asm ( "mov %1, %%rax\n\t"
@@ -159,10 +155,11 @@ char** separe_string(char* str, char separator){
     while(*str != '\0'){
         uint8_t len = strportionlength(str, separator);
         *res = (char*)malloc(len+1);
+        **res = 0;
         for(int i = 0; i<len; i++){
             (*res)[i] = str[i];
         }
-        (*res)[len] = '\0';
+        (*res)[len-1] = '\0';
         res++;
         str += len;
     }
@@ -225,17 +222,22 @@ void add_basic_commands(){
     addCommandToFileSystem("hi", (uint64_t)hellow);
     addCommandToFileSystem("help", (uint64_t)helpCmd);
     addCommandToFileSystem("clear", (uint64_t)clearCmd);
+    addCommandToFileSystem("ls", (uint64_t)ls);
 }
 
 
 //todo gerer les arguments !
 void handleCmds(char* cmd){
+
+    if(*cmd == 0){
+        return;
+    }
     //todo separer la cmd et les arguments
     //PrintString("handling...\n\r", FOREGROUND_GREEN);
     PrintString("\n\r");
-    uint8_t nb_of_args = get_nb_of_args(cmd);
+    uint8_t argc = get_nb_of_args(cmd);
     
-    if(nb_of_args == 0){
+    if(argc == 0){
         Print("\n\rNo cmd\n\r");
         endCmd();
         return;
@@ -244,35 +246,29 @@ void handleCmds(char* cmd){
     char** args = separe_string(cmd, ' ');
 
     //affichage des arguments
-    for(int i = 0; i<nb_of_args; i++){
-        PrintString(args[i], FOREGROUND_LIGHTCYAN);
-        PrintString("\n\r", FOREGROUND_LIGHTCYAN);
+    for(int i = 0; i<argc; i++){
+        printf("arg %d: '%s. ", i, args[i]);
     }
 
-    // if(strcmp(args[0], "clear")){
-    //     for(int i = 0; i<nb_of_args; i++){
-    //         free(args[i]);
-    //     }
-    //     free(args);
-    //     clearCmd();
-    //     return;
-    // }
 
     //on essaye de trouver la commande dans bin
     uint16_t bin = find_file_inode_by_name(0, "bin");
     if(bin == 0xFFFF){
         PrintString("No bin folder found\n\r", FOREGROUND_RED);
-        for(int i = 0; i<nb_of_args; i++){
+        for(int i = 0; i<argc; i++){
             free(args[i]);
         }
         free(args);
         return;
     }
 
+
+    printf("ARGS0: '%s'\n", args[0]);
+
     uint16_t cmd_inode = find_file_inode_by_name(bin, args[0]);
     if(cmd_inode == 0xFFFF){
         errorCmd(args[0]);
-        for(int i = 0; i<nb_of_args; i++){
+        for(int i = 0; i<argc; i++){
             free(args[i]);
         }
         free(args);
@@ -281,8 +277,17 @@ void handleCmds(char* cmd){
 
     //on lit le fichier
     uint8_t* buffer = (uint8_t*)malloc(BLOCK_SIZE);
-    read_begin_of_file(cmd_inode, (char*)buffer, BLOCK_SIZE);
+    read_begin_of_file(cmd_inode, (char*)buffer, BLOCK_SIZE); 
+    printf("ok !\n");
 
+    //uint8_t (*func)(uint8_t, char**) = (void*)buffer; 
+    void* f = (void*)buffer;
+    uint8_t (*func)(uint8_t) = (uint8_t(*)(uint8_t))f;
+    uint8_t res = (*func)(argc);
+
+
+
+    /*
     //on execute la commande
     if(nb_of_args == 1){
         Print("No args\n\r", FOREGROUND_LIGHTGREEN);
@@ -296,6 +301,8 @@ void handleCmds(char* cmd){
     }
 
     asm_handler((uint64_t)args[1], (uint64_t)args[2], (uint64_t)buffer);
+    */
+
     free(buffer);
 
     return;

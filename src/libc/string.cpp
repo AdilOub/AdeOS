@@ -74,6 +74,16 @@ void strcpy(char* dest, const char* src) {
     *dest = '\0';
 }
 
+uint64_t atoi(char* str){
+    uint64_t n = 0;
+    while(*str != 0) {
+        n += *str - '0';
+        n *= 10;
+        str++;
+    }
+    return n;
+}
+
 
 /*
 TODO add to makefile et le finir

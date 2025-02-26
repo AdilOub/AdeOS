@@ -141,6 +141,7 @@ void PrintString(const char* str, uint8_t color, uint8_t unused){
         {
         case 10: //new line
             index += VGA_WIDTH;
+            index -= index%VGA_WIDTH; 
             break;
         case 13: //carriage return
             index -= index%VGA_WIDTH;
@@ -216,7 +217,8 @@ void printf(char* format, ...){
                 break;
             }
             format++;
-        }else{
+        }
+        else{
             buff[buffIndex] = *format;
             buffIndex++;
             format++;
@@ -227,6 +229,13 @@ void printf(char* format, ...){
     PrintString(buff, FOREGROUND_WHITE | BACKGROUND_BLACK);
 }
 
+void backspace(uint8_t backcolor){
+    uint16_t index = CursorPosition;
+    *(VGA_MEMORY + index * 2 - 2) = ' ';
+    *(VGA_MEMORY + index * 2 - 1) = backcolor;
+    index-=1;
+    SetCursorPosition(index);
+}
 
 #endif 
 

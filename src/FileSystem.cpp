@@ -278,7 +278,7 @@ void write_in_data(char* data, const char* stuff){
 
 folder* read_folder_info(uint16_t inode){
     if(get_nth_inode(inode) != FOLDER_SIGNATURE){
-        PrintString("Inode is not a folder\n\r");
+        printf("Indoe %d is not a folder", inode);
         return NULL;
     }
 
