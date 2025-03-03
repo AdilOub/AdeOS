@@ -2,10 +2,12 @@
 
 #include "DiskRead.h"
 #include "libc/stdtypes.h"
+#include "libc/string.h"
 #include "Render.h"
 #include "TextPrint.h"
 #include "Heap.h"
 #include "Memory.h"
+
 
 #define FAT_TABLE_SIZE 65536 // nombre de bloc qu'on peut avoir
 

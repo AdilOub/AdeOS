@@ -282,24 +282,24 @@ folder* read_folder_info(uint16_t inode){
         return NULL;
     }
 
-    folder* f = (folder*)malloc(sizeof(folder));
+    folder* f = (folder*)calloc(sizeof(folder));
     f->inode = inode;
-    char* buffer = (char*)malloc(sizeof(char)*BLOCK_SIZE);
+    char* buffer = (char*)calloc(sizeof(char)*BLOCK_SIZE);
     read(buffer, BLOCK_SIZE, inode * BLOCK_SIZE + FAT_TABLE_SIZE);
-    f->name = (char*)malloc(sizeof(char)*NAME_SIZE);
+    f->name = (char*)calloc(sizeof(char)*NAME_SIZE);
     memcopy(f->name, buffer+SIGNATURE_SIZE, NAME_SIZE);
     f->parent = *(uint16_t*)buffer;
 
     uint16_t nb_of_cluster = 0;
-    f->children_names = (char**)malloc(sizeof(char*)*MAX_INODE_PER_DIR);
-    f->children_inodes = (uint16_t*)malloc(sizeof(uint16_t)*MAX_INODE_PER_DIR);
+    f->children_names = (char**)calloc(sizeof(char*)*MAX_INODE_PER_DIR);
+    f->children_inodes = (uint16_t*)calloc(sizeof(uint16_t)*MAX_INODE_PER_DIR);
     for(int i = 0; i<MAX_INODE_PER_DIR; i++){
         uint8_t* child_inode = (uint8_t*)buffer + SIGNATURE_SIZE + NAME_SIZE + i * LINK_SIZE;
         if(*((uint16_t*)child_inode) != NOT_USED){
             nb_of_cluster++;
         }
         f->children_inodes[i] = *((uint16_t*)child_inode);
-        f->children_names[i] = (char*)malloc(sizeof(char)*(NAME_SIZE+1));
+        f->children_names[i] = (char*)calloc(sizeof(char)*(NAME_SIZE+1));
         memcopy(f->children_names[i], child_inode+SIGNATURE_SIZE, NAME_SIZE);
         f->children_names[i][NAME_SIZE] = '\0';
     }
@@ -334,19 +334,6 @@ void destroy_folder(folder* f){
 }
 
 
-//TODO restructuré le projet un peu mdr
-bool strcmp2(char* a, char* b){
-    int n = 0;
-    while(a[n] != '\0'){
-        if(a[n] != b[n]){
-            return false;
-        } 
-        n++;
-    }
-
-    return a[n] == b[n];
-}
-
 uint16_t find_file_inode_by_name(uint16_t parent, char* name){
     folder* f = NULL;
     f = read_folder_info(parent);
@@ -354,7 +341,7 @@ uint16_t find_file_inode_by_name(uint16_t parent, char* name){
         return 0xFFFF;
     }
     for(int i = 0; i<MAX_INODE_PER_DIR; i++){
-        if(strcmp2(f->children_names[i], name) == 1 && f->children_inodes[i] != NOT_USED){
+        if(strcmp(f->children_names[i], name) == 1 && f->children_inodes[i] != NOT_USED){
             uint16_t inode = f->children_inodes[i];
             destroy_folder(f);
             return inode;

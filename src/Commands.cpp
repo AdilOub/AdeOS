@@ -15,8 +15,9 @@ Creation de la hashtable des commandes
 
 
 #pragma region cmds
-uint8_t helpCmd(uint8_t argc){
+uint8_t helpCmd(uint8_t argc, char* args){
     printf(" Cmds: help; clear; arrow; lang-fr; lang-en; slt; fatal; reboot; cube. argc: %d.", argc);
+    printf("\nvalue of args: '%s'", args);
     endCmd();
     return 0;
 }
@@ -70,6 +71,46 @@ void ls(){
     }
     destroy_folder(info);
     return;
+}
+
+//TODO meilleur truc car la cest terrible.
+//Nottament gestion du path avec le shell (faire comme linux et utiliser arg0)
+void touch(uint8_t argc, char* arg){
+    if(argc < 2){
+        printf("Usage: touch <filename>");
+        endCmd();
+        return;
+    }
+    uint16_t f = create_file_in_parent(0, arg, "", 0);
+    if(f == 0xFFFF){
+        printf("Error creating file");
+    }else{
+        printf("File %s created", arg);
+    }
+    endCmd();
+}
+
+void cat(uint8_t argc, char* arg){
+
+    if(argc < 2){
+        printf("Usage: cat <filename>");
+        endCmd();
+        return;
+    }
+
+    uint16_t f = find_file_inode_by_name(0, arg);
+    if(f == 0xFFFF){
+        printf("File not found");
+        endCmd();
+        return;
+    }
+
+    char* buffer = (char*)malloc(sizeof(char)*512);
+    read_begin_of_file(f, buffer, 512);
+    printf("File content: '%s'", buffer);
+    PrintString(buffer);
+    free(buffer);
+    endCmd();
 }
 
 
@@ -155,7 +196,7 @@ char** separe_string(char* str, char separator){
     while(*str != '\0'){
         uint8_t len = strportionlength(str, separator);
         *res = (char*)malloc(len+1);
-        **res = 0;
+        (*res)[0] = 0;
         for(int i = 0; i<len; i++){
             (*res)[i] = str[i];
         }
@@ -223,8 +264,29 @@ void add_basic_commands(){
     addCommandToFileSystem("help", (uint64_t)helpCmd);
     addCommandToFileSystem("clear", (uint64_t)clearCmd);
     addCommandToFileSystem("ls", (uint64_t)ls);
+    addCommandToFileSystem("touch", (uint64_t)touch);
+    addCommandToFileSystem("cat", (uint64_t)cat);
 }
 
+
+char** separe_string_todo(char* str, char ignore){
+    char* str_begin = str;
+    char** val = (char**)malloc(sizeof(char*)*2);
+    uint8_t taille = 0;
+
+    while(*str != ' ' && *str != '\0'){
+        taille++;
+        str++;
+    }
+    val[0] = (char*)malloc(taille+1);
+    val[0][taille] = '\0';
+    memcopy(val[0], str_begin, taille);
+
+    val[1] = (char*)malloc(strlen(str)+1);
+    memcopy(val[1], str, strlen(str));
+    val[1][strlen(str)] = '\0';
+    return val;
+}
 
 //todo gerer les arguments !
 void handleCmds(char* cmd){
@@ -243,16 +305,17 @@ void handleCmds(char* cmd){
         return;
     }
 
-    char** args = separe_string(cmd, ' ');
+    char** args = separe_string_todo(cmd, ' ');
+    argc = 2;
+
 
     //affichage des arguments
     for(int i = 0; i<argc; i++){
-        printf("arg %d: '%s. ", i, args[i]);
+        printf("arg %d: '%s'. ", i, args[i]);
     }
-
-
-    //on essaye de trouver la commande dans bin
+    
     uint16_t bin = find_file_inode_by_name(0, "bin");
+
     if(bin == 0xFFFF){
         PrintString("No bin folder found\n\r", FOREGROUND_RED);
         for(int i = 0; i<argc; i++){
@@ -262,8 +325,6 @@ void handleCmds(char* cmd){
         return;
     }
 
-
-    printf("ARGS0: '%s'\n", args[0]);
 
     uint16_t cmd_inode = find_file_inode_by_name(bin, args[0]);
     if(cmd_inode == 0xFFFF){
@@ -281,9 +342,11 @@ void handleCmds(char* cmd){
     printf("ok !\n");
 
     //uint8_t (*func)(uint8_t, char**) = (void*)buffer; 
+    char* arg = args[1];
+    arg++;
     void* f = (void*)buffer;
-    uint8_t (*func)(uint8_t) = (uint8_t(*)(uint8_t))f;
-    uint8_t res = (*func)(argc);
+    uint8_t (*func)(uint8_t, char*) = (uint8_t(*)(uint8_t, char*))f;
+    uint8_t res = (*func)(argc, arg);
 
 
 
@@ -303,6 +366,11 @@ void handleCmds(char* cmd){
     asm_handler((uint64_t)args[1], (uint64_t)args[2], (uint64_t)buffer);
     */
 
+    for(int i = 0; i<argc; i++){
+        free(args[i]);
+    }
+    free(args);
+    
     free(buffer);
 
     return;

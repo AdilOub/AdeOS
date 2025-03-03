@@ -1,6 +1,6 @@
 #pragma once
 #include "TextPrint.h"
-#define MEMORY_COUNT_LOCATION 0x5000 //set dans DetectMemory.asm
+#define MEMORY_COUNT_LOCATION 0xC000 //set dans DetectMemory.asm
 
 extern uint8_t MemoryRegionCount;
 

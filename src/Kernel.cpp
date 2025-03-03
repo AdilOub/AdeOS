@@ -64,7 +64,7 @@ void setup_file_system(){
     uint8_t test_syscall_data[] = { 0xB8, 0x00, 0x00, 0x00, 0x00, 0xCD, 0x80, 0xC3, 0x01}; //mov eax, 0; int 0x80; ret trigger le syscall d'example
     uint64_t size = sizeof(test_syscall_data);
     uint16_t f = create_file_in_parent(bin, "testsyscall", (char*)test_syscall_data, size);
-    
+    create_file_in_parent(0, "secret.txt", "hello buddy what's up ? Still some work to do....", 50);
 }
 
 uint8_t keyboard_input[256];
@@ -84,7 +84,7 @@ extern "C" void _start(){
     
     ClearScreen();
     SetCursorPosition(PosFromCoord(0, 0));
-    PrintString(Test);
+    //PrintString(Test);
     PrintString("Bienvenue sur "); PrintString("AdeOs", FOREGROUND_LIGHTGREEN); PrintString(" !\n\r\n\r");
     
     //Print("Test affichage:\n\r", FOREGROUND_LIGHTCYAN);

@@ -13,3 +13,5 @@ void strcatover(char** dest, const char* src) ;
 void strcpy(char* dest, const char* src) ;
 
 uint64_t strlen(const char* str) ;
+
+bool strcmp(const char* str1, const char* str2) ;

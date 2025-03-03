@@ -46,5 +46,5 @@ const char* IntToString(long long value);
 
 
 void testPrint();
-void printf(char* format, ...);
+void printf(const char* format, ...);
 void backspace(uint8_t backcolor);

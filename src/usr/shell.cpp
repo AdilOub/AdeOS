@@ -41,7 +41,7 @@ void shell() {
 }
 
 void startShell() {
-    PrintString("Welcome to the shell!\n\r");
+    printf("Welcome to the shell! address of buffer: %x\n", (uint64_t)buffer);
     clearBuffer();
     bufferIndex = 0;
     shellActive = true;

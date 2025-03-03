@@ -174,7 +174,7 @@ void ClearScreen(uint8_t ClearColor){
     }
 }
 
-void printf(char* format, ...){
+void printf(const char* format, ...){
     __builtin_va_list args; //on aurait pu lire la pile directement (tout les 2 elements à partir de la pos +7 de format) mais c'est berk
     __builtin_va_start(args, format);
     char buff[MAX_PRINTF_BUFFER];

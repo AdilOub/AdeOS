@@ -6,7 +6,7 @@ DetectMemeory:
     ;mov ax, 0x800;
     mov ax, 0
     mov es, ax
-    mov di, 0x5000 ;adresse ou on va stocker les regions de memoire: 0x800:0x4=0x8004, à modifier dans Memory.h
+    mov di, 0xC000 ;adresse ou on va stocker les regions de memoire: 0x800:0x4=0x8004, à modifier dans Memory.h
     xor ebx, ebx
     xor eax, eax;
 
