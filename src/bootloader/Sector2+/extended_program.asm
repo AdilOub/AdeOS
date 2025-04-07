@@ -24,13 +24,20 @@ setVGA_graphic:
     int 0x10
     ret
 
+setVBEGraphic:
+    mov ax, 0x4F02
+    mov bx, 0x411
+    int 0x10
+    ret
+
 EnterProtectedMode:
     mov bx, ExtendedProgramStart
     call PrintString
     call JmpLine
 
     ;call setVGA_graphic
-    
+    call setVBEGraphic
+
     call DetectMemeory
     call EnableA20
     cli ;jmp to 32 bits on desactive les interruptions
