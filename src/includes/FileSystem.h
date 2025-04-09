@@ -66,3 +66,4 @@ void destroy_folder(folder* f);
 uint8_t check_if_root();
 uint16_t find_file_inode_by_name(uint16_t parent, char* name);
 
+char* get_path_to_root(uint16_t inode);

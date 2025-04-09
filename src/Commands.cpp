@@ -15,6 +15,14 @@ Creation de la hashtable des commandes
 
 
 #pragma region cmds
+void test(char* ags){
+    char* path = get_path_to_root(2);
+    printf("Path: '%s'", path);
+    free(path);
+    return;
+}
+
+
 uint8_t helpCmd(uint8_t argc, char* args){
     printf(" Cmds: help; clear; arrow; lang-fr; lang-en; slt; fatal; reboot; cube. argc: %d.", argc);
     printf("\nvalue of args: '%s'", args);
@@ -107,7 +115,7 @@ void cat(uint8_t argc, char* arg){
 
     char* buffer = (char*)malloc(sizeof(char)*512);
     read_begin_of_file(f, buffer, 512);
-    printf("File content: '%s'", buffer);
+    //printf("File content: '%s'", buffer);
     PrintString(buffer);
     free(buffer);
     endCmd();
@@ -266,6 +274,7 @@ void add_basic_commands(){
     addCommandToFileSystem("ls", (uint64_t)ls);
     addCommandToFileSystem("touch", (uint64_t)touch);
     addCommandToFileSystem("cat", (uint64_t)cat);
+    addCommandToFileSystem("test", (uint64_t)test);
 }
 
 

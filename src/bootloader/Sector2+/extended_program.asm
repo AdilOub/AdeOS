@@ -20,7 +20,7 @@ jmp EnterProtectedMode
 ;de base c'était set dans bootloader.asm en mode 0x03 (text mode)
 setVGA_graphic:
     mov ah, 0x00
-    mov al, 0x12
+    mov al, 0x03
     int 0x10
     ret
 
@@ -35,8 +35,8 @@ EnterProtectedMode:
     call PrintString
     call JmpLine
 
-    ;call setVGA_graphic
-    call setVBEGraphic
+    call setVGA_graphic
+    ;call setVBEGraphic
 
     call DetectMemeory
     call EnableA20

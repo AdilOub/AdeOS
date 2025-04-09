@@ -96,8 +96,8 @@ uint16_t create_folder(uint16_t parent, char* name){
     uint16_t* ptr = (uint16_t*)malloc(sizeof(uint16_t));
     *ptr = parent;
     write((char*)ptr, sizeof(uint16_t), new_inode * BLOCK_SIZE + FAT_TABLE_SIZE);
-    write("<-pof ", 6, new_inode * BLOCK_SIZE + FAT_TABLE_SIZE + sizeof(uint16_t)); //TODO rmv after debug
-    write(name, strlen(name), new_inode * BLOCK_SIZE + FAT_TABLE_SIZE + sizeof(uint16_t) + 6); //TODO rmv after debug
+    //write("<-pof ", 6, new_inode * BLOCK_SIZE + FAT_TABLE_SIZE + sizeof(uint16_t)); //TODO rmv after debug, si je le met je dois add +6 arpès sizeof(uint16) en bas
+    write(name, strlen(name), new_inode * BLOCK_SIZE + FAT_TABLE_SIZE + sizeof(uint16_t)); //TODO rmv after debug
 
     //le nouveau dossier est vide, on met tous ses inodes fils à NOT_USED
     *ptr = NOT_USED;
@@ -351,6 +351,40 @@ uint16_t find_file_inode_by_name(uint16_t parent, char* name){
     return 0xFFFF;
 }
 
+
+char* get_path_to_root(uint16_t inode){
+    if(get_nth_inode(inode) != FOLDER_SIGNATURE){
+        PrintString("Not a folder\n\r");
+        return NULL;
+    }
+
+    folder* f = NULL;
+    f = read_folder_info(inode);
+    if(f==NULL){
+        PrintString("Failed to read folder\n\r");
+        return NULL;
+    }
+
+    if(inode == 0){
+        //c'est le root:
+        PrintString("On a le root !");
+        char* path = (char*)malloc(2);
+        path[0] = '/';
+        path[1] = 0;
+        return path;
+    }
+
+    char* parent_path = get_path_to_root(f->parent);
+    char* path = (char*)malloc(strlen(parent_path) + strlen(f->name) + 1);
+    memcopy(path, parent_path, strlen(parent_path));
+    printf("\n[!] Name: '%s'\n", f->name);
+    printf("[!] Parent path: '%s' %d\n", parent_path, strlen(parent_path));
+    memcopy(path+strlen(parent_path), f->name, strlen(f->name));
+    free(parent_path);
+    return path;
+
+    
+}
 
 /*
 
