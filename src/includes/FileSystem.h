@@ -49,10 +49,9 @@ typedef struct folder folder;
 void setup_root();
 
 //creation
-uint16_t create_folder_in_parent(uint16_t parent, char* name);
-uint16_t create_file_in_parent(uint16_t parent, char* name, char* data, uint64_t size);
-void write_in_data(char* data, const char* stuff);
-uint16_t read_begin_of_file(uint16_t inode, char* buffer, int size);
+uint16_t create_folder_in_parent(uint16_t parent, const char* name);
+uint16_t create_file_in_parent(uint16_t parent, const char* name, const char* data, uint64_t size);
+uint16_t read_file(uint16_t inode, char* buffer, int size);
 
 
 //suppression
@@ -67,3 +66,5 @@ uint8_t check_if_root();
 uint16_t find_file_inode_by_name(uint16_t parent, char* name);
 
 char* get_path_to_root(uint16_t inode);
+
+void print_folder_info(folder* f);

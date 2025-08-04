@@ -44,7 +44,7 @@ idtDescriptor:
 ; [extern isr10_handler] ;invalid tss
 ; [extern isr11_handler] ;11
 ; [extern isr12_handler] ;12
-; [extern isr13_handler] ; general protection fault
+[extern isr13_handler] ; general protection fault
 [extern isr14_handler] ; page fault
 ; [extern isr15_handler] ;15
 ; [extern isr16_handler] ;16
@@ -167,12 +167,12 @@ isr8:
 ;   iretq
 ;   GLOBAL isr12
 
-; isr13:
-;   PUSHALL
-;   call isr13_handler
-;   POPALL
-;   iretq
-;   GLOBAL isr13
+isr13:
+  PUSHALL
+  call isr13_handler
+  POPALL
+  iretq
+  GLOBAL isr13
 
 isr14:
   PUSHALL

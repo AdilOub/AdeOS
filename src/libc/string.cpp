@@ -85,6 +85,50 @@ uint64_t atoi(char* str){
 }
 
 
+
+uint16_t strargc(char* str, char sep){
+    uint16_t n = 0;
+    while(*str != 0){
+        if(*str == sep && *(str+1) != 0)
+            n++;
+        str++;
+    }
+    return n+1;
+}
+
+char** splitargv(char* str, char sep){
+    uint16_t n_partie = strargc(str, sep);
+    char** res = (char**)malloc(sizeof(char*) * n_partie);
+
+    if(n_partie == 1){ //si aucun separateur, on renvoie la chaine entière
+        res[0] = (char*)malloc(sizeof(char) * (strlen(str)+1));
+        strcpy(res[0], str);
+        return res;
+    }
+ 
+    uint16_t start = 0;
+    for(uint16_t i = 0; i<n_partie; i++){
+        uint16_t end = start;
+        while(str[end] != sep && str[end] != 0){
+            end++;
+        }
+        
+        res[i] = (char*)malloc(sizeof(char) * (end-start+1));
+        memcopy(res[i], str+start, end-start);
+        res[i][end-start] = 0;
+        start = end+1;
+    }
+    
+    return res;
+}
+
+void freeargv(char** argv, uint16_t argc){
+    for(uint16_t i = 0; i<argc; i++){
+        free(argv[i]);
+    }
+    free(argv);
+}
+
 /*
 TODO add to makefile et le finir
 */

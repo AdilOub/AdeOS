@@ -32,6 +32,7 @@ void shell() {
             buffer[bufferIndex] = c;
             bufferIndex++;
             printf("%c", c);
+
         }
         buffer[bufferIndex] = '\0';
         bufferIndex = 0;

@@ -15,28 +15,31 @@ Creation de la hashtable des commandes
 
 
 #pragma region cmds
-void test(char* ags){
+uint8_t test(uint8_t argc, char* args[]){
     char* path = get_path_to_root(2);
     printf("Path: '%s'", path);
     free(path);
-    return;
+    return 0;
 }
 
 
-uint8_t helpCmd(uint8_t argc, char* args){
+uint8_t helpCmd(uint8_t argc, char* args[]){
     printf(" Cmds: help; clear; arrow; lang-fr; lang-en; slt; fatal; reboot; cube. argc: %d.", argc);
-    printf("\nvalue of args: '%s'", args);
+    for(int i = 0; i< argc; i++){
+        printf("Value of arg %d: '%s'. ", i, args[i]);
+    }
     endCmd();
     return 0;
 }
 
-void clearCmd(){
+uint8_t clearCmd(uint8_t argc, char* args[]){
     ClearScreen();
     SetCursorPosition(PosFromCoord(0,0));
     endCmd();
+    return 0;
 }
 
-void arrowCmd(char* args){
+uint8_t arrowCmd(uint8_t argc, char* args[]){
     if(getArrowState()){
         enableArrow(false);
         PrintString(" Arrow disabled");
@@ -45,80 +48,74 @@ void arrowCmd(char* args){
         PrintString(" Arrow enabled");
     }
     endCmd();
+    return 0;
 }
 
-void langFrCmd(char* args){
-    setLanguage(KBSet1::ScanCodeLookupTableAZERTY);
-    PrintString(" Keyboard set to azerty");
-    endCmd();
-}
-
-void langEnCmd(char* args){
-    setLanguage(KBSet1::ScanCodeLookupTableQWERTY);
-    PrintString(" Keyboard set to qwerty");
-    endCmd();
-}
-
-void sltCmd(char* args){
+uint8_t sltCmd(uint8_t argc, char* args[]){
     ClearScreen(BACKGROUND_BLACK);
     SetCursorPosition(0);
     PrintString(Test);
     endCmd();
+    return 0;
 }
 
-void fatalCmd(char* args){
+uint8_t fatalCmd(uint8_t argc, char* args[]){
     PrintString(" Generating fatal error...", FOREGROUND_RED);
     endCmd();
     int a = 1/0;
+    return 0;
 }
 
-void ls(){
+uint8_t ls(uint8_t argc, char* args[]){
     folder* info = read_folder_info(0);
-    for(uint16_t i = 0; i< info->nb_of_cluster; i++){
-        printf("Cluster %d: %s\n\r", i, info->children_names[i]);
-    }
+    print_folder_info(info);
     destroy_folder(info);
-    return;
+    return 0;
 }
 
 //TODO meilleur truc car la cest terrible.
 //Nottament gestion du path avec le shell (faire comme linux et utiliser arg0)
-void touch(uint8_t argc, char* arg){
+uint8_t touch(uint8_t argc, char* args[]){
     if(argc < 2){
         printf("Usage: touch <filename>");
         endCmd();
-        return;
+        return 1;
     }
-    uint16_t f = create_file_in_parent(0, arg, "", 0);
+    uint16_t f = create_file_in_parent(0, args[1], "hi honey this is a test file!\0", 32);
     if(f == 0xFFFF){
-        printf("Error creating file");
+        printf("Error creating file\n");
+        return 2;
     }else{
-        printf("File %s created", arg);
+        printf("File '%s' created with inode %d! \n", args[1], f);
     }
     endCmd();
+
+    return 0;
 }
 
-void cat(uint8_t argc, char* arg){
+uint8_t cat(uint8_t argc, char* args[]){
 
     if(argc < 2){
         printf("Usage: cat <filename>");
         endCmd();
-        return;
+        return 1;
     }
 
-    uint16_t f = find_file_inode_by_name(0, arg);
+    uint16_t f = find_file_inode_by_name(0, args[1]);
     if(f == 0xFFFF){
         printf("File not found");
         endCmd();
-        return;
+        return 2;
     }
 
     char* buffer = (char*)malloc(sizeof(char)*512);
-    read_begin_of_file(f, buffer, 512);
+    read_file(f, buffer, 512);
     //printf("File content: '%s'", buffer);
     PrintString(buffer);
     free(buffer);
     endCmd();
+
+    return 0;
 }
 
 
@@ -253,11 +250,11 @@ uint8_t* functionToAsmHandler(uint64_t function_ptr){
 }
 
 //TODO faire un truc plus propre en utilisant es et des décalages (pour gerer les 64 bits de mémoires !)
-void addCommandToFileSystem(char* name, uint64_t fptr){
+void addCommandToFileSystem(const char* name, uint64_t fptr){
     uint8_t* buffer = functionToAsmHandler(fptr);
     uint16_t bin = find_file_inode_by_name(0, "bin");
     if(bin == 0xFFFF){
-        PrintString("No bin folder found\n\r", FOREGROUND_RED);
+        PrintString("No bin folder found in adding\n\r", FOREGROUND_RED);
         return;
     }
 
@@ -275,112 +272,54 @@ void add_basic_commands(){
     addCommandToFileSystem("touch", (uint64_t)touch);
     addCommandToFileSystem("cat", (uint64_t)cat);
     addCommandToFileSystem("test", (uint64_t)test);
+
 }
 
 
-char** separe_string_todo(char* str, char ignore){
-    char* str_begin = str;
-    char** val = (char**)malloc(sizeof(char*)*2);
-    uint8_t taille = 0;
-
-    while(*str != ' ' && *str != '\0'){
-        taille++;
-        str++;
-    }
-    val[0] = (char*)malloc(taille+1);
-    val[0][taille] = '\0';
-    memcopy(val[0], str_begin, taille);
-
-    val[1] = (char*)malloc(strlen(str)+1);
-    memcopy(val[1], str, strlen(str));
-    val[1][strlen(str)] = '\0';
-    return val;
-}
-
-//todo gerer les arguments !
 void handleCmds(char* cmd){
 
     if(*cmd == 0){
         return;
     }
-    //todo separer la cmd et les arguments
-    //PrintString("handling...\n\r", FOREGROUND_GREEN);
+   
+
     PrintString("\n\r");
-    uint8_t argc = get_nb_of_args(cmd);
-    
-    if(argc == 0){
-        Print("\n\rNo cmd\n\r");
-        endCmd();
-        return;
-    }
 
-    char** args = separe_string_todo(cmd, ' ');
-    argc = 2;
+    uint16_t argc = strargc(cmd, ' ');
+    char** argv = splitargv(cmd, ' ');
 
-
-    //affichage des arguments
-    for(int i = 0; i<argc; i++){
-        printf("arg %d: '%s'. ", i, args[i]);
-    }
-    
     uint16_t bin = find_file_inode_by_name(0, "bin");
 
     if(bin == 0xFFFF){
         PrintString("No bin folder found\n\r", FOREGROUND_RED);
-        for(int i = 0; i<argc; i++){
-            free(args[i]);
-        }
-        free(args);
+        freeargv(argv, argc);
         return;
     }
 
 
-    uint16_t cmd_inode = find_file_inode_by_name(bin, args[0]);
+    uint16_t cmd_inode = find_file_inode_by_name(bin, argv[0]);
     if(cmd_inode == 0xFFFF){
-        errorCmd(args[0]);
-        for(int i = 0; i<argc; i++){
-            free(args[i]);
-        }
-        free(args);
+        errorCmd(argv[0]);
+        freeargv(argv, argc);
         return;
     }
+
+    //TODO: modifier argv[0] pour qu'il corresponde au path !
 
     //on lit le fichier
-    uint8_t* buffer = (uint8_t*)malloc(BLOCK_SIZE);
-    read_begin_of_file(cmd_inode, (char*)buffer, BLOCK_SIZE); 
-    printf("ok !\n");
+    uint8_t* loaded_cmd = (uint8_t*)malloc(BLOCK_SIZE);
+    read_file(cmd_inode, (char*)loaded_cmd, BLOCK_SIZE); 
 
     //uint8_t (*func)(uint8_t, char**) = (void*)buffer; 
-    char* arg = args[1];
-    arg++;
-    void* f = (void*)buffer;
-    uint8_t (*func)(uint8_t, char*) = (uint8_t(*)(uint8_t, char*))f;
-    uint8_t res = (*func)(argc, arg);
+    void* f = (void*)loaded_cmd;
+    uint8_t (*func)(uint8_t, char**) = (uint8_t(*)(uint8_t, char**))f;
+    uint8_t res = (*func)(argc, argv);
 
 
+    printf("[-] Exit code: %d\n", res);
 
-    /*
-    //on execute la commande
-    if(nb_of_args == 1){
-        Print("No args\n\r", FOREGROUND_LIGHTGREEN);
-        asm_no_arg_handler((uint64_t)buffer);
-        free(buffer);
-        for(int i = 0; i<nb_of_args; i++){
-            free(args[i]);
-        }
-        free(args);
-        return;
-    }
-
-    asm_handler((uint64_t)args[1], (uint64_t)args[2], (uint64_t)buffer);
-    */
-
-    for(int i = 0; i<argc; i++){
-        free(args[i]);
-    }
-    free(args);
-    
-    free(buffer);
+    freeargv(argv, argc);
+    free(loaded_cmd);
 
     return;
 

@@ -22,7 +22,7 @@ extern uint64_t isr8;
 // extern uint64_t isr10;
 // extern uint64_t isr11;
 // extern uint64_t isr12;
-// extern uint64_t isr13;
+extern uint64_t isr13; //general protection fault
 extern uint64_t isr14;
 // extern uint64_t isr16;
 // extern uint64_t isr17;
@@ -90,6 +90,15 @@ void InitIDT(){
     _idt[8].ist = 0;
     _idt[8].selector = 0x08;
     _idt[8].types_attr = 0x8f;
+
+    //general protection fault
+    _idt[13].zero = 0;
+    _idt[13].offset_low = (uint16_t)(((uint64_t)&isr13 & 0x000000000000ffff));
+    _idt[13].offset_mid = (uint16_t)(((uint64_t)&isr13 & 0x00000000ffff0000) >> 16);
+    _idt[13].offset_high = (uint32_t)(((uint64_t)&isr13 & 0xffffffff00000000) >> 32);
+    _idt[13].ist = 0;
+    _idt[13].selector = 0x08;
+    _idt[13].types_attr = 0x8f;
 
     //page fault
     _idt[14].zero = 0;
@@ -544,12 +553,12 @@ extern "C" void isr8_handler(){
 //     asm("hlt");
 // }
 
-// extern "C" void isr13_handler(){
-//     SetCursorPosition(0);asm("cli");
-//     PrintString("Kernel panic: general protection fault\n\r", BACKGROUND_RED | FOREGROUND_WHITE);
-//     //c'est surement grave
-//     asm("hlt");
-// }
+extern "C" void isr13_handler(){
+     SetCursorPosition(0);asm("cli");
+     PrintString("Kernel panic: general protection fault\n\r", BACKGROUND_RED | FOREGROUND_WHITE);
+     //c'est surement grave
+     asm("hlt");
+}
 
 extern "C" void isr14_handler(){
     asm("cli");

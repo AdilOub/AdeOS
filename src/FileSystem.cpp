@@ -8,7 +8,7 @@ void read(char* buffer, int size, int offset){
 }
 
 
-void write(char* buffer, int size, int offset) {
+void write(const char* buffer, int size, int offset) {
     writeDATA(offset+DISK_OFFSET, size, (uint8_t*)buffer);
 }
 
@@ -87,7 +87,7 @@ uint16_t find_inode_in_folder(uint16_t parent, uint16_t inode){
 }
 
 
-uint16_t create_folder(uint16_t parent, char* name){
+uint16_t create_folder(uint16_t parent, const char* name){
     //on l'ajoute à la fat table
     uint16_t new_inode = get_next_free_inode_nb();
     write_nth_inode(new_inode, FOLDER_SIGNATURE);
@@ -109,7 +109,7 @@ uint16_t create_folder(uint16_t parent, char* name){
     return new_inode;
 }
 
-uint16_t create_folder_in_parent(uint16_t parent, char* name){
+uint16_t create_folder_in_parent(uint16_t parent, const char* name){
     //on récupère le premier liens libre dans le dossier parent
     uint16_t not_used = find_not_used_in_folder(parent);
     if(not_used == 0xFFFF){
@@ -134,7 +134,7 @@ uint16_t create_folder_in_parent(uint16_t parent, char* name){
 }
 
 
-uint16_t create_file(uint16_t parent, char* data, uint16_t nb_of_cluster, uint64_t size){
+uint16_t create_file(uint16_t parent, const char* data, uint16_t nb_of_cluster, uint64_t size){
     //on veut commencer par trouver nb_of_cluster clusters libres dnas la fat table
     uint16_t* clusters = (uint16_t*)malloc(nb_of_cluster * sizeof(uint16_t));
 
@@ -168,7 +168,7 @@ uint16_t create_file(uint16_t parent, char* data, uint16_t nb_of_cluster, uint64
     return first_cluster;
 }
 
-uint16_t create_file_in_parent(uint16_t parent, char* name, char* data, uint64_t size){
+uint16_t create_file_in_parent(uint16_t parent, const char* name, const char* data, uint64_t size){
     //uint64_t size = strlen(data);
     uint16_t nb_of_cluster = (size / BLOCK_SIZE) + !!(size%BLOCK_SIZE); //j'aime bien, !! pour avoir 0 ou 1
     //uint16_t nb_of_cluster = (size >> BLOCK_SIZE_POW2) + !!(size & BLOCK_SIZE_MASK); //encore plus opti parceque why not mdr
@@ -234,7 +234,7 @@ uint8_t delete_inode(uint16_t parent, uint16_t inode){
 }
 
 
-uint16_t read_begin_of_file(uint16_t inode, char* buffer, int size){
+uint16_t read_file(uint16_t inode, char* buffer, int size){
     uint16_t* fat_table = read_fat_table();
     uint16_t current = inode;
     int i = 0;
@@ -245,13 +245,6 @@ uint16_t read_begin_of_file(uint16_t inode, char* buffer, int size){
     }
     free(fat_table);
     return i;
-}
-
-void write_in_data(char* data, const char* stuff){
-    for(int i = 0; i<strlen(stuff); i++){
-        data[i] = stuff[i];
-    }
-    //data[strlen(stuff)] = '\0';
 }
 
 /*uint16_t* read_folder(uint16_t parent){
@@ -282,6 +275,7 @@ folder* read_folder_info(uint16_t inode){
         return NULL;
     }
 
+
     folder* f = (folder*)calloc(sizeof(folder));
     f->inode = inode;
     char* buffer = (char*)calloc(sizeof(char)*BLOCK_SIZE);
@@ -290,6 +284,7 @@ folder* read_folder_info(uint16_t inode){
     memcopy(f->name, buffer+SIGNATURE_SIZE, NAME_SIZE);
     f->parent = *(uint16_t*)buffer;
 
+    
     uint16_t nb_of_cluster = 0;
     f->children_names = (char**)calloc(sizeof(char*)*MAX_INODE_PER_DIR);
     f->children_inodes = (uint16_t*)calloc(sizeof(uint16_t)*MAX_INODE_PER_DIR);
@@ -333,6 +328,19 @@ void destroy_folder(folder* f){
     free(f);
 }
 
+
+void print_folder_info(folder* f){
+    printf("Folder name: %s\n", f->name);
+    printf("Parent inode: %d\n", f->parent);
+    printf("Inode: %d\n", f->inode);
+    printf("Number of clusters: %d\n", f->nb_of_cluster);
+    for(int i = 0; i<f->nb_of_cluster; i++){
+        if(f->children_inodes[i] != NOT_USED){
+            printf("CI_%d: '%s'\n", f->children_inodes[i], f->children_names[i]);
+        }
+    }
+    return;
+}
 
 uint16_t find_file_inode_by_name(uint16_t parent, char* name){
     folder* f = NULL;

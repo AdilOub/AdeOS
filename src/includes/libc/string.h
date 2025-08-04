@@ -15,3 +15,9 @@ void strcpy(char* dest, const char* src) ;
 uint64_t strlen(const char* str) ;
 
 bool strcmp(const char* str1, const char* str2) ;
+
+
+//Pour le système de commande:
+uint16_t strargc(char* str, char sep);
+char** splitargv(char* str, char sep);
+void freeargv(char** argv, uint16_t argc);
