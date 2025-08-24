@@ -1,5 +1,6 @@
 #include "../includes/cpu/io.h"
 
+//8 bits
 void outb(uint16_t port, uint8_t val){
     asm volatile ("outb %0, %1" : : "a"(val), "Nd"(port));
 }
@@ -10,13 +11,36 @@ uint8_t inb(uint16_t port){
     return returnVal;
 }
 
+
+//16 bits
+void outsw(uint16_t __port, void* __addr){
+      asm volatile ("outsw":"=S" (__addr) :"d" (__port), "0" (__addr));
+}
+
 void insw (uint16_t __port, void *__addr)
 {
   asm volatile ("insw":"=D" (__addr) :"d" (__port), "0" (__addr));
 }
 
-void outsw(uint16_t __port, void* __addr){
-      asm volatile ("outsw":"=S" (__addr) :"d" (__port), "0" (__addr));
+void outw(uint16_t port, uint16_t val){
+    asm volatile ("outw %0, %1" : : "a"(val), "Nd"(port));
+}
+
+uint16_t inw(uint16_t port){
+    uint16_t returnVal;
+    asm volatile ("inw %1, %0" : "=a"(returnVal) : "Nd"(port));
+    return returnVal;
+}
+
+//32 bits
+void outl(uint16_t port, uint32_t val){
+    asm volatile ("outl %0, %1" : : "a"(val), "Nd"(port));
+}
+
+uint32_t inl(uint16_t port){
+    uint32_t returnVal;
+    asm volatile ("inl %1, %0" : "=a"(returnVal) : "Nd"(port));
+    return returnVal;
 }
 
 //unused

@@ -29,6 +29,7 @@ char currentChar = '\0';
 
 char getc(){
     while(currentChar == '\0'){
+        //TODO: wtf ?
         asm("hlt"); 
     }
     char c = currentChar;

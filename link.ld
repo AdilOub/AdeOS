@@ -24,6 +24,8 @@ INPUT
     compiled/Mouse.o
     compiled/shell.o
     compiled/string.o
+    compiled/pci.o
+    compiled/rtl8139.o
 )
 
 OUTPUT

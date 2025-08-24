@@ -174,6 +174,9 @@ void ClearScreen(uint8_t ClearColor){
     }
 }
 
+
+//todo printf qui permet d'avoir des couleurs, pour ça je dois 
+//casser la chaine, flm actuellement
 void printf(const char* format, ...){
     __builtin_va_list args; //on aurait pu lire la pile directement (tout les 2 elements à partir de la pos +7 de format) mais c'est berk
     __builtin_va_start(args, format);
@@ -208,8 +211,23 @@ void printf(const char* format, ...){
                 break;
             case 'x':
                 arg = (uint64_t)__builtin_va_arg(args, int64_t);
-                strcpy(buff + buffIndex, HexToString((int64_t)arg));
-                buffIndex += strlen(HexToString((int64_t)arg));
+                
+                if( (arg & 0xFF) == arg){
+                    strcpy(buff + buffIndex, HexToString((uint8_t)arg));
+                    buffIndex += strlen(HexToString((uint8_t)arg));
+                }
+                else if( (arg & 0xFFFF) == arg){
+                    strcpy(buff + buffIndex, HexToString((uint16_t)arg));
+                    buffIndex += strlen(HexToString((uint16_t)arg));
+                }
+                else if( (arg & 0xFFFFFFFF) == arg){
+                    strcpy(buff + buffIndex, HexToString((uint32_t)arg));
+                    buffIndex += strlen(HexToString((uint32_t)arg));
+                }
+                else{
+                    strcpy(buff + buffIndex, HexToString((uint64_t)arg));
+                    buffIndex += strlen(HexToString((uint64_t)arg));
+                }
                 break;
             default:
                 buff[buffIndex] = *format;
@@ -226,8 +244,9 @@ void printf(const char* format, ...){
     }
 
     buff[buffIndex] = 0;
-    PrintString(buff, FOREGROUND_WHITE | BACKGROUND_BLACK);
+    PrintString(buff, FOREGROUND_WHITE | BACKGROUND_BLACK, 0);
 }
+    
 
 void backspace(uint8_t backcolor){
     uint16_t index = CursorPosition;

@@ -1,8 +1,6 @@
 ;[org 0x7e00] ;linker do that for us
 
 
-
-
 jmp EnterProtectedMode
 
 
@@ -31,12 +29,23 @@ setVBEGraphic:
     ret
 
 EnterProtectedMode:
+    
+
+
     mov bx, ExtendedProgramStart
     call PrintString
     call JmpLine
 
     call setVGA_graphic
     ;call setVBEGraphic
+
+
+    mov ax, 0xB101; test pci
+    int 0x1A
+    xor bx, bx
+    mov bl, al
+    call PrintHex ; affiche 0x0001 jsp à quoi ça correspond par contre :/
+
 
     call DetectMemeory
     call EnableA20

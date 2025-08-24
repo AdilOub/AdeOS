@@ -23,7 +23,8 @@
 
 //driver
 #include "includes/drivers/Keyboard.h"
-//#include "includes/drivers/mouse.h"
+#include "includes/drivers/pci.h"
+#include "includes/drivers/network/rtl8139.h"
 
 #include "includes/usr/shell.h"
 
@@ -97,21 +98,28 @@ extern "C" void _start(){
     }else{
         //Print("Root not detected\n\r", FOREGROUND_LIGHTRED);
         Print("Warning ! No root detected...\n\r", FOREGROUND_LIGHTRED);
-        Print("Press any key to setup the root... (this will delete all data !)\n\r", FOREGROUND_LIGHTRED);
-        while(!keyboard_input[256]){
-        }
+        Print("Press any key to setup the root dir... (this will delete all data !)\n\r", FOREGROUND_LIGHTRED);
+        /*while(getc()==0){
+        }*/
         setup_file_system();
-        add_basic_commands();
+        
+        Print("Press any key to add basic commands...\n\r", FOREGROUND_LIGHTGREEN);
+        /*while(getc()==0){
+        }*/add_basic_commands();
+    
     }
+    Print("Press any key to test pci devices.\n\r", FOREGROUND_LIGHTGREEN);
+    while(getc()==0){
+    }
+    rtl8139_setup();
+    printMACAddress();
 
 
-
-    Print("Everything is fine...\n\r", FOREGROUND_LIGHTGREEN);
-    const char* s = "aaa";
+    //Print("Everything is fine...\n\r", FOREGROUND_LIGHTGREEN);
+    //const char* s = "aaa";
     startShell();
 
-    //initPS2Mouse();
-
+    
 
 
 
