@@ -116,7 +116,7 @@ void checkDevice(uint8_t bus, uint8_t device) {
     uint8_t subClass = getSubClassCode(bus, device, function);
 
     uint8_t headerType = getHeaderType(bus, device, function);
-     printf("PCI at bus%d dev%d: vendorID=%x, deviceID=%x, class=%x, subc=%x\n", bus, device, (vendorID), (deviceID), classCode, subClass);
+    //printf("PCI at bus%d dev%d: vendorID=%x, deviceID=%x, class=%x, subc=%x\n", bus, device, (vendorID), (deviceID), classCode, subClass);
 
 
     //  if( (headerType & 0x80) != 0) {
@@ -133,7 +133,7 @@ void checkDevice(uint8_t bus, uint8_t device) {
 
 //TODO utiliser une fonction pour scanner tous les bus proprement, et les sauvegarder dans une structure en mémoire ou un truc du genre
 void testPCI(){
-        PrintString("Testing PCI bus...\n\r", FOREGROUND_LIGHTCYAN);
+        //PrintString("Testing PCI bus...\n\r", FOREGROUND_LIGHTCYAN);
         checkDevice(0, 0); //pci host bridge
         checkDevice(0, 1); //pci-to-isa bridge
         checkDevice(0, 2); //quemu graphic card

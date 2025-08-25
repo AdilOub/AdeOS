@@ -39,6 +39,7 @@ extern uint64_t isr14;
 extern uint64_t isr32; //timer
 extern uint64_t isr33; //keyboard
 
+extern uint64_t isr43; //rtl8139 ethernet card
 extern uint64_t isr44; //mouse ps2
 
 extern uint64_t isr128; //software interupt, 128=0x80 arbritraire 
@@ -145,6 +146,14 @@ void InitIDT(){
 	_idt[33].selector = 0x08;
 	_idt[33].types_attr = 0x8e;
     
+    //rtl8139 ethernet card
+    _idt[43].zero = 0;
+    _idt[43].offset_low = (uint16_t)(((uint64_t)&isr43 & 0x000000000000ffff));
+    _idt[43].offset_mid = (uint16_t)(((uint64_t)&isr43 & 0x00000000ffff0000) >> 16);
+    _idt[43].offset_high = (uint32_t)(((uint64_t)&isr43 & 0xffffffff00000000) >> 32);
+    _idt[43].ist = 0;
+    _idt[43].selector = 0x08;
+    _idt[43].types_attr = 0x8e;
 
     //mouse
     _idt[44].zero = 0;
@@ -175,8 +184,9 @@ void InitIDT(){
 
 
     //TODO reactivé les interupts
-    outb(0x21, 0xf9); //11111001 on n'autorise que ~~l'irq0~~ et l'irq1 (~~timer~~ et clavier) + irq2 (cascade, pour utiliser le slave)
-    outb(0xa1, 0xef); //et la souris sur le slave
+    outb(0x21, 0xf9); //1111 1001 on n'autorise que ~~l'irq0~~ et l'irq1 (~~timer~~ et clavier) + irq2 (cascade, pour utiliser le slave)
+    //outb(0xa1, 0xef); //1110 1111 et la souris sur le slave
+    outb(0xa1, 0xe7); //1110 0111 et souris+ethernet rtl sur le slave
 
     //outb(0x28, 0xf7); //11110111 on n'autorise que l'irq11 (mouse)
 
@@ -237,13 +247,13 @@ extern "C" void isr33_handler(){
         return;
     }
     
-    if(scanCode < 0x80){
-        keyboard_input[scanCode] = 1;
-        keyboard_input[256] = 1;
-    }else{
-        keyboard_input[scanCode - 0x80] = 0;
-        keyboard_input[256] = 0;
-    }
+    // if(scanCode < 0x80){
+    //     keyboard_input[scanCode] = 1;
+    //     keyboard_input[256] = 1;
+    // }else{
+    //     keyboard_input[scanCode - 0x80] = 0;
+    //     keyboard_input[256] = 0;
+    // }
     
     if(MainKeyBoardHandler != 0){
         MainKeyBoardHandler(scanCode);
@@ -261,6 +271,161 @@ extern "C" void isr38_handler(){
     outb(0x20, 0x20);
     outb(0xa0, 0x20);
 }
+
+
+
+#define RX_BUFFER_SIZE 8192
+#define RX_EXTRA 1500  // pour WRAP=1
+#define ROK 0x01       // Receive OK
+#define CR_BUFE 0x01   // Bit buffer empty
+//network
+
+
+static uint32_t rx_index = 0; // offset dans le RX buffer
+
+
+extern "C" void isr43_handler() {
+    asm("cli");
+
+    uint32_t bar0 = 0xC000; // remplacer par getBar0(RTL8139_BUS, RTL8139_DEVICE, 0) & ~3
+    uint16_t isr = inw(bar0 + 0x3E); // ISR
+    outw(bar0 + 0x3E, isr);          // clear bits d'interruption
+
+    // --- Reception ---
+    if(isr & ROK) {
+        while(1) {
+            uint16_t cur = inw(bar0 + 0x38); // CURR
+            if(rx_index == cur){
+                printf("Aucun nouveau paquet");
+                break;
+            }     
+
+            // Pointeur vers le header RTL8139
+            uint8_t* pkt_ptr = rx_buffer + rx_index;
+            uint16_t status = pkt_ptr[0] | (pkt_ptr[1] << 8);
+            uint16_t length = pkt_ptr[2] | (pkt_ptr[3] << 8);  // inclut CRC
+            uint8_t* frame = pkt_ptr + 4; 
+
+
+            // paquet incomplet ou invalide => sortir
+            if(!(status & ROK) || length == 0 || (length > RX_BUFFER_SIZE)){
+                //printf("Pb: status=%x, length=%x", status, length);
+                break;
+            }
+
+            //printf("OK: status=%x, length=%x\n", status, length);
+
+
+            // pointeur sur la trame Ethernet
+
+            // copie ou traitement
+            handleEthernetFrame(frame, length - 4); // on enlève le CRC
+
+            // avancer rx_index, alignement 4 octets
+            rx_index += (length + 4 + 3) & ~3;
+            if(rx_index >= RX_BUFFER_SIZE) {
+                // wrap-around
+                rx_index = 0;
+            }
+
+            // mettre à jour CAPR pour informer la carte
+            uint16_t capr_val = (rx_index - 0x10) & 0xFFFF; 
+            outw(bar0 + 0x38, capr_val); // mise à jour du pointeur de lecture
+        }
+    }
+
+    // EOI PIC
+    outb(0x20, 0x20);
+    outb(0xA0, 0x20);
+    asm("sti");
+}
+
+
+
+// extern "C" void isr43_handler(){
+//     asm("cli");
+
+//     uint32_t bar0 = 0xC000; // remplacer par getBar0(RTL8139_BUS, RTL8139_DEVICE, 0) & ~3
+//     uint16_t isr = inw(bar0 + 0x3E); // lire le registre ISR
+//     outw(bar0 + 0x3E, isr);          // clear les bits d’interruption
+
+//     // --- Transmission ---
+//     if(isr & 0x04){
+//         // tu peux gérer ici les status TX si nécessaire
+//     }
+
+//     // --- Réception ---
+//     if(isr & 0x01){
+//         uint16_t cur = inw(bar0 + 0x38); // CURR : offset octet que NIC va remplir
+
+//         while(rx_index != cur){
+//             uint32_t* header = (uint32_t*)(rx_buffer + rx_index);
+//             uint16_t status = header[0] & 0xFFFF;
+//             uint16_t length = header[1] & 0xFFFF;
+
+//             // Paquet non complet ou invalide => sortir
+//             if(!(status & 0x01) || length == 0 || length > RX_BUFFER_SIZE){
+//                 printf("status: %x ; taille: %x\n", status, length);
+//                 break;
+//             }
+
+//             uint8_t* frame = rx_buffer + rx_index + 4; // les 4 octets sont le header RTL8139
+//             handleEthernetFrame(frame, length);
+
+//             // avancer rx_index, aligner à 4 octets
+//             rx_index += (length + 4 + 3) & ~3;
+//             if(rx_index >= RX_BUFFER_SIZE){
+//                 rx_index = 0;
+//             }
+//         }
+//     }
+
+//     // EOI PIC
+//     outb(0x20, 0x20);
+//     outb(0xA0, 0x20);
+//     asm("sti");
+// }
+
+// extern "C" void isr43_handler(){
+//     asm("cli");
+//     //uint32_t bar0 = getBar0(_RTL8139_BUS, _RTL8139_DEVICE, 0) & 0xFFFFFFFC;
+//     uint32_t bar0 = 0xC000; //TODO remove hardcode
+//     uint16_t isr_res = inw(bar0 + 0x3E); //ISR
+    
+//     //static uint16_t rx_index = 0;  // offset dans rx_buffer
+//     //printf("rtl8139 ISR: %x\n", isr_res);
+    
+//     outw(bar0 + 0x3E, 0x05); //clear the interrupt status bits
+//     if(isr_res & 0x01){ //receive ok
+//         static uint32_t rx_index = 0;  // offset dans rx_buffer
+//         PrintString("rtl8139 received a packet, ", FOREGROUND_GREEN); printf("index: %d\n", rx_index);
+//         //handle received packet
+//         uint16_t cur = inw(bar0 + 0x38); // CURR, offset en octets
+
+//         while(rx_index != cur){
+//             //cur = inw(bar0 + 0x38); // CURR, offset en octets
+
+//             uint32_t* header = (uint32_t*)(rx_buffer + rx_index);
+//             uint16_t length = (header[1] & 0xFFFF); 
+//             uint16_t status = header[0] & 0xFFFF;
+//             if(!(status & 0x01) || length == 0){ //no more packets
+//                 break;
+//             }
+//             uint8_t* frame = (uint8_t*)(rx_buffer + rx_index +4);
+//             handleEthernetFrame(frame, length);
+//             rx_index += (length + 4 + 3) & ~3; //align
+//             if(rx_index >= RX_BUFFER_SIZE){
+//                 rx_index = 0;
+//             }
+//         }
+//     }
+
+
+//     outb(0x20, 0x20);
+//     outb(0xa0, 0x20);
+//     asm("sti");
+// }
+
 
 //mouse
 int16_t mouse_dx = 0;
@@ -290,6 +455,9 @@ int16_t linearConversion(int16_t val, int16_t min, int16_t max, int16_t new_min,
 int32_t min(int32_t a, int32_t b){
     return a < b ? a : b;
 }
+
+
+
 
 extern "C" void isr44_handler(){
     asm("cli");

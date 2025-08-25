@@ -54,7 +54,8 @@ uint8_t arrowCmd(uint8_t argc, char* args[]){
 uint8_t sltCmd(uint8_t argc, char* args[]){
     ClearScreen(BACKGROUND_BLACK);
     SetCursorPosition(0);
-    PrintString(Test);
+    //PrintString(Test);
+    printf("todo :(");
     endCmd();
     return 0;
 }
@@ -248,6 +249,12 @@ uint8_t* functionToAsmHandler(uint64_t function_ptr){
 
     return buffer;
 }
+
+
+void hellow(){
+    Print("Helloow ^_^\n\r", FOREGROUND_LIGHTMAGENTA);
+}
+
 
 //TODO faire un truc plus propre en utilisant es et des décalages (pour gerer les 64 bits de mémoires !)
 void addCommandToFileSystem(const char* name, uint64_t fptr){

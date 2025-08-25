@@ -1,4 +1,5 @@
-#pragma once
+#ifndef STRING_H
+#define STRING_H
 
 #include "stdtypes.h"
 #include "../Heap.h"
@@ -21,3 +22,5 @@ bool strcmp(const char* str1, const char* str2) ;
 uint16_t strargc(char* str, char sep);
 char** splitargv(char* str, char sep);
 void freeargv(char** argv, uint16_t argc);
+
+#endif

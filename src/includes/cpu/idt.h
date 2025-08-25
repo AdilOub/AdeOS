@@ -1,11 +1,15 @@
 #pragma once
 #include "io.h"
 
-#include "../Kernel.h"
 #include "../libc/stdtypes.h"
 #include "../TextPrint.h"
-#include "../KBScanCodeSet1.h"
-#include "../DiskRead.h"
+#include "../drivers/network/netstack.h"
+
+#ifndef PCI_H
+#define PCI_H
+
+#endif
+
 
 struct IDT64{
     uint16_t offset_low;

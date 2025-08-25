@@ -26,12 +26,14 @@ kernel: $(ALL_CPP_FILES) $(ALL_HEADER_FILES)
 	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/Timer.cpp -o compiled/Timer.o
 	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/DiskRead.cpp -o compiled/DiskRead.o
 	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/FileSystem.cpp -o compiled/FileSystem.o
+	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/libc/string.cpp -o compiled/string.o
 	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/Compiler.cpp -o compiled/Compiler.o
 	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/drivers/Mouse.cpp -o compiled/Mouse.o
 	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/drivers/pci.cpp -o compiled/pci.o
 	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/drivers/network/rtl8139.cpp -o compiled/rtl8139.o
+	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/drivers/network/dhcp.cpp -o compiled/dhcp.o
+	gcc -Ttext 0x8000 -ffreestanding -mno-red-zone -m64 -fno-pie -c src/drivers/network/netstack.cpp -o compiled/netstack.o
 	gcc $(gcc_options) src/usr/shell.cpp -o compiled/shell.o
-	gcc $(gcc_options) src/libc/string.cpp -o compiled/string.o
 
 link: 
 	ld -T"link.ld"
@@ -42,7 +44,7 @@ new_disk: bootloader kernel link
 	truncate diskimg/boot.bin --size 1M #pour s'assurer que le disque virtuel est assez grand
 
 quemu_new_disk: new_disk
-	qemu-system-x86_64 diskimg/boot.bin -m 8M -no-reboot -no-shutdown -d cpu_reset -device rtl8139
+	qemu-system-x86_64 diskimg/boot.bin -m 8M -no-reboot -no-shutdown -d cpu_reset -net nic,model=rtl8139 -net tap,ifname=tap0_adeos,script=no,downscript=no
 
 
 recomp_only_kernel: bootloader kernel link
@@ -56,6 +58,15 @@ quemu_persist_disk: recomp_only_kernel
 
 vbox_img: new_disk
 	qemu-img convert -O vdi diskimg/boot.bin diskimg/vbox_disk.vdi
+
+create_bridge:
+	sudo ip tuntap add dev tap0_adeos mode tap user $(shell whoami)
+	sudo ip link set tap0_adeos up
+	sudo ip link set tap0_adeos promisc on
+	sudo ip link add name br0_adeos type bridge
+	sudo ip link set dev br0_adeos up
+	sudo ip link set dev tap0_adeos master br0_adeos
+
 
 @PHONY: clean
 clean:

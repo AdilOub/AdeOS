@@ -1,6 +1,5 @@
 
 #include "includes/ASCITable.h"
-#include "includes/Kernel.h"
 
 
 /************************************************************************

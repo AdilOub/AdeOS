@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Kernel.h"
 #include "libc/stdtypes.h"
 #include "ASCITable.h"
 #include "Math.h"

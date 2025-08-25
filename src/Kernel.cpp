@@ -25,6 +25,7 @@
 #include "includes/drivers/Keyboard.h"
 #include "includes/drivers/pci.h"
 #include "includes/drivers/network/rtl8139.h"
+#include "includes/drivers/network/netstack.h"
 
 #include "includes/usr/shell.h"
 
@@ -70,10 +71,17 @@ void setup_file_system(){
 
 uint8_t keyboard_input[256];
 
-void hellow(){
-    Print("Helloow ^_^\n\r", FOREGROUND_LIGHTMAGENTA);
-}
 
+void check_endian() {
+    uint16_t x = 0x1234;
+    uint8_t *p = (uint8_t*)&x;
+
+    if(p[0] == 0x34) {
+        PrintString("Little endian\n", BACKGROUND_GREEN);
+    } else {
+        PrintString("Big endian\n", BACKGROUND_GREEN);
+    }
+}
 
 extern "C" void _start(){
     InitIDT();
@@ -108,15 +116,37 @@ extern "C" void _start(){
         }*/add_basic_commands();
     
     }
+
+        ClearScreen(); SetCursorPosition(PosFromCoord(0,0));
     Print("Press any key to test pci devices.\n\r", FOREGROUND_LIGHTGREEN);
     while(getc()==0){
     }
-    rtl8139_setup();
-    printMACAddress();
+
+
+    rtl8139_setup();    
+    uint8_t* mac = getMACAddress();
+    Print("MAC Address set in net_info struct: ", FOREGROUND_LIGHTGREEN);
+    printf("%x:%x:%x:%x:%x:%x\n\r", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+    free(mac);
+
+    //sendDummyPackage();
+    
+    setIP(); //hardcoded for now
+    
+
+    printf("press any key to ping ipv4");
+    while(getc()==0){
+    }
+
+    PrintString("Pinging gateway...\n\r", FOREGROUND_LIGHTGREEN);
+
+    printf("IP: %x\n", net_info.gateway);
+    testPing(2);
 
 
     //Print("Everything is fine...\n\r", FOREGROUND_LIGHTGREEN);
     //const char* s = "aaa";
+    printf("Starting shell...\n\r");
     startShell();
 
     

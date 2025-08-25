@@ -8,7 +8,6 @@
 #include "Heap.h"
 #include "Memory.h"
 
-
 #define FAT_TABLE_SIZE 65536 // nombre de bloc qu'on peut avoir
 
 

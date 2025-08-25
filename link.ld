@@ -26,6 +26,8 @@ INPUT
     compiled/string.o
     compiled/pci.o
     compiled/rtl8139.o
+    compiled/dhcp.o
+    compiled/netstack.o
 )
 
 OUTPUT

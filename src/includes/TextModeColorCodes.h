@@ -1,5 +1,4 @@
 #pragma once
-#include "Kernel.h"
 
 #ifndef VGA13 
 

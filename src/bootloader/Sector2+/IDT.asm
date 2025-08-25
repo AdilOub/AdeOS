@@ -68,6 +68,7 @@ idtDescriptor:
 [extern isr32_handler] ;timer
 [extern isr33_handler] ;clavier
 
+[extern isr43_handler] ;rtl8139 ethernet card
 [extern isr44_handler] ;ps2 (mouse)
 
 [extern isr38_handler] ;ata primary
@@ -327,6 +328,14 @@ isr38:
   POPALL
   iretq
   GLOBAL isr38
+
+
+isr43: ;rtl8139 ethernet card
+  PUSHALL
+  call isr43_handler
+  POPALL
+  iretq
+  GLOBAL isr43
 
 isr44:
   PUSHALL

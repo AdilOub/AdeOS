@@ -14,7 +14,3 @@ extern uint8_t keyboard_input[256];
 
 extern const char Test[];
 extern const uint8_t Emi1[];
-
-
-
-void hellow();

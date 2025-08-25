@@ -1,5 +1,4 @@
 #include "includes/TextPrint.h"
-#include "includes/Kernel.h"
 #include "includes/Render.h"
 
 
