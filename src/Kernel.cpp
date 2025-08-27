@@ -141,8 +141,9 @@ extern "C" void _start(){
     PrintString("Pinging gateway...\n\r", FOREGROUND_LIGHTGREEN);
 
     printf("IP: %x\n", net_info.gateway);
-    testPing(2);
-
+    //testPing(2);
+    //testPing(3);
+    //broadcast_ping((const uint8_t*)"zizi", 5, 3);
 
     //Print("Everything is fine...\n\r", FOREGROUND_LIGHTGREEN);
     //const char* s = "aaa";

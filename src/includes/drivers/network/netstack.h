@@ -54,7 +54,7 @@ typedef struct icm_echo_t {
 
 //ARP
 #pragma pack(push, 1)
-typedef struct {
+typedef struct arp_packet_t {
     uint16_t htype;     // Hardware type (Ethernet = 1)
     uint16_t ptype;     // Protocol type (IPv4 = 0x0800)
     uint8_t  hlen;      // Hardware size (MAC = 6)
@@ -74,9 +74,10 @@ void setMACAddress();
 uint8_t* getMACAddress();
 
 void testPing(uint16_t seq);
+void broadcast_ping(const uint8_t* payload, uint16_t size, uint16_t seq);
 void testARP();
 
-eth_frame_t* createARPRequest(uint32_t target_ip);
+eth_frame_t* createARPRequest(uint32_t target_ip, uint16_t operation, const uint8_t* sha);
 void handleARPPacket(eth_frame_t* frame);
 
 void handleEthernetFrame(uint8_t* frame, uint16_t length);

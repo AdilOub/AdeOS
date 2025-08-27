@@ -14,3 +14,7 @@ sudo ip link set dev tap0_adeos master br0_adeos
 
 #pour connecter le bridge a internet (via eth0):
 #sudo ip link set dev eth0 master br0_adeos
+
+
+#commande pour ping:
+#arping -I tap0_adeos ff:ff:ff:ff:ff:ff

@@ -35,7 +35,7 @@ uint8_t* getMACAddress(){
 
 //Todo use DHCP to get an IP address, pour l'instant c'est hardcodé
 void setIP(){
-    net_info.ip = 0xC0A80164;      // 192.168.1.100
+    net_info.ip = 0xC0A80064;      // 192.168.0.100
     net_info.mask = 0xFFFFFF00;    // 255.255.255.0
     net_info.gateway = 0xC0A80101; // 192.168.1.1
 }
@@ -73,7 +73,7 @@ ipv4_header_t* createIPv4Header(uint32_t dest_ip, uint8_t protocol, uint16_t dat
     return header;
 }
 
-eth_frame_t* createEthernetFrame(uint8_t* dst_mac, uint16_t ethertype, uint16_t payload_length){
+eth_frame_t* createEthernetFrame(const uint8_t* dst_mac, uint16_t ethertype, uint16_t payload_length){
     eth_frame_t* frame = (eth_frame_t*)malloc(sizeof(eth_frame_t) + payload_length);
     if(frame == 0){
         PrintString("Failed to allocate memory for Ethernet frame\n\r", BACKGROUND_RED);
@@ -123,10 +123,10 @@ uint16_t icmp_checksum(uint16_t* data, int length){
     return htle16(~sum);
 }
 
-icm_echo_t* createICMPEchoRequest(uint16_t id, uint16_t seq, uint8_t* payload, uint16_t payload_length){
+icm_echo_t* createICMPEchoRequest(uint16_t id, uint16_t seq, const uint8_t* payload, uint16_t payload_length){
     icm_echo_t* echo = (icmp_echo_t*)malloc(sizeof(icmp_echo_t) + payload_length);
 
-    echo->type = 8; // Echo Request
+    echo->type = htle16(8); // Echo Request
     echo->code = 0;
     echo->checksum = 0; // will be calculated later
     echo->id = htle16(id);
@@ -171,8 +171,62 @@ eth_frame_t* createARPRequest(uint32_t target_ip) {
     return frame;
 }
 
+eth_frame_t* createARPReply(uint32_t target_ip, const uint8_t* target_mac) {
+    arp_packet_t* arp = (arp_packet_t*)malloc(sizeof(arp_packet_t));
+    if (!arp) return 0;
+
+    arp->htype = htle16(1);
+    arp->ptype = htle16(0x0800);
+    arp->hlen  = 6;
+    arp->plen  = 4;
+    arp->oper  = htle16(2);
+
+    //Nous
+    memcopy(arp->sha, net_info.mac, 6);
+    arp->spa = htle32(net_info.ip);
+
+    //Eux
+    memcopy(arp->tha, target_mac, 6);
+    arp->tpa = htle32(target_ip);
+
+    eth_frame_t* frame = createEthernetFrame(target_mac, htle16(0x0806), sizeof(arp_packet_t));
+
+    memcopy(frame->payload, arp, sizeof(arp_packet_t));
+    free(arp);
+
+    return frame;
+}
+
+
+uint32_t ip_list_to_uint32(uint8_t a, uint8_t b, uint8_t c, uint8_t d){
+    return (a<<24) | (b<<16) | (c<<8) | (d);
+}
+
+
+//TODO check si ça s'addresse à moi (check if who has ip = my ip !!!)
 void handleARPPacket(eth_frame_t* frame) {
     arp_packet_t* arp = (arp_packet_t*)frame->payload;
+
+
+    if(htle16(arp->oper) == 1){ //Request
+        printf("ARP Request: IP %d.%d.%d.%d -> MAC %x%x%x%x%x%x\n",
+               arp->spa & 0xFF, (arp->spa >> 8) & 0xFF,
+               (arp->spa >> 16) & 0xFF, (arp->spa >> 24) & 0xFF,
+               arp->sha[0], arp->sha[1], arp->sha[2],
+               arp->sha[3], arp->sha[4], arp->sha[5]);
+        //on envoie la réponse
+        eth_frame_t* arp_req = createARPReply(htle32(arp->spa), arp->sha);
+        rtl8139_transmit_packet((char*)arp_req, sizeof(eth_frame_t) + sizeof(arp_packet_t));
+
+        uint8_t* payload = (uint8_t*)malloc(sizeof(eth_frame_t) + sizeof(arp_packet_t));
+        memcopy(payload, arp_req, sizeof(eth_frame_t) + sizeof(arp_packet_t));
+        //broadcast_ping(payload, sizeof(eth_frame_t) + sizeof(arp_packet_t), 4);
+        free(payload);
+
+        free(arp_req);
+        printf("ARP Reply Sent.\n");
+        return;        
+    }
 
     if (htle16(arp->oper) == 2) { // Reply
         //uint8_t* gateway_mac = (uint8_t*)malloc(6);
@@ -184,10 +238,21 @@ void handleARPPacket(eth_frame_t* frame) {
 
         // Tu peux stocker la MAC dans une petite ARP cache
         //memcopy(gateway_mac, arp->sha, 6);
-    }else{
-        printf("Received non-reply ARP packet: %x\n", htle16(arp->oper));
+        return;
     }
 
+    printf("Received non-reply ARP packet: %x\n", htle16(arp->oper));
+
+}
+
+
+void broadcast_ping(const uint8_t* payload, uint16_t size, uint16_t seq){
+    icm_echo_t* echo = createICMPEchoRequest(1, seq, payload, size);
+    uint8_t dst_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff}; //broadcast for testing
+    eth_frame_t* frame = createIPv4EthernetFrame(dst_mac, net_info.gateway, 1, sizeof(icm_echo_t) + size, (uint8_t*)echo); //pinging the gateway for testing
+    free(echo);
+    rtl8139_transmit_packet((char*)frame, sizeof(eth_frame_t) + sizeof(ipv4_header_t) + sizeof(icm_echo_t) + size);
+    free(frame);
 }
 
 
@@ -236,9 +301,6 @@ void handleEthernetFrame(uint8_t* frame, uint16_t length){
 
         case 0x0800: // IPv4
             printf("Received IPv4 packet\n");
-            for(int i = 0; i<26; i++){
-                printf("%c", *(eth->payload+i));
-            }
             //handleIPv4Packet(eth);
             break;
         default:

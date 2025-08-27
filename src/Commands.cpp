@@ -15,6 +15,19 @@ Creation de la hashtable des commandes
 
 
 #pragma region cmds
+
+uint8_t ping(uint8_t argc, char* args[]){
+    if(argc < 2){
+        broadcast_ping((const uint8_t*)"hello from adeOs", 17, 12);
+        printf("pingning...\n");
+    }
+    else{
+        printf("todo...\n");
+    }
+
+    return 0;
+}
+
 uint8_t test(uint8_t argc, char* args[]){
     char* path = get_path_to_root(2);
     printf("Path: '%s'", path);
@@ -279,6 +292,7 @@ void add_basic_commands(){
     addCommandToFileSystem("touch", (uint64_t)touch);
     addCommandToFileSystem("cat", (uint64_t)cat);
     addCommandToFileSystem("test", (uint64_t)test);
+    addCommandToFileSystem("ping", (uint64_t)ping);
 
 }
 

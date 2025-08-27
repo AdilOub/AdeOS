@@ -6,6 +6,7 @@
 #include "Heap.h"
 #include "Timer.h"
 #include "Render.h"
+#include "drivers/network/netstack.h"
 
 
 void clearCmdBuffer(char* buffer, int bufferSize);

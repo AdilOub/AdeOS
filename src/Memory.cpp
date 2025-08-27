@@ -48,7 +48,7 @@ void* memset(void* start, uint8_t val, uint64_t size){
 
 //fix de memcopy
 
-void memcopy(void* destination, void* source, uint64_t num){
+void memcopy(void* destination, const void* source, uint64_t num){
 	uint8_t* valPtr = (uint8_t*)source;
 	uint8_t* ptr = (uint8_t*)destination;
 	for(uint64_t i = 0; i < num; i++){

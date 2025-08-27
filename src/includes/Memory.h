@@ -5,7 +5,7 @@
 extern uint8_t MemoryRegionCount;
 
 void* memset(void* start, uint8_t value, uint64_t num);
-void memcopy(void* destination, void* source, uint64_t num);
+void memcopy(void* destination, const void* source, uint64_t num);
 
 
 struct  MemoryMapEntry

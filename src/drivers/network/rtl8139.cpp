@@ -112,6 +112,14 @@ uint8_t rtl8139_transmit_packet(char* packet, uint16_t length){
     //     printf("RTL8139 TX0 is not busy\n");
     // }
 
+    uint16_t status = inw(bar0+0x10+ tx_cur*4);
+
+    //TODO ADD TIMEOUT
+    while(! (status & (1<<13))){
+        //controller is idle, waiting
+        
+    }
+    
     memcopy(tx_buffers[tx_cur], packet, length);
     outl(bar0 + 0x10 + tx_cur*4, length & 0x0000FFFF);
     tx_cur = (tx_cur + 1) % TX_BUFFER_COUNT;
