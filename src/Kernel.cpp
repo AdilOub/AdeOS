@@ -104,49 +104,33 @@ extern "C" void _start(){
     if(check_if_root()){
         Print("Root detected\n\r", FOREGROUND_LIGHTGREEN);
     }else{
-        //Print("Root not detected\n\r", FOREGROUND_LIGHTRED);
+        Print("Root not detected\n\r", FOREGROUND_LIGHTRED);
         Print("Warning ! No root detected...\n\r", FOREGROUND_LIGHTRED);
         Print("Press any key to setup the root dir... (this will delete all data !)\n\r", FOREGROUND_LIGHTRED);
-        /*while(getc()==0){
-        }*/
+        while(getc()==0){
+        }
         setup_file_system();
         
-        Print("Press any key to add basic commands...\n\r", FOREGROUND_LIGHTGREEN);
-        /*while(getc()==0){
-        }*/add_basic_commands();
+        Print("Adding basic commands...\n\r", FOREGROUND_LIGHTGREEN);
+        add_basic_commands();
     
     }
 
-        ClearScreen(); SetCursorPosition(PosFromCoord(0,0));
-    Print("Press any key to test pci devices.\n\r", FOREGROUND_LIGHTGREEN);
+    Print("Press any key to setup pci devices.\n\r", FOREGROUND_LIGHTGREEN);
     while(getc()==0){
     }
 
-
     rtl8139_setup();    
+    PrintString("rtl8139 setup done.\n\r", FOREGROUND_LIGHTGREEN);
+    
     uint8_t* mac = getMACAddress();
     Print("MAC Address set in net_info struct: ", FOREGROUND_LIGHTGREEN);
     printf("%x:%x:%x:%x:%x:%x\n\r", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-    free(mac);
-
-    //sendDummyPackage();
-    
+    free(mac);    
     setIP(); //hardcoded for now
-    
-
-    printf("press any key to ping ipv4");
-    while(getc()==0){
-    }
-
-    PrintString("Pinging gateway...\n\r", FOREGROUND_LIGHTGREEN);
-
     printf("IP: %x\n", net_info.gateway);
-    //testPing(2);
-    //testPing(3);
-    //broadcast_ping((const uint8_t*)"zizi", 5, 3);
 
-    //Print("Everything is fine...\n\r", FOREGROUND_LIGHTGREEN);
-    //const char* s = "aaa";
+
     printf("Starting shell...\n\r");
     startShell();
 

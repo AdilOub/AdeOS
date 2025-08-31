@@ -44,8 +44,7 @@ new_disk: bootloader kernel link
 	truncate diskimg/boot.bin --size 1M #pour s'assurer que le disque virtuel est assez grand
 
 quemu_new_disk: new_disk
-	qemu-system-x86_64 diskimg/boot.bin -m 8M -no-reboot -no-shutdown -d cpu_reset -net nic,model=rtl8139 -net tap,ifname=tap0_adeos,script=no,downscript=no
-
+	qemu-system-x86_64 diskimg/boot.bin -m 8M -no-reboot -no-shutdown -d cpu_reset -net nic,model=rtl8139 -net user
 
 recomp_only_kernel: bootloader kernel link
 	cat compiled/bootloader.bin compiled/kernel.bin > compiled/boot.bin
@@ -61,12 +60,15 @@ vbox_img: new_disk
 
 create_bridge:
 	sudo ip tuntap add dev tap0_adeos mode tap user $(shell whoami)
+	sudo ip addr add 192.168.0.1/24 dev tap0_adeos
 	sudo ip link set tap0_adeos up
 	sudo ip link set tap0_adeos promisc on
 	sudo ip link add name br0_adeos type bridge
 	sudo ip link set dev br0_adeos up
 	sudo ip link set dev tap0_adeos master br0_adeos
 
+old_qemu_new_disk_network_local:
+	qemu-system-x86_64 diskimg/boot.bin -m 8M -no-reboot -no-shutdown -d cpu_reset -net nic,model=rtl8139 -net tap,ifname=tap0_adeos,script=no,downscript=no
 
 @PHONY: clean
 clean:

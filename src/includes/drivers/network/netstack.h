@@ -53,7 +53,6 @@ typedef struct icm_echo_t {
 
 
 //ARP
-#pragma pack(push, 1)
 typedef struct arp_packet_t {
     uint16_t htype;     // Hardware type (Ethernet = 1)
     uint16_t ptype;     // Protocol type (IPv4 = 0x0800)
@@ -64,10 +63,24 @@ typedef struct arp_packet_t {
     uint32_t spa;       // Sender IP address
     uint8_t  tha[6];    // Target MAC address
     uint32_t tpa;       // Target IP address
-} arp_packet_t;
-#pragma pack(pop)
+} __attribute__((packed)) arp_packet_t;
 
 
+//UDP
+typedef struct udp_header_t {
+    uint16_t src_port;
+    uint16_t dst_port;
+    uint16_t length;
+    uint16_t checksum;
+} __attribute__((packed)) udp_header_t;
+
+typedef struct {
+    uint32_t src_addr;
+    uint32_t dst_addr;
+    uint8_t zero;
+    uint8_t protocol;
+    uint16_t udp_length;
+} __attribute__((packed)) udp_pseudo_header_t;
 
 void setIP();
 void setMACAddress();
@@ -82,6 +95,8 @@ void handleARPPacket(eth_frame_t* frame);
 
 void handleEthernetFrame(uint8_t* frame, uint16_t length);
 
+
+void testUDP();
 
 uint16_t htle16(uint16_t nb);
 uint32_t htle32(uint32_t nb) ;

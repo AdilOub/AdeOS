@@ -37,7 +37,35 @@ uint8_t* getMACAddress(){
 void setIP(){
     net_info.ip = 0xC0A80064;      // 192.168.0.100
     net_info.mask = 0xFFFFFF00;    // 255.255.255.0
-    net_info.gateway = 0xC0A80101; // 192.168.1.1
+    net_info.gateway = 0xC0A80001; // 192.168.0.1
+}
+
+
+static uint16_t checksum(const void *data, uint32_t len) {
+    const uint16_t *word = (const uint16_t *)data;
+    uint32_t sum = 0;
+
+    while (len > 1) {
+        sum += *word++;
+        if (sum & 0x10000)
+            sum = (sum & 0xFFFF) + 1;
+        len -= 2;
+    }
+
+    if (len > 0) {
+        uint16_t last = 0;
+        *(uint8_t*)&last = *(const uint8_t*)word;
+        sum += last;
+        if (sum & 0x10000)
+            sum = (sum & 0xFFFF) + 1;
+    }
+
+    return ~sum;
+}
+
+uint16_t ipv4_checksum(const ipv4_header_t* ip_hdr, uint32_t ip_hdr_len) {
+    // Le champ checksum doit être mis à zéro avant
+    return checksum((const void*)ip_hdr, ip_hdr_len);
 }
 
 
@@ -68,7 +96,8 @@ ipv4_header_t* createIPv4Header(uint32_t dest_ip, uint8_t protocol, uint16_t dat
     while(sum >> 16){
         sum = (sum & 0xFFFF) + (sum >> 16);
     }
-    header->header_checksum = htle16((uint16_t)(~sum));
+    header->header_checksum = 0;
+    header->header_checksum = ipv4_checksum(header, sizeof(ipv4_header_t));
 
     return header;
 }
@@ -87,7 +116,7 @@ eth_frame_t* createEthernetFrame(const uint8_t* dst_mac, uint16_t ethertype, uin
     for(int i = 0; i < 6; i++){
         frame->src_mac[i] = net_info.mac[i];
     }
-    frame->ethertype = ethertype;
+    frame->ethertype = htle16(ethertype);
     //Payload will be set later
     return frame;
 }
@@ -162,7 +191,7 @@ eth_frame_t* createARPRequest(uint32_t target_ip) {
 
     // Ethernet frame (broadcast destination)
     uint8_t broadcast[6] = {0xff,0xff,0xff,0xff,0xff,0xff};
-    eth_frame_t* frame = createEthernetFrame(broadcast, htle16(0x0806), sizeof(arp_packet_t));
+    eth_frame_t* frame = createEthernetFrame(broadcast, 0x0806, sizeof(arp_packet_t));
 
     // Copy ARP payload
     memcopy(frame->payload, arp, sizeof(arp_packet_t));
@@ -189,7 +218,7 @@ eth_frame_t* createARPReply(uint32_t target_ip, const uint8_t* target_mac) {
     memcopy(arp->tha, target_mac, 6);
     arp->tpa = htle32(target_ip);
 
-    eth_frame_t* frame = createEthernetFrame(target_mac, htle16(0x0806), sizeof(arp_packet_t));
+    eth_frame_t* frame = createEthernetFrame(target_mac, 0x0806, sizeof(arp_packet_t));
 
     memcopy(frame->payload, arp, sizeof(arp_packet_t));
     free(arp);
@@ -197,6 +226,75 @@ eth_frame_t* createARPReply(uint32_t target_ip, const uint8_t* target_mac) {
     return frame;
 }
 
+
+
+
+uint16_t udp_checksum(uint32_t src_ip, uint32_t dst_ip, 
+                      const uint8_t *udp_packet, uint32_t udp_len) {
+    udp_pseudo_header_t ph;
+    ph.src_addr = htle32(src_ip);
+    ph.dst_addr = htle32(dst_ip);
+    ph.zero = 0;
+    ph.protocol = 17; // UDP
+    ph.udp_length = htle32(udp_len);
+
+    // Taille = pseudo header + UDP header + data
+    uint32_t total_len = sizeof(ph) + udp_len;
+    uint8_t buf[1500]; // assez grand pour un paquet Ethernet
+    memcopy(buf, &ph, sizeof(ph));
+    memcopy(buf + sizeof(ph), udp_packet, udp_len);
+
+    return checksum(buf, total_len);
+}
+
+eth_frame_t* createIPv4UDPFrame(uint8_t* dst_mac, uint32_t dst_ip,
+                                uint16_t src_port, uint16_t dst_port,
+                                const uint8_t* payload, uint16_t payload_len) {
+    // IPv4 header
+    ipv4_header_t* ip_hdr = createIPv4Header(dst_ip, 17 /*UDP*/, sizeof(udp_header_t) + payload_len);
+
+    // UDP header
+    udp_header_t* udp_hdr = (udp_header_t*)malloc(sizeof(udp_header_t));
+    udp_hdr->src_port = htle16(src_port);
+    udp_hdr->dst_port = htle16(dst_port);
+    udp_hdr->length = htle16(sizeof(udp_header_t) + payload_len);
+
+    udp_hdr->checksum = 0; 
+    udp_hdr->checksum = udp_checksum(net_info.ip, dst_ip, (const uint8_t*)udp_hdr, sizeof(udp_header_t) + payload_len);
+
+
+    // Ethernet frame
+    eth_frame_t* frame = createEthernetFrame(dst_mac, 0x0800, sizeof(ipv4_header_t) + sizeof(udp_header_t) + payload_len);
+
+    // Copie IPv4 header dans payload
+    memcopy(frame->payload, ip_hdr, sizeof(ipv4_header_t));
+    // Copie UDP header juste après
+    memcopy(frame->payload + sizeof(ipv4_header_t), udp_hdr, sizeof(udp_header_t));
+    // Copie le payload utilisateur
+    memcopy(frame->payload + sizeof(ipv4_header_t) + sizeof(udp_header_t), payload, payload_len);
+
+
+    free(ip_hdr);
+    free(udp_hdr);
+
+    return frame;
+}
+
+
+void testUDP() {
+    //uint32_t dst_ip =  0xC0A80001; // 192.168.0.1
+    uint32_t dst_ip = 0x0A000201; // 10.0.2.2 = host NAT IP
+    uint16_t src_port = 1234;
+    uint16_t dst_port = 5555;
+    uint8_t message[] = "HELLO FROM OS!";
+
+    eth_frame_t* frame = createIPv4UDPFrame(net_info.mac, dst_ip,
+                                            src_port, dst_port,
+                                            message, sizeof(message)-1);
+
+    rtl8139_transmit_packet((char*)frame, sizeof(eth_frame_t) + sizeof(ipv4_header_t) + sizeof(udp_header_t) + sizeof(message)-1);
+    free(frame);
+}
 
 uint32_t ip_list_to_uint32(uint8_t a, uint8_t b, uint8_t c, uint8_t d){
     return (a<<24) | (b<<16) | (c<<8) | (d);
@@ -242,6 +340,19 @@ void handleARPPacket(eth_frame_t* frame) {
     }
 
     printf("Received non-reply ARP packet: %x\n", htle16(arp->oper));
+
+}
+
+void handleIPv4Packet(eth_frame_t* frame){
+    ipv4_header_t* ipv4_packet = (ipv4_header_t*)frame->payload;
+    
+    
+    if(ipv4_packet->protocol == 1){
+        printf("ICMP packet\n");
+        return;
+    }
+
+    printf("unhandled protocol: %x", ipv4_packet->protocol);
 
 }
 
@@ -301,7 +412,7 @@ void handleEthernetFrame(uint8_t* frame, uint16_t length){
 
         case 0x0800: // IPv4
             printf("Received IPv4 packet\n");
-            //handleIPv4Packet(eth);
+            handleIPv4Packet(eth);
             break;
         default:
             printf("Unknown Ethernet type: 0x%x, treating as raw\n", ethertype);

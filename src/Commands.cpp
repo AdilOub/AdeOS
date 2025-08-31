@@ -17,16 +17,25 @@ Creation de la hashtable des commandes
 #pragma region cmds
 
 uint8_t ping(uint8_t argc, char* args[]){
-    if(argc < 2){
+    if(argc < 1){
         broadcast_ping((const uint8_t*)"hello from adeOs", 17, 12);
         printf("pingning...\n");
     }
     else{
-        printf("todo...\n");
+        uint16_t len = strlen(args[1]); //possible overflow ? limited by shell buffer size
+        broadcast_ping((const uint8_t*)args[1], len, 12);
+        printf("pinging with custom msg...\n");
     }
 
     return 0;
 }
+
+
+uint8_t udping(uint8_t argc, char* args[]){
+    testUDP();
+    return 0;
+}
+
 
 uint8_t test(uint8_t argc, char* args[]){
     char* path = get_path_to_root(2);
@@ -288,11 +297,12 @@ void add_basic_commands(){
     addCommandToFileSystem("hi", (uint64_t)hellow);
     addCommandToFileSystem("help", (uint64_t)helpCmd);
     addCommandToFileSystem("clear", (uint64_t)clearCmd);
-    addCommandToFileSystem("ls", (uint64_t)ls);
-    addCommandToFileSystem("touch", (uint64_t)touch);
-    addCommandToFileSystem("cat", (uint64_t)cat);
+    //addCommandToFileSystem("ls", (uint64_t)ls);
+    //addCommandToFileSystem("touch", (uint64_t)touch);
+    //addCommandToFileSystem("cat", (uint64_t)cat);
     addCommandToFileSystem("test", (uint64_t)test);
     addCommandToFileSystem("ping", (uint64_t)ping);
+    addCommandToFileSystem("udping", (uint64_t)udping);
 
 }
 

@@ -58,8 +58,8 @@ uint64_t rtl8139_setup(){
         outl(bar0 + 0x20 + i*4, (uint32_t)((uint64_t) (tx_buffers[i]) & 0xFFFFFFFF)); 
     }
     
-    printf("RTL8139 setup done\n");
-    return (uint64_t)rx_buffer;
+    //printf("RTL8139 setup done\n");
+    return 0;
 }
 
 
