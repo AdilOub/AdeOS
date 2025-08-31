@@ -333,6 +333,9 @@ void handleARPPacket(eth_frame_t* frame) {
                (arp->spa >> 16) & 0xFF, (arp->spa >> 24) & 0xFF,
                arp->sha[0], arp->sha[1], arp->sha[2],
                arp->sha[3], arp->sha[4], arp->sha[5]);
+        eth_frame_t* reply = createARPReply(arp->spa, arp->sha);
+        rtl8139_transmit_packet((char*)reply, sizeof(eth_frame_t)+sizeof(arp_packet_t));
+        free(reply);
 
         // Tu peux stocker la MAC dans une petite ARP cache
         //memcopy(gateway_mac, arp->sha, 6);
@@ -396,11 +399,11 @@ void handleEthernetFrame(uint8_t* frame, uint16_t length){
     eth_frame_t* eth = (eth_frame_t*)frame;
 
     // Afficher MAC source/destination pour debug
-    printf("Ethernet frame: dst %x%x%x%x%x%x, src %x%x%x%x%x%x\n",
-           eth->dst_mac[0], eth->dst_mac[1], eth->dst_mac[2],
-           eth->dst_mac[3], eth->dst_mac[4], eth->dst_mac[5],
-           eth->src_mac[0], eth->src_mac[1], eth->src_mac[2],
-           eth->src_mac[3], eth->src_mac[4], eth->src_mac[5]);
+    // printf("Ethernet frame: dst %x%x%x%x%x%x, src %x%x%x%x%x%x\n",
+    //        eth->dst_mac[0], eth->dst_mac[1], eth->dst_mac[2],
+    //        eth->dst_mac[3], eth->dst_mac[4], eth->dst_mac[5],
+    //        eth->src_mac[0], eth->src_mac[1], eth->src_mac[2],
+    //        eth->src_mac[3], eth->src_mac[4], eth->src_mac[5]);
 
     uint16_t ethertype = htle16(eth->ethertype); // convertir si nécessaire
 
@@ -415,7 +418,7 @@ void handleEthernetFrame(uint8_t* frame, uint16_t length){
             handleIPv4Packet(eth);
             break;
         default:
-            printf("Unknown Ethernet type: 0x%x, treating as raw\n", ethertype);
+            //printf("Unknown Ethernet type: 0x%x, treating as raw\n", ethertype);
             //print packet payload:
 
             break;

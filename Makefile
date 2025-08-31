@@ -67,7 +67,7 @@ create_bridge:
 	sudo ip link set dev br0_adeos up
 	sudo ip link set dev tap0_adeos master br0_adeos
 
-old_qemu_new_disk_network_local:
+quemu_new_disk_localnet: new_disk
 	qemu-system-x86_64 diskimg/boot.bin -m 8M -no-reboot -no-shutdown -d cpu_reset -net nic,model=rtl8139 -net tap,ifname=tap0_adeos,script=no,downscript=no
 
 @PHONY: clean
